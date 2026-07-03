@@ -1007,7 +1007,8 @@
                                 <div id="measurement-req-dropdown" style="display:none; position:absolute; left:0; top:110%; background:#1e293b; border:1px solid var(--brand-gold); border-radius:6px; width:220px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:100;">
                                     <div style="padding:8px; font-size:0.8em; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Select Garment Type</div>
                                     <div style="padding:4px 8px; font-size:0.7em; color:var(--brand-gold); letter-spacing:0.05em; text-transform:uppercase;">Tailored Clothing</div>
-                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Suit', event)">Suit</a>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Suit', event)">Suit (2-Piece)</a>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Suit (3-Piece)', event)">Suit (3-Piece)</a>
                                     <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Kaunda/Senator Suit', event)">Kaunda/Senator Suit</a>
                                     <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('African Wear/Kaftan', event)">African Wear/Kaftan</a>
                                     <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Corporate Wear', event)">Corporate Wear</a>
@@ -1077,7 +1078,7 @@
             if (old) old.remove();
 
             // Build garment selector
-            const garmentOptions = ['Suit','Shirt','Trouser','Dress','Skirt','Blouse','Coat','Half Coat','Kanzu','Buibui','Kaunda/Senator Suit','Standard Size','Shoes','Accessories']
+            const garmentOptions = ['Suit','Suit (3-Piece)','Shirt','Trouser','Dress','Skirt','Blouse','Coat','Half Coat','Kanzu','Buibui','Kaunda/Senator Suit','Standard Size','Shoes','Accessories']
                 .map(g => `<option value="${g}" ${g === defaultGarment ? 'selected' : ''}>${g}</option>`)
                 .join('');
 
