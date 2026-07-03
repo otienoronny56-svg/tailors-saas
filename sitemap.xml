@@ -4,19 +4,19 @@
 
    <!-- Homepage — highest priority -->
    <url>
-      <loc>https://tailors.co.ke/</loc>
+      <loc>https://www.tailors.co.ke/</loc>
       <lastmod>2026-07-03</lastmod>
       <changefreq>daily</changefreq>
       <priority>1.0</priority>
       <image:image>
-         <image:loc>https://tailors.co.ke/hero_bg.png</image:loc>
+         <image:loc>https://www.tailors.co.ke/hero_bg.png</image:loc>
          <image:title>Stitch &amp; Styles Kenya — Bespoke Tailoring &amp; Fashion Marketplace</image:title>
       </image:image>
    </url>
 
    <!-- Marketplace — key discovery page -->
    <url>
-      <loc>https://tailors.co.ke/views/client/marketplace.html</loc>
+      <loc>https://www.tailors.co.ke/views/client/marketplace.html</loc>
       <lastmod>2026-07-03</lastmod>
       <changefreq>daily</changefreq>
       <priority>0.95</priority>
@@ -24,7 +24,7 @@
 
    <!-- Tailor Onboarding — business growth -->
    <url>
-      <loc>https://tailors.co.ke/tailor-onboarding.html</loc>
+      <loc>https://www.tailors.co.ke/tailor-onboarding.html</loc>
       <lastmod>2026-07-03</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.85</priority>
@@ -32,34 +32,10 @@
 
    <!-- Blog listing -->
    <url>
-      <loc>https://tailors.co.ke/views/client/blog.html</loc>
+      <loc>https://www.tailors.co.ke/views/client/blog.html</loc>
       <lastmod>2026-07-03</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.80</priority>
-   </url>
-
-   <!-- Login -->
-   <url>
-      <loc>https://tailors.co.ke/login.html</loc>
-      <lastmod>2026-07-03</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.6</priority>
-   </url>
-
-   <!-- Choose Role -->
-   <url>
-      <loc>https://tailors.co.ke/choose-role.html</loc>
-      <lastmod>2026-07-03</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.5</priority>
-   </url>
-
-   <!-- LLMs.txt — AI discoverability -->
-   <url>
-      <loc>https://tailors.co.ke/llms.txt</loc>
-      <lastmod>2026-07-03</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.4</priority>
    </url>
 
 </urlset>

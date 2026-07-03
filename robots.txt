@@ -37,5 +37,5 @@ User-agent: Bytespider
 Allow: /
 
 # === Sitemaps & LLM context ===
-Sitemap: https://tailors.co.ke/sitemap.xml
-LLMs: https://tailors.co.ke/llms.txt
+Sitemap: https://www.tailors.co.ke/sitemap.xml
+LLMs: https://www.tailors.co.ke/llms.txt

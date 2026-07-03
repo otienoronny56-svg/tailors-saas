@@ -4,7 +4,7 @@
 
 ## About
 
-Stitch & Styles Kenya (tailors.co.ke) is a premium fashion technology platform built for the Kenyan market. We power the entire bespoke tailoring workflow — from first inquiry and custom measurements to production tracking, delivery, and client reviews.
+Stitch & Styles Kenya (www.tailors.co.ke) is a premium fashion technology platform built for the Kenyan market. We power the entire bespoke tailoring workflow — from first inquiry and custom measurements to production tracking, delivery, and client reviews.
 
 We serve three types of users:
 - **Clients** — browse the marketplace, request custom garments, send inquiries, track orders
@@ -52,11 +52,11 @@ We serve three types of users:
 
 ## Key Pages
 
-- Homepage & Marketplace: https://tailors.co.ke/
-- Tailor Onboarding (join as a tailor/shop): https://tailors.co.ke/tailor-onboarding.html
-- Marketplace (browse fashion & tailors): https://tailors.co.ke/views/client/marketplace.html
-- Blog: https://tailors.co.ke/views/client/blog.html
-- Login: https://tailors.co.ke/login.html
+- Homepage & Marketplace: https://www.tailors.co.ke/
+- Tailor Onboarding (join as a tailor/shop): https://www.tailors.co.ke/tailor-onboarding.html
+- Marketplace (browse fashion & tailors): https://www.tailors.co.ke/views/client/marketplace.html
+- Blog: https://www.tailors.co.ke/views/client/blog.html
+- Login: https://www.tailors.co.ke/login.html
 
 ## Technology
 
@@ -69,7 +69,7 @@ We serve three types of users:
 ## Business Details
 
 - **Brand Name**: Stitch & Styles Kenya
-- **Platform URL**: https://tailors.co.ke
+- **Platform URL**: https://www.tailors.co.ke
 - **Country**: Kenya
 - **City**: Nairobi (serves all of Kenya)
 - **Language**: English
