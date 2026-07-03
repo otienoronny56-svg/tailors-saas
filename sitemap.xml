@@ -1,39 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+   <!-- Homepage — highest priority -->
    <url>
       <loc>https://tailors.co.ke/</loc>
-      <lastmod>2026-06-18</lastmod>
+      <lastmod>2026-07-03</lastmod>
       <changefreq>daily</changefreq>
       <priority>1.0</priority>
+      <image:image>
+         <image:loc>https://tailors.co.ke/hero_bg.png</image:loc>
+         <image:title>Stitch &amp; Styles Kenya — Bespoke Tailoring &amp; Fashion Marketplace</image:title>
+      </image:image>
    </url>
-   <url>
-      <loc>https://tailors.co.ke/index.html</loc>
-      <lastmod>2026-06-18</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.9</priority>
-   </url>
-   <url>
-      <loc>https://tailors.co.ke/choose-role.html</loc>
-      <lastmod>2026-06-18</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.8</priority>
-   </url>
-   <url>
-      <loc>https://tailors.co.ke/tailor-onboarding.html</loc>
-      <lastmod>2026-06-18</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.8</priority>
-   </url>
-   <url>
-      <loc>https://tailors.co.ke/login.html</loc>
-      <lastmod>2026-06-18</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.7</priority>
-   </url>
+
+   <!-- Marketplace — key discovery page -->
    <url>
       <loc>https://tailors.co.ke/views/client/marketplace.html</loc>
-      <lastmod>2026-06-19</lastmod>
+      <lastmod>2026-07-03</lastmod>
       <changefreq>daily</changefreq>
-      <priority>0.9</priority>
+      <priority>0.95</priority>
    </url>
+
+   <!-- Tailor Onboarding — business growth -->
+   <url>
+      <loc>https://tailors.co.ke/tailor-onboarding.html</loc>
+      <lastmod>2026-07-03</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.85</priority>
+   </url>
+
+   <!-- Blog listing -->
+   <url>
+      <loc>https://tailors.co.ke/views/client/blog.html</loc>
+      <lastmod>2026-07-03</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.80</priority>
+   </url>
+
+   <!-- Login -->
+   <url>
+      <loc>https://tailors.co.ke/login.html</loc>
+      <lastmod>2026-07-03</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.6</priority>
+   </url>
+
+   <!-- Choose Role -->
+   <url>
+      <loc>https://tailors.co.ke/choose-role.html</loc>
+      <lastmod>2026-07-03</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.5</priority>
+   </url>
+
+   <!-- LLMs.txt — AI discoverability -->
+   <url>
+      <loc>https://tailors.co.ke/llms.txt</loc>
+      <lastmod>2026-07-03</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.4</priority>
+   </url>
+
 </urlset>
