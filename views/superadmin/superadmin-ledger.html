@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TKKW51QFZ5"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-TKKW51QFZ5');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superadmin Dashboard</title>
+    <link rel="icon" type="image/png" href="../../logo.jpeg">
+    <link rel="stylesheet" href="../../styles.css">
+    <script src="/js/lib/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/chart.js/dist/chart.umd.js"></script>
+    <style>
+        
+
+        
+
+        
+
+        .main-content {
+            
+            
+            flex-grow: 1;
+            min-width: 0;
+            width: calc(100% - 260px) !important;
+            box-sizing: border-box;
+            padding: 20px 30px !important;
+        }
+
+        .main-content h1 {
+            color: var(--brand-gold) !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .super-metric-card {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-bottom: 4px solid var(--brand-gold) !important;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .super-metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4) !important;
+        }
+
+        .org-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-premium { background: rgba(212, 175, 55, 0.1) !important; color: var(--brand-gold) !important; border: 1px solid rgba(212, 175, 55, 0.2) !important; }
+        .badge-basic { background: rgba(136, 146, 176, 0.1) !important; color: var(--brand-slate) !important; border: 1px solid rgba(136, 146, 176, 0.2) !important; }
+        .badge-active { background: rgba(16, 185, 129, 0.1) !important; color: #10b981 !important; border: 1px solid rgba(16, 185, 129, 0.2) !important; }
+
+        .chart-container {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3) !important;
+            margin-top: 30px;
+        }
+
+        .pulse-label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--brand-slate);
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Card Container style for table list */
+        
+
+        .order-list h2 {
+            color: var(--brand-gold) !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6em;
+            margin: 0;
+        }
+
+        /* Table styling overrides */
+        
+
+        
+
+        
+
+        
+
+        /* Prevent parent styles.css hover-td background light override */
+        
+
+        
+
+        
+
+        
+
+        /* Small Button styling */
+        .small-btn {
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s !important;
+            cursor: pointer;
+            padding: 8px 16px !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .small-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* MOBILE HAMBURGER MENU & RESPONSIVENESS */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: var(--brand-navy);
+            color: var(--brand-gold);
+            border: 1px solid var(--brand-gold);
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+            .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-bottom: 2px; }
+            .dashboard-charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2px; margin-bottom: 2px; }
+            .advanced-metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-bottom: 2px; }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                position: fixed;
+                z-index: 999;
+                height: 100%;
+                width: 260px;
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                width: 100% !important;
+                padding: 15px !important;
+            }
+            .main-content h1 {
+                font-size: 1.6em !important;
+            }
+            .main-content > header > div {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 15px;
+            }
+            .main-content > header > div > div:first-child {
+                padding-left: 45px;
+            }
+            .main-content > header > h1 {
+                padding-left: 45px;
+            }
+            .main-content > header > div > div:last-child {
+                flex-wrap: nowrap !important;
+                padding-left: 45px;
+                gap: 5px !important;
+            }
+            .main-content > header > div > div:last-child button {
+                padding: 6px 10px !important;
+                font-size: 0.8em !important;
+                white-space: nowrap;
+            }
+            .main-content > header > div > div:last-child .top-right-theme-toggle {
+                width: 32px !important;
+                height: 32px !important;
+                padding: 0 !important;
+                font-size: 1em !important;
+            }
+            .dashboard-charts-grid, .advanced-metrics-grid {
+                grid-template-columns: 1fr !important;
+                gap: 2px !important;
+                margin-bottom: 2px !important;
+            }
+            .metrics-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 2px !important;
+                margin-bottom: 2px !important;
+            }
+            .metrics-grid .stat-card {
+                padding: 10px 5px !important;
+                text-align: center;
+            }
+            .metrics-grid .stat-card h3 {
+                font-size: 0.65em !important;
+                white-space: normal;
+                line-height: 1.2;
+            }
+            .metrics-grid .stat-card p.stat-value, 
+            .metrics-grid .stat-card > div.dark-mode-text {
+                font-size: 1.2em !important;
+                margin: 5px 0 !important;
+            }
+            .metrics-grid .stat-card > div:last-child {
+                font-size: 0.6em !important;
+                flex-direction: column;
+                gap: 2px !important;
+            }
+        }
+    </style>
+    <link rel="manifest" href="../../manifest.json">
+
+    <!-- Sleek UI Override for Superadmin -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body, .main-content h1, .sidebar-logo, h2, h3, h4, .stat-card h3 {
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        /* Sleek Sidebar */
+        .sidebar {
+            background: #ffffff !important;
+            border-right: 1px solid #f1f5f9 !important;
+        }
+        .dark-mode .sidebar {
+            background: #0f172a !important;
+            border-right: 1px solid #1e293b !important;
+        }
+
+        .sidebar-logo {
+            font-size: 1.2em !important;
+            color: #0f172a !important;
+            letter-spacing: 0px !important;
+        }
+        .dark-mode .sidebar-logo { color: #f8fafc !important; }
+        
+        
+        
+        .sidebar nav a {
+            color: #64748b !important;
+            font-size: 0.95em !important;
+            padding: 12px 15px !important;
+            margin: 4px 15px !important;
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+        }
+        .sidebar nav a:hover {
+            background: #f8fafc !important;
+            color: #3b82f6 !important;
+        }
+        .sidebar nav a.active {
+            background: rgba(59, 130, 246, 0.1) !important;
+            color: #3b82f6 !important;
+            border: none !important;
+            font-weight: 600 !important;
+        }
+        
+        .dark-mode .sidebar nav a { color: #94a3b8 !important; }
+        .dark-mode .sidebar nav a:hover { background: #1e293b !important; color: #60a5fa !important; }
+        .dark-mode .sidebar nav a.active { background: rgba(96, 165, 250, 0.1) !important; color: #60a5fa !important; }
+
+        /* Main Content Spacing */
+        .dashboard-container {
+            background: #f8fafc !important;
+        }
+        .dark-mode .dashboard-container { background: #0b1120 !important; }
+        
+        .main-content {
+            padding: 0 !important;
+        }
+        
+        .main-content h1 {
+            font-size: 1.5em !important;
+            color: #0f172a !important;
+            font-weight: 600 !important;
+        }
+        .dark-mode .main-content h1 { color: #f8fafc !important; }
+
+        /* Sleek Cards */
+        .stat-card, .dashboard-section, .order-list, .order-form-container {
+            background: #ffffff !important;
+            border-radius: 16px !important;
+            border: 1px solid #f1f5f9 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+            padding: 20px !important;
+        }
+        .dark-mode .stat-card, .dark-mode .dashboard-section, .dark-mode .order-list, .dark-mode .order-form-container {
+            background: #1e293b !important;
+            border: 1px solid #334155 !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em !important;
+            color: #64748b !important;
+            font-weight: 500 !important;
+        }
+        .stat-card p.stat-value {
+            font-size: 2.2em !important;
+            color: #0f172a !important;
+            font-weight: 600 !important;
+            margin-top: 10px !important;
+        }
+        .dark-mode .stat-card p.stat-value { color: #f8fafc !important; }
+        
+        /* Badges */
+        .badge-premium, .badge-active, .badge-warning {
+            border-radius: 20px !important;
+            font-size: 0.75em !important;
+            padding: 4px 10px !important;
+            text-transform: none !important;
+            font-weight: 500 !important;
+            border: none !important;
+        }
+        
+        /* Table Styling */
+        table th {
+            font-family: 'Inter', sans-serif !important;
+            color: #64748b !important;
+            font-size: 0.8em !important;
+            font-weight: 500 !important;
+            background: transparent !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+        .dark-mode table th { border-bottom: 1px solid #334155 !important; color: #94a3b8 !important; }
+        
+        table td {
+            font-size: 0.9em !important;
+            border-bottom: 1px solid #f8fafc !important;
+            color: #334155 !important;
+        }
+        .dark-mode table td { border-bottom: 1px solid #1e293b !important; color: #cbd5e1 !important; }
+        
+        /* Inputs & Buttons */
+        .small-btn, .submit-btn {
+            border-radius: 8px !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+            font-size: 0.85em !important;
+            padding: 8px 16px !important;
+            box-shadow: none !important;
+        }
+    </style>
+
+</head>
+<body>
+    <!-- Dark Mode Initializer -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+    <div class="mobile-menu-btn" id="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+    </div>
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">STITCH & STYLES KENYA</h1>
+                    <span class="sidebar-subtitle">SAAS CONTROL</span>
+                </div>
+            </div>
+
+            <p id="user-info" style="padding: 10px 15px; font-size: 0.8em; color: #64748b;">Logged in as: Owner</p>
+                        <nav></nav>
+            <script>
+                if (typeof window.toggleSidebarDropdown !== 'function') {
+                    window.toggleSidebarDropdown = function(button) {
+                        const event = window.event || (arguments.length > 1 ? arguments[1] : null);
+                        if (event) {
+                            event.alreadyHandledDropdown = true;
+                        }
+                        const dropdown = button.closest('.sidebar-dropdown');
+                        if (dropdown) {
+                            dropdown.classList.toggle('open');
+                        }
+                    };
+                }
+            </script>
+        </aside>
+
+        <main class="main-content">
+            <header style="margin-bottom: 0; padding: 10px 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="margin: 0; font-size: 1.8em !important;" class="dashboard-main-title dark-mode-text">SaaS Control Centre</h1>
+                    <p id="dashboard-welcome-text" style="color: #64748b; font-size: 0.95em; font-weight: 500; margin-top: 5px;">Welcome back! Here is your platform overview.</p>
+                </div>
+                <div class="top-header-actions" style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="toggleGuide('superadmin-guide')" class="small-btn" style="background: #ffffff; border: 1px solid #e2e8f0; color: #475569; cursor: pointer;"><i class="fas fa-question-circle"></i> Guide</button>
+                    <button onclick="location.reload()" class="small-btn" style="background: #ffffff; border: 1px solid #e2e8f0; color: #475569; cursor: pointer;"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    
+                    <button onclick="toggleTheme()" class="top-right-theme-toggle" title="Toggle Dark Mode"
+                        style="background: transparent; border: 1px solid #e2e8f0; color: #475569; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        onmouseover="this.style.background='#f8fafc'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-moon theme-toggle-icon"></i>
+                    </button>
+                    <button onclick="handleLogout()" class="small-btn" style="background: #e11d48; color: white; border: none;">Logout</button>
+                </div>
+                </div>
+            </header>
+
+                <!-- Interactive Superadmin Guide -->
+                <div class="dashboard-guide-banner stat-card" id="superadmin-guide" style="display: flex; margin-bottom: 25px; align-items: flex-start; gap: 15px;">
+                    <i class="fas fa-crown" style="font-size: 1.8em; color: var(--brand-gold); margin-top: 2px;"></i>
+                    <div>
+                        <h4 style="margin: 0 0 5px 0;" class="dark-mode-text">💡 SaaS Platform Control Centre Guide</h4>
+                        <p>Welcome to the global platform monitor. Track all tenant registrations, monitor system MRR metrics, verify security event telemetry, and review active user stats across shops.</p>
+                    </div>
+                    <button class="close-guide-btn" onclick="toggleGuide('superadmin-guide');" title="Dismiss Guide">&times;</button>
+                </div>
+                <script>
+                    if (localStorage.getItem('guide_visible_superadmin-guide') === 'false') {
+                        document.getElementById('superadmin-guide').style.display = 'none';
+                    }
+                    function toggleGuide(id) {
+                        const guide = document.getElementById(id);
+                        if (guide) {
+                            const isHidden = guide.style.display === 'none';
+                            guide.style.display = isHidden ? 'flex' : 'none';
+                            localStorage.setItem('guide_visible_' + id, isHidden ? 'true' : 'false');
+                        }
+                    }
+                </script>
+
+            <div class="metrics-grid">
+                <div class="stat-card">
+                    <h3>Total Escrow Volume</h3>
+                    <div style="font-size: 2.2em; font-weight: 700; margin: 10px 0;" id="ledger-total-volume" class="dark-mode-text">...</div>
+                    <div style="font-size: 0.8em; color: #64748b; font-weight: 500;">All time processed</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Platform Revenue (1.5%)</h3>
+                    <div style="font-size: 2.2em; font-weight: 700; margin: 10px 0; color: var(--brand-gold);" id="ledger-platform-fee" class="dark-mode-text">...</div>
+                    <div style="font-size: 0.8em; color: #64748b; font-weight: 500;">Total platform fees earned</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Pending Tailor Payouts</h3>
+                    <div style="font-size: 2.2em; font-weight: 700; margin: 10px 0;" id="ledger-tailor-payouts" class="dark-mode-text">...</div>
+                    <div style="font-size: 0.8em; color: #64748b; font-weight: 500;">Funds awaiting disbursement</div>
+                </div>
+            </div>
+
+            <!-- Ledger Table -->
+            <div class="stat-card chart-container" style="margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;">Escrow Ledger Transactions</h3>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--glass-border);">
+                                <th style="padding: 12px 15px;">Date</th>
+                                <th style="padding: 12px 15px;">Receipt No</th>
+                                <th style="padding: 12px 15px;">Client</th>
+                                <th style="padding: 12px 15px;">Tailor / Shop</th>
+                                <th style="padding: 12px 15px;">Amount</th>
+                                <th style="padding: 12px 15px;">Platform Fee (1.5%)</th>
+                                <th style="padding: 12px 15px;">Tailor Payout (98.5%)</th>
+                                <th style="padding: 12px 15px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledger-tbody">
+                            <tr><td colspan="8" style="text-align:center; padding: 20px;">Loading ledger...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <script>
+                async function loadLedger() {
+                    try {
+                        const { data: payments, error } = await supabaseClient
+                            .from('escrow_payments')
+                            .select(`
+                                *,
+                                orders (
+                                    customer_name,
+                                    organization_id
+                                )
+                            `)
+                            .order('created_at', { ascending: false });
+
+                        if (error) throw error;
+                        
+                        // Fetch organizations safely to avoid foreign key alias collisions
+                        const { data: orgs } = await supabaseClient.from('organizations').select('id, name');
+                        const orgMap = {};
+                        if (orgs) {
+                            orgs.forEach(o => orgMap[o.id] = o.name);
+                        }
+
+                        let totalVolume = 0;
+                        let platformRevenue = 0;
+                        let pendingPayouts = 0;
+
+                        const tbody = document.getElementById('ledger-tbody');
+                        
+                        if (!payments || payments.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No escrow payments found.</td></tr>';
+                        } else {
+                            tbody.innerHTML = payments.map(p => {
+                                // Only calculate completed/escrowed payments
+                                if (p.status === 'IN_ESCROW' || p.status === 'PAID') {
+                                    totalVolume += p.amount;
+                                    const fee = p.amount * 0.015;
+                                    const payout = p.amount - fee;
+                                    platformRevenue += fee;
+                                    
+                                    if (p.status === 'IN_ESCROW') {
+                                        pendingPayouts += payout;
+                                    }
+                                    
+                                    const orgId = p.orders?.organization_id;
+                                    const shopName = orgId && orgMap[orgId] ? orgMap[orgId] : 'Unknown Shop';
+                                    const clientName = p.orders?.customer_name || 'Unknown Client';
+                                    const dateStr = new Date(p.created_at).toLocaleDateString();
+                                    const statusColor = p.status === 'IN_ESCROW' ? '#e67e22' : (p.status === 'PAID' ? '#10b981' : '#dc3545');
+
+                                    return `
+                                        <tr style="border-bottom: 1px solid var(--glass-border);">
+                                            <td style="padding: 12px 15px;">${dateStr}</td>
+                                            <td style="padding: 12px 15px;">${p.mpesa_receipt_number || 'N/A'}</td>
+                                            <td style="padding: 12px 15px;">${clientName}</td>
+                                            <td style="padding: 12px 15px;">${shopName}</td>
+                                            <td style="padding: 12px 15px; font-weight: bold;">Ksh ${p.amount.toLocaleString()}</td>
+                                            <td style="padding: 12px 15px; color: var(--brand-gold);">Ksh ${fee.toLocaleString()}</td>
+                                            <td style="padding: 12px 15px; color: #10b981;">Ksh ${payout.toLocaleString()}</td>
+                                            <td style="padding: 12px 15px;"><span style="background: ${statusColor}22; color: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold;">${p.status}</span></td>
+                                        </tr>
+                                    `;
+                                }
+                                return '';
+                            }).join('');
+                        }
+
+                        document.getElementById('ledger-total-volume').textContent = `Ksh ${totalVolume.toLocaleString()}`;
+                        document.getElementById('ledger-platform-fee').textContent = `Ksh ${platformRevenue.toLocaleString()}`;
+                        document.getElementById('ledger-tailor-payouts').textContent = `Ksh ${pendingPayouts.toLocaleString()}`;
+
+                    } catch (err) {
+                        console.error('Error loading ledger:', err);
+                        document.getElementById('ledger-tbody').innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 20px; color: red;">Error: ${err.message}</td></tr>`;
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    setTimeout(loadLedger, 500);
+                });
+            </script>
+        </main>
+    </div>
+
+    <script src="../../js/core/config.js?v=1781824528054"></script>
+    
+    <!-- Core & Utils -->
+    <script src="../../js/utils/helpers.js?v=1781824528054"></script>
+    <script src="../../js/ui/theme.js?v=1781824528054"></script>
+    <script src="../../js/core/globals.js?v=1781824528054"></script>
+    <script src="../../js/core/init.js?v=1781824528054"></script>
+    <script src="../../js/core/auth.js?v=1781824528054"></script>
+    <script src="../../js/ui/sidebar.js?v=1781824528054"></script>
+    <script src="../../js/ui/modals.js?v=1781824528054"></script>
+    <script src="../../js/features/inventory.js?v=1781824528054"></script>
+    <script src="../../js/features/clients.js?v=1781824528054"></script>
+    
+    <script src="../../js/features/orders.js?v=1781824528054"></script>
+    <script src="../../js/features/payments.js?v=1781824528054"></script>
+    <script src="../../js/features/analytics.js?v=1781824528054"></script>
+    <script src="../../js/features/messaging.js?v=1781824528054"></script>
+    <script src="../../js/features/management.js?v=1781824528054"></script>
+    <script src="../../app.js?v=1781824528054"></script>
+    <script src="../../mobile-nav.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             // Logic will be handled by app.js checkSession and routing
+        });
+    </script>
+</body>
+</html>

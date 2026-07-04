@@ -75,6 +75,7 @@ async function updateSidebarBranding(forcedName = null) {
             if (USER_PROFILE.role === 'superadmin') {
                 navHtml = `
                     <a href="/views/superadmin/superadmin-dashboard.html" id="nav-dashboard"><i class="fas fa-chart-pie" style="margin-right: 8px;"></i> Dashboard</a>
+                    <a href="/views/superadmin/superadmin-ledger.html" id="nav-ledger"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Financial Ledger</a>
                     <a href="/views/superadmin/superadmin-orgs.html" id="nav-orgs"><i class="fas fa-building" style="margin-right: 8px;"></i> Tenants</a>
                     <a href="/views/superadmin/superadmin-users-list.html" id="nav-users"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
                     <a href="/views/superadmin/superadmin-blog.html" id="nav-blog"><i class="fas fa-blog" style="margin-right: 8px;"></i> Blog Management</a>

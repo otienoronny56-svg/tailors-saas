@@ -1392,7 +1392,7 @@ async function openAdminOrderView(orderId) {
                         </p>
                     </div>
                     <div style="flex: 1 1 30%; min-width: 80px; background: #007bff; color: white; padding: 8px; border-radius: 5px; text-align: center;">
-                        <small style="font-size: 0.8em;">Paid</small>
+                        <small style="font-size: 0.8em;"><i class="fas fa-shield-alt" style="color:#d4af37; margin-right:4px;"></i>Secured in Escrow</small>
                         <p style="margin: 2px 0; font-size: 1.1em; font-weight: bold;">
                             Ksh ${paid.toLocaleString()}
                         </p>
@@ -1406,6 +1406,12 @@ async function openAdminOrderView(orderId) {
                 </div>
                 
                 <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+                    ${balance > 0 ? `
+                        <button onclick="requestBalancePayment('${order.id}', ${balance}, '${order.shop_id || order.organization_id}')" 
+                                style="flex: 1; background: #10b981; color: white; padding: 10px 4px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; font-size: 0.85em; display:flex; align-items:center; justify-content:center; gap:6px;">
+                            <i class="fas fa-hand-holding-usd"></i> Request Balance
+                        </button>
+                    ` : ''}
                     <button onclick="window.location.href='/views/admin/admin-order-details.html?id=${order.id}'" 
                             style="flex: 1; background: #000; color: #d4af37; padding: 10px 4px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; font-size: 0.85em; display:flex; align-items:center; justify-content:center; gap:6px;">
                         <i class="fas fa-pen"></i> Edit
@@ -2996,6 +3002,11 @@ window.downloadInvoicePDF = async function (orderId) {
         alert("Error generating invoice: " + error.message);
     }
 }
+
+window.requestBalancePayment = async function(orderId, balanceAmount, shopId) {
+    alert('This M-Pesa payment request feature is currently in final testing and will be officially releasing in September. Thank you for your patience!');
+    return;
+};
 
 
 

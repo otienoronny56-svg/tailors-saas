@@ -255,15 +255,16 @@ async function loadAllTransactions() {
         if ((typeFilter === 'all' || typeFilter === 'payment') && paymentsData.data) {
             paymentsData.data.forEach(p => {
                 const relatedOrder = orderMap[p.order_id] || {};
+                const isEscrow = p.payment_method?.includes('Escrow');
                 transactions.push({
-                    type: 'Payment',
+                    type: isEscrow ? 'Escrow Payment' : 'Payment',
                     time: p.recorded_at,
                     customer: relatedOrder.customer_name || 'Unknown',
                     details: `Method: ${p.payment_method || 'Cash'} ${relatedOrder.garment_type ? '(' + relatedOrder.garment_type + ')' : ''}`,
                     amount: p.amount || 0,
-                    color: '#10b981',
-                    bg: 'rgba(16, 185, 129, 0.1)',
-                    icon: 'fa-money-bill-wave'
+                    color: isEscrow ? 'var(--brand-gold)' : '#10b981',
+                    bg: isEscrow ? 'rgba(212, 175, 55, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                    icon: isEscrow ? 'fa-shield-alt' : 'fa-money-bill-wave'
                 });
             });
         }
@@ -346,8 +347,9 @@ async function exportTransactionsCSV() {
         if ((typeFilter === 'all' || typeFilter === 'payment') && paymentsData.data) {
             paymentsData.data.forEach(p => {
                 const relatedOrder = orderMap[p.order_id] || {};
+                const isEscrow = p.payment_method?.includes('Escrow');
                 rawTransactions.push({
-                    type: 'Payment',
+                    type: isEscrow ? 'Escrow Payment' : 'Payment',
                     time: p.recorded_at,
                     customer: relatedOrder.customer_name || 'Unknown',
                     details: `Method: ${p.payment_method || 'Cash'} ${relatedOrder.garment_type ? '(' + relatedOrder.garment_type + ')' : ''}`,

@@ -2368,13 +2368,14 @@ async function loadRecentActivities(shopId) {
         if (payments) {
             payments.forEach(p => {
                 const relatedOrder = orderMap[p.order_id] || {};
+                const isEscrow = p.payment_method?.includes('Escrow');
                 activities.push({
-                    title: `Payment Received`,
+                    title: isEscrow ? `Escrow Payment Secured` : `Payment Received`,
                     desc: `Ksh ${p.amount.toLocaleString()} via ${p.payment_method || 'Cash'} from ${relatedOrder.customer_name || 'Customer'}`,
                     time: p.recorded_at,
-                    icon: 'fa-money-bill-wave',
-                    color: '#10b981',
-                    bg: 'rgba(16, 185, 129, 0.1)'
+                    icon: isEscrow ? 'fa-shield-alt' : 'fa-money-bill-wave',
+                    color: isEscrow ? 'var(--brand-gold)' : '#10b981',
+                    bg: isEscrow ? 'rgba(212, 175, 55, 0.1)' : 'rgba(16, 185, 129, 0.1)'
                 });
             });
         }

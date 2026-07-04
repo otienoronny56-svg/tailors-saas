@@ -57,14 +57,35 @@ serve(async (req) => {
       }
 
       // Create Pending Escrow Record
-      const { error: dbError } = await supabase.from("escrow_payments").insert({
-        order_id: order_id,
-        client_id: req.headers.get("x-user-id"), // We'd get this from auth usually
-        tailor_id: req.headers.get("x-tailor-id"),
-        amount: amount,
-        platform_fee: amount * 0.01,
-        paystack_reference: data.data.reference,
-        status: "PENDING_FUNDS"
+      // Resolve the correct tailor_id from the order
+      const orderId = order_id;
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('manager_id, shop_id')
+        .eq('id', orderId)
+        .single();
+        
+      let resolvedTailorId = orderData?.manager_id;
+      
+      if (!resolvedTailorId && orderData?.shop_id) {
+          const { data: shopData } = await supabase
+              .from('shops')
+              .select('owner_id')
+              .eq('id', orderData.shop_id)
+              .single();
+          if (shopData) resolvedTailorId = shopData.owner_id;
+      }
+      
+      const { data: paymentRecord, error: dbError } = await supabase
+        .from('escrow_payments')
+        .insert({
+          order_id: orderId,
+          client_id: req.headers.get("x-user-id"), // We'd get this from auth usually
+          tailor_id: resolvedTailorId || req.headers.get("x-tailor-id"),
+          amount: amount,
+          platform_fee: amount * 0.01,
+          paystack_reference: data.data.reference,
+          status: "PENDING_FUNDS"
       });
 
       if (dbError) throw dbError;
