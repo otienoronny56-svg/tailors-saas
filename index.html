@@ -2845,6 +2845,7 @@
                     }
                     const activeNav = `
                         <div class="nav-user-pill">
+                            <button class="theme-toggle" onclick="toggleTheme()" style="background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:1.2em; margin-right: 15px;"><i class="fas fa-moon theme-toggle-icon"></i></button>
                             <span class="nav-user-name"><i class="fas fa-user-circle"></i> ${escapeHTML(firstName)}</span>
                             <a href="./views/client/client-dashboard.html" class="btn-portal"><i class="fas fa-comments"></i> My Inbox</a>
                             <button class="btn-signout" onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
@@ -2866,6 +2867,7 @@
                     
                     const activeNav = `
                         <div class="nav-user-pill">
+                            <button class="theme-toggle" onclick="toggleTheme()" style="background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:1.2em; margin-right: 15px;"><i class="fas fa-moon theme-toggle-icon"></i></button>
                             <span class="nav-user-name"><i class="fas fa-user-tie"></i> ${escapeHTML(firstName)}</span>
                             <a href="${dashUrlReal}" class="btn-portal"><i class="fas fa-th-large"></i> Dashboard</a>
                             <button class="btn-signout" onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
