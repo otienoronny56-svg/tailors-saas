@@ -239,7 +239,10 @@ async function loadPlatformUsers() {
         }
 
         tbody.innerHTML = profiles.map(profile => {
-            const orgName = orgMap[profile.organization_id] || 'Platform Level';
+            let orgName = orgMap[profile.organization_id];
+            if (!orgName) {
+                orgName = profile.role === 'client' ? 'Client App User' : 'Platform Level';
+            }
             
             const lastActive = profile.last_seen_at ? new Date(profile.last_seen_at) : null;
             const isOnline = lastActive && (new Date() - lastActive < 5 * 60 * 1000);
@@ -252,8 +255,8 @@ async function loadPlatformUsers() {
                     <td>
                         <div style="font-size:0.9em; color:#64748b;">${profile.email || 'No email provided'}</div>
                     </td>
-                    <td><span class="org-badge badge-basic">${orgName}</span></td>
-                    <td><span style="text-transform:capitalize;">${profile.role || 'user'}</span></td>
+                    <td><span class="org-badge badge-basic" style="${profile.role === 'client' ? 'background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2);' : ''}">${orgName}</span></td>
+                    <td><span style="text-transform:capitalize; ${profile.role === 'client' ? 'font-weight: 700; color: #3b82f6;' : ''}">${profile.role || 'user'}</span></td>
                     <td>${lastActive ? getRelativeTime(lastActive) : 'Never'}</td>
                     <td>
                         <div style="display: flex; flex-direction: row; gap: 5px; align-items: center;">
