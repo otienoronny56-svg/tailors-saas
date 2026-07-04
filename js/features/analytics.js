@@ -16,13 +16,15 @@ async function loadSuperadminDashboard() {
             console.warn("Could not fetch exact auth users, falling back to profiles.");
         }
 
-        const [{ data: orgs }, { data: profiles }] = await Promise.all([
+        const [{ data: orgs }, { data: profiles }, { count: trackingViewsCount }] = await Promise.all([
             supabaseClient.from('organizations').select('*').order('created_at', { ascending: true }),
-            supabaseClient.from('user_profiles').select('*')
+            supabaseClient.from('user_profiles').select('*'),
+            supabaseClient.from('tracking_logs').select('*', { count: 'exact', head: true })
         ]);
 
         const totalOrgs = orgs?.length || 0;
         const totalUsers = authUsersCount || profiles?.length || 0;
+        const totalTrackingViews = trackingViewsCount || 0;
         
         // Calculate Online Now (within 5 mins)
         const onlineNow = profiles?.filter(p => {
@@ -42,7 +44,8 @@ async function loadSuperadminDashboard() {
         setEl('total-orgs', totalOrgs);
         setEl('total-users', totalUsers);
         setEl('projected-mrr', `Ksh ${projectedMRR.toLocaleString()}`);
-        setEl('org-growth-text', `+${recentOrgs}`);        // --- Growth Pulse Chart ---
+        setEl('org-growth-text', `+${recentOrgs}`);
+        setEl('total-tracking-views', totalTrackingViews.toLocaleString());        // --- Growth Pulse Chart ---
         const canvas = document.getElementById('growthPulseChart');
         let currentGrowthFilter = 'monthly';
         

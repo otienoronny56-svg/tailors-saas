@@ -1313,7 +1313,7 @@ function shareTrackingLink(orderId, phone) {
     const basePath = window.location.pathname.indexOf('/views/') > 0 
         ? window.location.pathname.substring(0, window.location.pathname.indexOf('/views/')) 
         : '';
-    const trackingUrl = `${window.location.origin}${basePath}/views/client/track.html?id=${orderId}`;
+    const trackingUrl = `${window.location.origin}${basePath}/views/client/track.html?id=${orderId}&utm_source=tailor_share&utm_medium=whatsapp_or_copy&utm_campaign=order_tracking`;
     const text = `Hi! You can track the live status of your custom tailoring order here:\n\n${trackingUrl}`;
     
     // Attempt to open WhatsApp if phone exists

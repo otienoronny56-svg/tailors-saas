@@ -438,6 +438,15 @@
 
                 renderOrder(data[0]);
 
+                // Silently log this view in the tracking_logs table
+                const sourceParam = params.get('utm_source') || 'direct';
+                supabaseClient.from('tracking_logs').insert([{ 
+                    order_id: orderId,
+                    source: sourceParam
+                }]).then(({ error }) => {
+                    if (error) console.error("Could not log tracking view:", error);
+                });
+
             } catch (err) {
                 console.error("Tracking Error:", err);
                 showError("System Error", "Unable to load the order details right now.");
