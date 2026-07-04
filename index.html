@@ -2267,6 +2267,42 @@
             border: 1px solid rgba(255,255,255,0.05);
             margin-top: auto;
         }
+    
+        /* ===== WHATSAPP FLOAT ===== */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: #25d366;
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 35px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            background-color: #128c7e;
+            color: #FFF;
+        }
+        @media (max-width: 768px) {
+            .whatsapp-float {
+                width: 50px;
+                height: 50px;
+                bottom: 20px;
+                right: 20px;
+                font-size: 28px;
+            }
+        }
+
     </style>
     <link rel="manifest" href="manifest.json">
 </head>
@@ -2704,7 +2740,7 @@
                     <li><a href="#hiw-section">How It Works</a></li>
                     <li><a href="terms.html">Terms &amp; Conditions</a></li>
                     <li><a href="privacy.html">Privacy Policy</a></li>
-                    <li><a href="#">Support Center</a></li>
+                    <li><a href="support.html">Support Center</a></li>
                 </ul>
             </div>
         </div>
@@ -3380,6 +3416,12 @@
             }
         });
     </script>
+
+
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/254745806488" class="whatsapp-float" target="_blank" aria-label="Chat with us on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
 </body>
 
