@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TKKW51QFZ5"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-TKKW51QFZ5');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | Stitch &amp; Styles Kenya</title>
+    <meta name="description" content="Privacy Policy for Stitch & Styles Kenya. Learn how we collect, use, and protect your data on our tailoring platform.">
+    <meta name="keywords" content="privacy policy, data protection, stitch and styles Kenya privacy, fashion software data privacy, tailor client data">
+    <meta name="author" content="Stitch &amp; Styles Kenya">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="canonical" href="https://www.tailors.co.ke/privacy.html">
+
+    <!-- AI discoverability -->
+    <link rel="alternate" type="text/plain" href="https://www.tailors.co.ke/llms.txt" title="LLMs.txt — AI Summary">
+
+    <!-- Geo targeting -->
+    <meta name="geo.region" content="KE">
+    <meta name="geo.placename" content="Nairobi, Kenya">
+    <meta name="geo.position" content="-1.286389;36.817223">
+    <meta name="ICBM" content="-1.286389, 36.817223">
+
+    <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Stitch &amp; Styles Kenya">
+    <meta property="og:url" content="https://www.tailors.co.ke/privacy.html">
+    <meta property="og:title" content="Privacy Policy | Stitch &amp; Styles Kenya">
+    <meta property="og:description" content="Privacy Policy for Stitch & Styles Kenya. Learn how we collect, use, and protect your data on our tailoring platform.">
+    <meta property="og:image" content="https://www.tailors.co.ke/hero_bg.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Stitch &amp; Styles Kenya — Privacy Policy">
+    <meta property="og:locale" content="en_KE">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@stitch_and_styles_kenya">
+    <meta name="twitter:url" content="https://www.tailors.co.ke/privacy.html">
+    <meta name="twitter:title" content="Privacy Policy | Stitch &amp; Styles Kenya">
+    <meta name="twitter:description" content="Privacy Policy for Stitch & Styles Kenya. Learn how we collect, use, and protect your data on our tailoring platform.">
+    <meta name="twitter:image" content="https://www.tailors.co.ke/hero_bg.png">
+    <meta name="twitter:image:alt" content="Stitch &amp; Styles Kenya Privacy">
+    
+    <!-- PWA / Theme -->
+    <meta name="theme-color" content="#d4af37">
+    <link rel="icon" type="image/jpeg" href="logo.jpeg">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase Client -->
+    <script src="/js/lib/supabase.min.js"></script>
+    
+    <style>
+        /* ===== DESIGN TOKENS (Imported from index) ===== */
+        :root {
+            --bg-deep: #030712;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --bg-card-hover: rgba(31, 41, 55, 0.85);
+            --gold: #d4af37;
+            --gold-light: #f3cd57;
+            --gold-glow: rgba(212, 175, 55, 0.15);
+            --gold-border: rgba(212, 175, 55, 0.25);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-slate: #d1d5db;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --shadow-premium: 0 20px 40px rgba(0, 0, 0, 0.5);
+            --font-display: 'Playfair Display', serif;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            --bg-header: rgba(3, 7, 18, 0.75);
+            --bg-header-scrolled: rgba(3, 7, 18, 0.9);
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #ffffff;
+            --bg-card: #f9fafb;
+            --bg-card-hover: #f3f4f6;
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --text-slate: #374151;
+            --border-glass: rgba(0, 0, 0, 0.08);
+            --gold-glow: rgba(212, 175, 55, 0.1);
+            --bg-header: rgba(255, 255, 255, 0.75);
+            --bg-header-scrolled: rgba(255, 255, 255, 0.95);
+        }
+
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
+        body { font-family: var(--font-sans); background-color: var(--bg-deep); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+
+        /* ===== HEADER ===== */
+        header {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 10px 5%;
+            background: var(--bg-header);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-glass);
+            transition: var(--transition-smooth);
+        }
+
+        header.scrolled {
+            padding: 8px 5%;
+            background: var(--bg-header-scrolled);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo-group { display: flex; flex-direction: column; text-decoration: none; }
+        .logo-text { font-family: var(--font-display); font-weight: 700; font-size: 1.35em; color: var(--gold); letter-spacing: 0.5px; text-transform: uppercase; }
+        .logo-sub { font-size: 0.55em; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-top: -2px; }
+
+        nav { display: flex; align-items: center; gap: 20px; }
+        .nav-links { display: flex; align-items: center; gap: 18px; }
+        .nav-links a { color: var(--text-slate); text-decoration: none; font-weight: 500; font-size: 0.86em; transition: var(--transition-smooth); position: relative; padding: 3px 0; }
+        .nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: var(--gold); transition: var(--transition-smooth); }
+        .nav-links a:hover { color: var(--gold); }
+        .nav-links a:hover::after { width: 100%; }
+
+        #nav-auth-area { display: flex; align-items: center; gap: 16px; }
+        .btn-login { color: var(--text-slate); text-decoration: none; font-weight: 600; font-size: 0.84em; transition: var(--transition-smooth); padding: 7px 12px; border-radius: 7px; }
+        .btn-login:hover { color: var(--gold); background: rgba(255, 255, 255, 0.03); }
+        .btn-signup { background: var(--gold); border: none; color: var(--bg-deep); padding: 7px 16px; border-radius: 7px; text-decoration: none; font-weight: 700; font-size: 0.84em; cursor: pointer; transition: var(--transition-smooth); box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2); }
+        .btn-signup:hover { background: var(--gold-light); transform: translateY(-1px); }
+        
+        .mobile-menu-btn { display: none; background: none; border: none; color: var(--text-main); font-size: 1.5em; cursor: pointer; padding: 4px; z-index: 1010; }
+        .mobile-actions { display: none; align-items: center; gap: 16px; }
+        .mobile-auth-icon { color: var(--text-slate); font-size: 1.55em; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+
+        /* ===== ABOUT HERO ===== */
+        .about-hero {
+            padding: 110px 8% 40px;
+            background: radial-gradient(circle at center, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+            text-align: center;
+        }
+
+        .about-hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.5em, 5vw, 4.5em);
+            color: var(--text-main);
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+        
+        .about-hero h1 em {
+            color: var(--gold);
+            font-style: italic;
+        }
+
+        .about-hero p {
+            color: var(--text-slate);
+            font-size: 1.15em;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* ===== STORY SECTION ===== */
+        .story-section {
+            padding: 80px 8%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .story-image {
+            width: 100%;
+            border-radius: 24px;
+            border: 1px solid var(--border-glass);
+            box-shadow: var(--shadow-premium);
+        }
+
+        .story-content h2 {
+            font-family: var(--font-display);
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .story-content p {
+            color: var(--text-muted);
+            font-size: 1.05em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        /* ===== CORE VALUES ===== */
+        .values-wrapper {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-glass);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 100px 8%;
+            margin-top: 40px;
+        }
+
+        .values-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .values-header h2 {
+            font-family: var(--font-display);
+            font-size: 2.5em;
+            color: var(--text-main);
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .value-item {
+            background: rgba(3, 7, 18, 0.4);
+            border: 1px solid var(--border-glass);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            transition: var(--transition-smooth);
+        }
+
+        [data-theme="light"] .value-item {
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .value-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .value-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--gold-glow);
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            margin: 0 auto 24px;
+            border: 1px solid var(--gold-border);
+        }
+
+        .value-item h3 {
+            font-size: 1.3em;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .value-item p {
+            color: var(--text-muted);
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* ===== CTA BANNER ===== */
+        .cta-section {
+            margin: 100px 8%;
+            border-radius: 30px;
+            background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.12), transparent), linear-gradient(135deg, #0f1626 0%, #030712 100%);
+            border: 1px solid var(--border-glass);
+            padding: 80px 40px;
+            text-align: center;
+        }
+
+        [data-theme="light"] .cta-section {
+            background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.15), transparent), linear-gradient(135deg, #fdf6e3 0%, #f5f0e8 100%);
+        }
+
+        .cta-section h2 { font-family: var(--font-display); font-size: clamp(1.8em, 4vw, 2.5em); margin-bottom: 16px; }
+        .cta-section p { color: var(--text-muted); font-size: 1.05em; max-width: 550px; margin: 0 auto 36px; }
+        
+        .btn-hero-primary { background: var(--gold); color: var(--bg-deep); padding: 16px 36px; border-radius: 50px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: var(--transition-smooth); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3); }
+        .btn-hero-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+
+        /* ===== FOOTER ===== */
+        footer { background: #020408; border-top: 1px solid var(--border-glass); padding: 80px 8% 40px; }
+        [data-theme="light"] footer { background: #1a1206; }
+        .footer-inner { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 48px; margin-bottom: 60px; }
+        .footer-brand p { color: var(--text-muted); font-size: 0.9em; margin-top: 16px; max-width: 280px; }
+        .footer-col h5 { color: var(--text-main); font-weight: 700; font-size: 0.88em; text-transform: uppercase; margin-bottom: 24px; }
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+        .footer-col ul a { color: var(--text-muted); text-decoration: none; font-size: 0.9em; transition: var(--transition-smooth); }
+        .footer-col ul a:hover { color: var(--gold); }
+        .footer-bottom { max-width: 1400px; margin: 0 auto; border-top: 1px solid var(--border-glass); padding-top: 30px; text-align: center; color: var(--text-muted); font-size: 0.85em; }
+
+        @media (max-width: 992px) {
+            .story-section { grid-template-columns: 1fr; gap: 40px; }
+        }
+        @media (max-width: 1200px) {
+            .nav-links, #nav-auth-area { display: none !important; }
+            .mobile-actions, .mobile-menu-btn { display: flex; }
+            .footer-inner { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .footer-inner { grid-template-columns: 1fr; }
+            .cta-section { margin: 40px 5%; padding: 40px 20px; }
+        }
+        /* ===== MOBILE DRAWER MENU ===== */
+        .mobile-drawer {
+            position: fixed; top: 0; right: 0; width: 80%; max-width: 320px; height: 100vh;
+            background: var(--bg-card); backdrop-filter: blur(25px); z-index: 1005;
+            padding: 100px 30px 40px; display: flex; flex-direction: column; gap: 40px;
+            border-left: 1px solid var(--border-glass);
+            transform: translateX(100%); transition: var(--transition-smooth);
+        }
+        .mobile-drawer.open { transform: translateX(0); }
+        .mobile-drawer-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px); z-index: 1004; opacity: 0;
+            pointer-events: none; transition: var(--transition-smooth);
+        }
+        .mobile-drawer-overlay.open { opacity: 1; pointer-events: auto; }
+        .mobile-drawer-links { display: flex; flex-direction: column; gap: 24px; }
+        .mobile-drawer-links a {
+            color: var(--text-slate); text-decoration: none; font-size: 1.1em;
+            font-weight: 600; display: flex; align-items: center; gap: 12px;
+            transition: var(--transition-smooth);
+        }
+        .mobile-drawer-links a:hover { color: var(--gold); transform: translateX(5px); }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header id="main-header">
+        <a href="index.html" class="logo-group" style="flex-direction: row; align-items: center; gap: 10px; text-decoration: none;">
+            <div style="width: 36px; height: 36px; border-radius: 8px; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15); border: 1px solid var(--gold-border); flex-shrink: 0;">
+                <img src="logo.jpeg" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <span class="logo-text" style="font-size: 1.1em; line-height: 1.1; margin-bottom: 1px;">Stitch &amp; Styles</span>
+                <span class="logo-sub" style="font-size: 0.5em; letter-spacing: 1.5px;">Find Your Perfect Fit</span>
+            </div>
+        </a>
+        
+        <nav id="main-nav">
+            <div class="nav-links">
+                <a href="index.html#categories-section">Categories</a>
+                <a href="index.html#providers-section">Providers</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="about.html">About Us</a>
+                <a href="views/client/blog.html">Style Blog</a>
+                <a href="index.html#hiw-section">How It Works</a>
+            </div>
+            
+            <div id="nav-auth-area">
+                <button class="theme-toggle" onclick="toggleTheme()" style="background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:1.2em; margin-right: 15px;"><i class="fas fa-moon theme-toggle-icon"></i></button>
+                <a href="./login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                <a href="./login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
+            </div>
+
+            <div class="mobile-actions">
+                <div id="mobile-quick-auth">
+                    <a href="./login.html" class="mobile-auth-icon" aria-label="Log In"><i class="fas fa-user-circle"></i></a>
+                </div>
+                <button class="mobile-menu-btn" id="mobile-toggle-btn" aria-label="Toggle Navigation Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ===== MOBILE DRAWER MENU ===== -->
+    <div class="mobile-drawer-overlay" id="mobile-overlay"></div>
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="mobile-drawer-links">
+            <a href="index.html#categories-section" onclick="closeDrawer()"><i class="fas fa-th-large"></i> Categories</a>
+            <a href="index.html#providers-section" onclick="closeDrawer()"><i class="fas fa-store"></i> Providers</a>
+            <a href="pricing.html" onclick="closeDrawer()"><i class="fas fa-tags"></i> Pricing</a>
+            <a href="about.html" onclick="closeDrawer()"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="views/client/blog.html" onclick="closeDrawer()"><i class="fas fa-newspaper"></i> Style Blog</a>
+            <a href="index.html#hiw-section" onclick="closeDrawer()"><i class="fas fa-question-circle"></i> How It Works</a>
+        </div>
+        <div id="mobile-drawer-auth" style="display:flex; flex-direction:column; gap:16px;">
+            <a href="./login.html" class="btn-login" style="text-align:center; display:block;"><i class="fas fa-sign-in-alt"></i> Log In</a>
+            <a href="./login.html?mode=signup" class="btn-signup" style="text-align:center; display:block;"><i class="fas fa-user-plus"></i> Sign Up</a>
+        </div>
+    </div>
+
+    <!-- ===== PAGE HERO ===== -->
+    <section class="about-hero">
+        <h1>Privacy <em>Policy</em></h1>
+        <p>Your privacy is important to us.</p>
+    </section>
+
+    <!-- ===== CONTENT ===== -->
+    <section class="story-section" style="display: block; padding: 20px 5% 60px; max-width: 900px; margin: 0 auto; color: var(--text-main); font-family: var(--font-sans); line-height: 1.8;">
+        <div class="story-content" style="max-width: 100%;">
+            <p>At <strong>Stitch & Styles Kenya</strong>, we believe that your privacy matters. This Privacy Policy explains in simple language what information we collect when you use our software, how we use it, and how we keep it safe.</p>
+            <p>By creating a Stitch & Styles Kenya account and using our service, you agree to the practices described in this policy.</p>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">1. Who We Are</h3>
+            <p>Stitch & Styles Kenya is a cloud-based fashion tech marketplace and business management software designed for tailoring shops, designers, and clients in Kenya. We provide tools for managing customers, bespoke orders, measurements, invoices, inventory, and online marketplace listings.</p>
+            <p>When we say ‘Stitch & Styles Kenya’, ‘we’, ‘us’, or ‘our’ in this document, we mean the company that operates tailors.co.ke.</p>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">2. What Information We Collect</h3>
+            
+            <h4 style="color: var(--text-slate); margin-top: 20px; margin-bottom: 10px;">2.1 Information You Give Us</h4>
+            <p>When you sign up or use Stitch & Styles Kenya, you provide us with:</p>
+            <ul style="margin-left: 20px; margin-bottom: 20px; list-style-type: disc;">
+                <li>Your name and email address (to create your account)</li>
+                <li>Your business name, address, and phone number (for your shop profile and invoices)</li>
+                <li>Payment information (handled securely by our payment partners like M-Pesa; we do not store card numbers)</li>
+                <li>Customer data you enter into the software (customer names, contact details, measurements)</li>
+                <li>Order details, invoice data, and inventory records you create</li>
+            </ul>
+
+            <h4 style="color: var(--text-slate); margin-top: 20px; margin-bottom: 10px;">2.2 Information Collected Automatically</h4>
+            <p>When you visit our website or use our software, we automatically collect certain technical information:</p>
+            <ul style="margin-left: 20px; margin-bottom: 20px; list-style-type: disc;">
+                <li>Your IP address and general location (country/city level)</li>
+                <li>The type of device and browser you are using</li>
+                <li>Pages you visit and features you use within the app</li>
+                <li>Date and time of your visits</li>
+                <li>Error logs and performance data</li>
+            </ul>
+            <p><em>Note: We collect this data to improve the performance and reliability of Stitch & Styles Kenya, not to track you personally.</em></p>
+
+            <h4 style="color: var(--text-slate); margin-top: 20px; margin-bottom: 10px;">2.3 Information from Third-Party Services</h4>
+            <p>If you use third-party services connected to Stitch & Styles Kenya (such as M-Pesa payment gateways or email services), those services may share certain information with us as needed to complete transactions or deliver notifications.</p>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">3. How We Use Your Information</h3>
+            <p>We use the information we collect for the following purposes:</p>
+            <ul style="margin-left: 20px; margin-bottom: 20px; list-style-type: disc;">
+                <li><strong>Providing the Service:</strong> To create your account, save your data, and operate the platform.</li>
+                <li><strong>Sending Invoices & Notifications:</strong> To send invoices, delivery reminders, and order updates via SMS/Email.</li>
+                <li><strong>Customer Support:</strong> To help you when you contact our support team.</li>
+                <li><strong>Improving Stitch & Styles Kenya:</strong> To fix bugs, add features, and improve performance.</li>
+                <li><strong>Security:</strong> To detect fraud, unauthorized access, and abuse.</li>
+                <li><strong>Legal Compliance:</strong> To meet our legal obligations.</li>
+                <li><strong>Subscription & Billing:</strong> To manage your plan and process payments.</li>
+            </ul>
+            <p><strong>We do not sell your personal information or your customers’ data to third parties. Ever.</strong></p>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">4. Data You Enter About Your Customers</h3>
+            <p>When you add customer information (names, measurements, orders, contact details) to Stitch & Styles Kenya, you are the ‘data controller’ for that information. You decide what to collect and how to use it for your business.</p>
+            <p>Stitch & Styles Kenya acts as a ‘data processor’ — we store and process this data on your behalf, following your instructions, and we do not use your customers’ data for any other purpose.</p>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">5. Sharing Your Information</h3>
+            <p>We only share your information with third parties in the following limited situations:</p>
+            <ul style="margin-left: 20px; margin-bottom: 20px; list-style-type: disc;">
+                <li><strong>Service Providers:</strong> Companies that help us run our platform (e.g., cloud hosting, email/SMS delivery, payment processing). They are bound by strict data protection agreements.</li>
+                <li><strong>Legal Requirements:</strong> If required by law, court order, or government authority.</li>
+                <li><strong>Business Transfer:</strong> In the event Stitch & Styles Kenya is acquired or merged with another company, your data may transfer as part of that transaction. We will notify you beforehand.</li>
+                <li><strong>With Your Consent:</strong> Any other sharing only happens if you specifically agree to it.</li>
+            </ul>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">6. Third-Party Services We Use</h3>
+            <p>Stitch & Styles Kenya may use the following types of third-party tools to deliver our service:</p>
+            <div style="overflow-x: auto; margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse; min-width: 600px; color: var(--text-main);">
+                    <thead>
+                        <tr style="background-color: var(--bg-card); border-bottom: 1px solid var(--border-glass);">
+                            <th style="padding: 12px; text-align: left; font-weight: 600;">Type of Service</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 600;">Purpose</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 600;">Data Shared</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--border-glass);">
+                            <td style="padding: 12px;">Cloud Hosting</td>
+                            <td style="padding: 12px;">Store your account and business data securely</td>
+                            <td style="padding: 12px;">All encrypted app data</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-glass);">
+                            <td style="padding: 12px;">Email/SMS Service</td>
+                            <td style="padding: 12px;">Send invoices, notifications, and support replies</td>
+                            <td style="padding: 12px;">Email address, phone number, invoice content</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-glass);">
+                            <td style="padding: 12px;">Payment Gateway</td>
+                            <td style="padding: 12px;">Process subscription and transaction payments</td>
+                            <td style="padding: 12px;">Payment data (PCI compliant)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-glass);">
+                            <td style="padding: 12px;">Analytics Tools</td>
+                            <td style="padding: 12px;">Understand how features are used (anonymized)</td>
+                            <td style="padding: 12px;">Anonymous usage patterns</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px;">Error Monitoring</td>
+                            <td style="padding: 12px;">Detect and fix software bugs</td>
+                            <td style="padding: 12px;">Technical error logs</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">7. Data Storage and Security</h3>
+            <p>We take the security of your data seriously. Here is how we protect it:</p>
+            <ul style="margin-left: 20px; margin-bottom: 20px; list-style-type: disc;">
+                <li>All data is stored on secure, encrypted cloud servers.</li>
+                <li>Data in transit is protected using SSL/TLS encryption.</li>
+                <li>Access to customer data is restricted to authorized staff only.</li>
+                <li>Your account is protected by strict password and session authentication.</li>
+            </ul>
+            <p><em>Note: While we work hard to protect your data, no system is completely invulnerable. If a security breach occurs that affects your data, we will notify you promptly.</em></p>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">8. How Long We Keep Your Data</h3>
+            <p>We retain your data for as long as you have an active account. If you cancel or delete your account:</p>
+            <ul style="margin-left: 20px; margin-bottom: 20px; list-style-type: disc;">
+                <li>Your data will be retained for 30 days to allow account recovery.</li>
+                <li>After 30 days, your data will be permanently deleted from our servers.</li>
+                <li>Some anonymized data may be retained for statistical and legal compliance purposes.</li>
+            </ul>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">9. Your Rights</h3>
+            <p>You have the following rights regarding your data:</p>
+            <ul style="margin-left: 20px; margin-bottom: 20px; list-style-type: disc;">
+                <li><strong>Access:</strong> You can request a copy of all data we hold about you.</li>
+                <li><strong>Correction:</strong> You can update or correct any incorrect information.</li>
+                <li><strong>Deletion:</strong> You can ask us to delete your account and all associated data.</li>
+                <li><strong>Export:</strong> You can download your data in a standard format (CSV).</li>
+            </ul>
+            <p>To exercise any of these rights, contact us at <strong>support@tailors.co.ke</strong>.</p>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">10. Changes to This Policy</h3>
+            <p>We may update this Privacy Policy from time to time. When we do, we will post the updated version on this page. For significant changes, we will notify you by email. Continuing to use Stitch & Styles Kenya after changes means you accept the updated policy.</p>
+
+            <h3 style="color: var(--gold); margin-top: 40px; margin-bottom: 15px; font-family: var(--font-display);">11. Contact Us</h3>
+            <p>If you have questions about this Privacy Policy or how your data is handled, please contact us:</p>
+            <p><strong>Email:</strong> support@tailors.co.ke<br>
+            <strong>Website:</strong> tailors.co.ke/privacy</p>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div class="logo-group">
+                    <span class="logo-text">Stitch & Styles Kenya</span>
+                    <span class="logo-sub">Find Your Perfect Fit</span>
+                </div>
+                <p>Empowering Kenya's creative fashion ecosystem by connecting clients with verified custom designers and tailors.</p>
+            </div>
+            <div class="footer-col">
+                <h5>Explore</h5>
+                <ul>
+                    <li><a href="views/client/marketplace.html?tab=shops">Browse Shops</a></li>
+                    <li><a href="views/client/marketplace.html">Bespoke Design</a></li>
+                    <li><a href="views/client/marketplace.html?category=Watches">Luxury Watches</a></li>
+                    <li><a href="views/client/marketplace.html?category=Shoes">Custom Shoes</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h5>Business Portals</h5>
+                <ul>
+                    <li><a href="./login.html">Provider Login</a></li>
+                    <li><a href="./login.html?mode=signup">Register Shop</a></li>
+                    <li><a href="pricing.html">Pricing</a></li>
+                    <li><a href="./login.html">Order Management</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h5>Company</h5>
+                <ul>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="index.html#hiw-section">How It Works</a></li>
+                    <li><a href="terms.html">Terms &amp; Conditions</a></li>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="#">Support Center</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Stitch & Styles Kenya. All Rights Reserved. Crafted with care in Kenya.<br>
+            <a href="https://wa.me/254745806488" target="_blank" style="color: var(--gold); text-decoration: none; font-size: 0.9em; margin-top: 8px; display: inline-block;">Designed and Engineered by Systems By Ronny</a></p>
+        </div>
+    </footer>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="js/core/config.js"></script>
+    <script>
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile drawer toggles
+        const mobileToggleBtn = document.getElementById('mobile-toggle-btn');
+        const mobileDrawer = document.getElementById('mobile-drawer');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        if (mobileToggleBtn && mobileDrawer && mobileOverlay) {
+            mobileToggleBtn.addEventListener('click', () => {
+                mobileDrawer.classList.toggle('open');
+                mobileOverlay.classList.toggle('open');
+                const isOpen = mobileDrawer.classList.contains('open');
+                mobileToggleBtn.innerHTML = isOpen ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+            });
+            mobileOverlay.addEventListener('click', () => {
+                mobileDrawer.classList.remove('open');
+                mobileOverlay.classList.remove('open');
+                mobileToggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        }
+        
+        function closeDrawer() {
+            if(mobileDrawer) mobileDrawer.classList.remove('open');
+            if(mobileOverlay) mobileOverlay.classList.remove('open');
+            if(mobileToggleBtn) mobileToggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        }
+
+        // Supabase interaction
+        let supabaseClient;
+
+        if (typeof window.supabase !== 'undefined' && typeof APP_CONFIG !== 'undefined') {
+            supabaseClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+            checkUserSession();
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g,
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        async function checkUserSession() {
+            const authArea = document.getElementById('nav-auth-area');
+            const mobileAuthArea = document.getElementById('mobile-drawer-auth');
+            const mobQuickAuth = document.getElementById('mobile-quick-auth');
+            if (!supabaseClient) return;
+
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) {
+                    return; // keep guest nav
+                }
+                window.isUserLoggedIn = true;
+                let profileData = null;
+                try {
+                    const { data: profile } = await supabaseClient
+                        .from('user_profiles').select('role, full_name').eq('id', user.id).maybeSingle();
+                    if (profile) {
+                        profileData = profile;
+                    } else {
+                        const { data: worker } = await supabaseClient
+                            .from('workers').select('name').eq('id', user.id).maybeSingle();
+                        if (worker) {
+                            profileData = { role: 'manager', full_name: worker.name };
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Error fetching user profile:", e);
+                }
+                const role = profileData?.role || 'client';
+                const name = profileData?.full_name || user.user_metadata?.full_name || 'Account';
+                const firstName = name.split(' ')[0];
+
+                const dashUrl = role === 'superadmin' ? './views/superadmin/superadmin-dashboard.html'
+                    : role === 'owner' ? './views/admin/admin-dashboard.html'
+                    : role === 'client' ? './views/client/client-dashboard.html'
+                    : './views/manager/manager-dashboard.html';
+
+                // Update mobile quick auth icon
+                if (mobQuickAuth) {
+                    mobQuickAuth.innerHTML = `
+                        <a href="${dashUrl}" class="mobile-auth-icon" style="color:var(--gold);" aria-label="Dashboard">
+                            <i class="fas ${role === 'client' ? 'fa-user-circle' : 'fa-user-tie'}"></i>
+                        </a>`;
+                }
+
+                document.querySelectorAll('a[href*="login.html"]').forEach(a => {
+                    try {
+                        const url = new URL(a.href, window.location.origin);
+                        const next = url.searchParams.get('next');
+                        a.href = next ? decodeURIComponent(next) : dashUrl;
+                    } catch (e) {
+                        a.href = dashUrl;
+                    }
+                });
+
+                const loggedInHtml = `
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <button class="theme-toggle" onclick="toggleTheme()" style="background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:1.2em; margin-right: 15px;"><i class="fas fa-moon theme-toggle-icon"></i></button>
+                        <span style="color:var(--text-main); font-size:0.9em; font-weight: 500;"><i class="fas fa-user-circle" style="color:var(--gold);"></i> ${escapeHTML(firstName)}</span>
+                        <a href="${dashUrl}" class="btn-signup" style="padding: 6px 14px; font-size:0.8em;">Dashboard</a>
+                        <button onclick="signOutUser()" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer;"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                `;
+
+                if (authArea) authArea.innerHTML = loggedInHtml;
+                if (mobileAuthArea) {
+                    mobileAuthArea.innerHTML = `
+                        <a href="${dashUrl}" class="btn-signup" style="text-align:center; display:block;"><i class="fas fa-columns"></i> Go to Dashboard</a>
+                        <button onclick="signOutUser()" class="btn-login" style="width:100%; margin-top:8px; background:none; border:none; color:var(--text-muted); cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+                    `;
+                }
+            } catch (err) {
+                console.warn('Session check failed:', err);
+            }
+        }
+
+        async function signOutUser() {
+            if (supabaseClient) await supabaseClient.auth.signOut();
+            window.location.reload();
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const icons = document.querySelectorAll('.theme-toggle-icon');
+            icons.forEach(icon => {
+                if (newTheme === 'light') {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                const icons = document.querySelectorAll('.theme-toggle-icon');
+                icons.forEach(icon => {
+                    if (savedTheme === 'light') {
+                        icon.classList.remove('fa-moon');
+                        icon.classList.add('fa-sun');
+                    } else {
+                        icon.classList.remove('fa-sun');
+                        icon.classList.add('fa-moon');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

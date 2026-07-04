@@ -1534,6 +1534,226 @@
             font-size: 0.85em;
         }
 
+        /* ===== FEATURES SECTION ===== */
+        .features-section {
+            padding: 80px 8%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .feature-group-title {
+            text-align: center;
+            margin: 60px 0 40px;
+            position: relative;
+        }
+        
+        .feature-group-title::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-glass);
+            z-index: 1;
+        }
+        
+        .feature-group-title h3 {
+            display: inline-block;
+            background: var(--bg-deep);
+            padding: 0 24px;
+            position: relative;
+            z-index: 2;
+            color: var(--gold-light);
+            font-size: 1.4em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .feature-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .feature-block.reverse {
+            direction: rtl;
+        }
+        
+        .feature-block.reverse > * {
+            direction: ltr;
+        }
+
+        .feature-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: var(--gold-glow);
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            margin-bottom: 24px;
+            border: 1px solid var(--gold-border);
+        }
+
+        .feature-content h3 {
+            font-family: var(--font-display);
+            font-size: 2.2em;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .feature-subtitle {
+            font-size: 1.1em;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .feature-content p {
+            color: var(--text-muted);
+            font-size: 1.05em;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .feature-checklist {
+            list-style: none;
+            margin-bottom: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .feature-checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: var(--text-slate);
+            font-size: 1.05em;
+            line-height: 1.5;
+        }
+
+        .feature-checklist li i {
+            color: #10b981;
+            font-size: 1.2em;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        
+        [data-theme="light"] .feature-checklist li i {
+            color: #059669;
+        }
+
+        .btn-feature {
+            background: #5a4fcf;
+            color: #ffffff;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1em;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 15px rgba(90, 79, 207, 0.3);
+            border: none;
+        }
+
+        .btn-feature:hover {
+            background: #4a3ebf;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(90, 79, 207, 0.4);
+            color: #ffffff;
+        }
+
+        .feature-image-wrap {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow-premium);
+        }
+
+        .feature-mockup {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: -20px;
+            bottom: -20px;
+            background-image: url('hero_slide2.png');
+            background-size: cover;
+            background-position: left top;
+            border-top-left-radius: 12px;
+            border: 1px solid var(--border-glass);
+            box-shadow: -10px -10px 30px rgba(0,0,0,0.4);
+        }
+
+        .feature-block.reverse .feature-mockup {
+            left: -20px;
+            right: 20px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 12px;
+            box-shadow: 10px -10px 30px rgba(0,0,0,0.4);
+            background-position: right top;
+        }
+        
+        @media (max-width: 992px) {
+            .feature-block, .feature-block.reverse {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                direction: ltr;
+            }
+            .feature-block.reverse > * {
+                direction: ltr;
+            }
+            .feature-image-wrap {
+                height: 350px;
+                order: 2;
+            }
+            .feature-content {
+                order: 1;
+            }
+            .feature-group-title h3 {
+                font-size: 1.1em;
+            }
+        }
+        @media (max-width: 768px) {
+            .features-section {
+                padding: 60px 5%;
+            }
+            .feature-content h3 {
+                font-size: 1.6em;
+            }
+            .feature-subtitle {
+                font-size: 0.95em;
+            }
+            .feature-checklist li {
+                font-size: 0.95em;
+            }
+            .btn-feature {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
         /* ===== SHIMMER SKELETONS ===== */
         @keyframes shimmer {
             0% { background-position: -450px 0; }
@@ -2069,7 +2289,8 @@
             <div class="nav-links">
                 <a href="#categories-section">Categories</a>
                 <a href="#providers-section">Providers</a>
-                <a href="#showcase-section">Showcase</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="about.html">About Us</a>
                 <a href="views/client/blog.html">Style Blog</a>
                 <a href="#hiw-section">How It Works</a>
             </div>
@@ -2097,9 +2318,10 @@
         <div class="mobile-drawer-links">
             <a href="#categories-section" onclick="closeDrawer()"><i class="fas fa-th-large"></i> Categories</a>
             <a href="#providers-section" onclick="closeDrawer()"><i class="fas fa-store"></i> Providers</a>
-            <a href="#showcase-section" onclick="closeDrawer()"><i class="fas fa-image"></i> Showcase</a>
+            <a href="pricing.html" onclick="closeDrawer()"><i class="fas fa-tags"></i> Pricing</a>
+            <a href="about.html" onclick="closeDrawer()"><i class="fas fa-info-circle"></i> About Us</a>
             <a href="views/client/blog.html" onclick="closeDrawer()"><i class="fas fa-newspaper"></i> Style Blog</a>
-            <a href="#hiw-section" onclick="closeDrawer()"><i class="fas fa-info-circle"></i> How It Works</a>
+            <a href="#hiw-section" onclick="closeDrawer()"><i class="fas fa-question-circle"></i> How It Works</a>
         </div>
         <div id="mobile-drawer-auth" style="display:flex; flex-direction:column; gap:16px;">
             <a href="./login.html" class="btn-login" style="text-align:center; display:block;"><i class="fas fa-sign-in-alt"></i> Log In</a>
@@ -2315,6 +2537,120 @@
         </div>
     </section>
 
+    <!-- ===== DETAILED FEATURES ===== -->
+    <section class="features-section" id="features-section">
+        <div style="text-align:center; margin-bottom: 60px;">
+            <span class="section-eyebrow" style="justify-content:center;">Platform Capabilities</span>
+            <h2 class="section-heading" style="text-align:center;">Everything You Need To <em>Succeed</em></h2>
+            <p class="section-subtext" style="margin: 0 auto; text-align:center;">Powerful tools designed specifically for the African fashion ecosystem.</p>
+        </div>
+
+        <!-- Tailor Features Wrapper -->
+        <div class="feature-group-title">
+            <h3><i class="fas fa-cut"></i> For Tailors &amp; Businesses</h3>
+        </div>
+
+        <div class="feature-block">
+            <div class="feature-content">
+                <div class="feature-icon"><i class="fas fa-tasks"></i></div>
+                <h3>Order Management &amp; Bespoke Pipeline</h3>
+                <p class="feature-subtitle">All Your Tailor Shop Orders, In One Place</p>
+                <p>When a customer orders a bespoke suit or custom garment, a lot of steps are involved. Keep track of measuring, fabric choosing, cutting, stitching, fittings, and finishing effortlessly.</p>
+                <ul class="feature-checklist">
+                    <li><i class="fas fa-check-circle"></i> Visual tracking for bespoke orders in a simple list.</li>
+                    <li><i class="fas fa-check-circle"></i> See at a glance what stage each garment is at.</li>
+                    <li><i class="fas fa-check-circle"></i> Search for any overdue or ready-for-collection order.</li>
+                    <li><i class="fas fa-check-circle"></i> Fully customizable workflow to match your shop.</li>
+                </ul>
+                <a href="./login.html" class="btn-feature">See it in action <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="feature-image-wrap">
+                <div class="feature-mockup" style="background-image: url('https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&q=80&w=800');"></div>
+            </div>
+        </div>
+
+        <div class="feature-block reverse">
+            <div class="feature-content">
+                <div class="feature-icon"><i class="fas fa-users-cog"></i></div>
+                <h3>Customer CRM &amp; Database</h3>
+                <p class="feature-subtitle">Remember Every Customer, Make Them Feel Special</p>
+                <p>Deliver a personalized experience that keeps customers coming back. Maintain a complete database of your clients with everything you need to know, including their billing and order history.</p>
+                <ul class="feature-checklist">
+                    <li><i class="fas fa-check-circle"></i> Store detailed client measurement profiles securely.</li>
+                    <li><i class="fas fa-check-circle"></i> Access full billing history, invoices, and past orders instantly.</li>
+                    <li><i class="fas fa-check-circle"></i> Track communication history and customer preferences.</li>
+                    <li><i class="fas fa-check-circle"></i> VIP tagging for your most valuable clients.</li>
+                </ul>
+                <a href="./login.html" class="btn-feature">See it in action <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="feature-image-wrap">
+                <div class="feature-mockup" style="background-image: url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=800');"></div>
+            </div>
+        </div>
+
+        <div class="feature-block">
+            <div class="feature-content">
+                <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h3>M-Pesa Integrations &amp; Billing</h3>
+                <p class="feature-subtitle">Seamless Payments Built for Kenya</p>
+                <p>Manage your cash flow with confidence. Our integrated billing system is tailored for local payment preferences, making transactions smooth and secure.</p>
+                <ul class="feature-checklist">
+                    <li><i class="fas fa-check-circle"></i> Direct M-Pesa integration for instant payments.</li>
+                    <li><i class="fas fa-check-circle"></i> Automated invoice generation and tracking.</li>
+                    <li><i class="fas fa-check-circle"></i> Handle deposits and final milestone payments easily.</li>
+                    <li><i class="fas fa-check-circle"></i> Real-time payment confirmation and notifications.</li>
+                </ul>
+                <a href="./login.html" class="btn-feature">See it in action <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="feature-image-wrap">
+                <div class="feature-mockup" style="background-image: url('https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=800');"></div>
+            </div>
+        </div>
+
+        <div class="feature-block reverse" style="margin-bottom: 80px;">
+            <div class="feature-content">
+                <div class="feature-icon"><i class="fas fa-envelope-open-text"></i></div>
+                <h3>Automated Communications</h3>
+                <p class="feature-subtitle">Keep Everyone in the Loop Automatically</p>
+                <p>Eliminate manual follow-ups. Our automated system handles customer updates and tracking links so you can focus entirely on your craft.</p>
+                <ul class="feature-checklist">
+                    <li><i class="fas fa-check-circle"></i> Centralized messaging inbox for client inquiries.</li>
+                    <li><i class="fas fa-check-circle"></i> Automated SMS and email updates at every stage.</li>
+                    <li><i class="fas fa-check-circle"></i> Auto-generate order tracking links for clients.</li>
+                    <li><i class="fas fa-check-circle"></i> Share reference images and design notes securely.</li>
+                </ul>
+                <a href="./login.html" class="btn-feature">See it in action <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="feature-image-wrap">
+                <div class="feature-mockup" style="background-image: url('https://images.unsplash.com/photo-1555421689-d68471e189f2?auto=format&fit=crop&q=80&w=800');"></div>
+            </div>
+        </div>
+
+        <!-- Client Features Wrapper -->
+        <div class="feature-group-title">
+            <h3><i class="fas fa-user-check"></i> For Clients &amp; Shoppers</h3>
+        </div>
+
+        <div class="feature-block">
+            <div class="feature-content">
+                <div class="feature-icon"><i class="fas fa-search-location"></i></div>
+                <h3>Real-Time Order Tracking</h3>
+                <p class="feature-subtitle">Know Exactly Where Your Garment Is</p>
+                <p>No more guessing or calling the shop. Track the progress of your bespoke pieces directly from your phone in real-time using unique tracking links.</p>
+                <ul class="feature-checklist">
+                    <li><i class="fas fa-check-circle"></i> Live tracking links for your orders.</li>
+                    <li><i class="fas fa-check-circle"></i> Notifications when items are ready for fitting or collection.</li>
+                    <li><i class="fas fa-check-circle"></i> View detailed invoices and payment statuses.</li>
+                </ul>
+                <a href="views/client/marketplace.html" class="btn-feature">Explore Marketplace <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="feature-image-wrap">
+                <div class="feature-mockup" style="background-image: url('https://images.unsplash.com/photo-1617064295988-cbce66b88301?auto=format&fit=crop&q=80&w=800');"></div>
+            </div>
+        </div>
+
+    </section>
+
     <!-- ===== CTA BANNER ===== -->
     <div class="cta-section">
         <h2>Premium Style, Tailored For You</h2>
@@ -2357,14 +2693,17 @@
                 <ul>
                     <li><a href="./login.html">Provider Login</a></li>
                     <li><a href="./login.html?mode=signup">Register Shop</a></li>
+                    <li><a href="pricing.html">Pricing</a></li>
                     <li><a href="./login.html">Order Management</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h5>Company</h5>
                 <ul>
+                    <li><a href="about.html">About Us</a></li>
                     <li><a href="#hiw-section">How It Works</a></li>
-                    <li><a href="#">Privacy Terms</a></li>
+                    <li><a href="terms.html">Terms &amp; Conditions</a></li>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
                     <li><a href="#">Support Center</a></li>
                 </ul>
             </div>
