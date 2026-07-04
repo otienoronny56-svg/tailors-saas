@@ -928,6 +928,18 @@ async function loadPendingClosureOrders() {
             .eq('status', 6)
             .order('created_at', { ascending: false });
 
+        // Ensure owner only sees their organization's shops
+        if (USER_PROFILE && USER_PROFILE.organization_id) {
+            const { data: orgShops } = await supabaseClient.from('shops').select('id').eq('organization_id', USER_PROFILE.organization_id);
+            const validShopIds = orgShops ? orgShops.map(s => s.id) : [];
+            if(validShopIds.length === 0) {
+                const tbody = document.getElementById('orders-tbody');
+                if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No pending orders</td></tr>';
+                return;
+            }
+            query = query.in('shop_id', validShopIds);
+        }
+
         const shopFilter = document.getElementById('shop-filter')?.value;
         if (shopFilter && shopFilter !== "") {
             query = query.eq('shop_id', shopFilter);

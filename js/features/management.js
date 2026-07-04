@@ -214,10 +214,14 @@ async function loadPlatformUsers() {
     if (!tbody) return;
 
     try {
-        // Fetch profiles and orgs in parallel
+        // Fetch profiles and orgs in parallel using adminClient to bypass RLS and fetch clients
+        const adminClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
+            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+        });
+        
         const [profileRes, orgsRes] = await Promise.all([
-            window.supabaseClient.from('user_profiles').select('*'),
-            window.supabaseClient.from('organizations').select('id, name')
+            adminClient.from('user_profiles').select('*'),
+            adminClient.from('organizations').select('id, name')
         ]);
 
         if (profileRes.error) throw profileRes.error;
