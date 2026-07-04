@@ -139,147 +139,6 @@
         .btn-login { color: var(--text-slate); text-decoration: none; font-weight: 600; font-size: 0.84em; transition: var(--transition-smooth); padding: 7px 12px; border-radius: 7px; }
         .btn-login:hover { color: var(--gold); background: rgba(255, 255, 255, 0.03); }
         .btn-signup { background: var(--gold); border: none; color: var(--bg-deep); padding: 7px 16px; border-radius: 7px; text-decoration: none; font-weight: 700; font-size: 0.84em; cursor: pointer; transition: var(--transition-smooth); box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2); }
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TKKW51QFZ5"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-TKKW51QFZ5');
-    </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricing | Stitch &amp; Styles Kenya</title>
-    <meta name="description" content="Simple, transparent pricing for tailors. Start your 14-day free trial today and elevate your fashion business.">
-    <meta name="keywords" content="tailoring software pricing, fashion SaaS pricing, bespoke tailor tools Kenya, stitch and styles pricing, affordable tailoring software">
-    <meta name="author" content="Stitch &amp; Styles Kenya">
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-    <link rel="canonical" href="https://www.tailors.co.ke/pricing.html">
-
-    <!-- AI discoverability -->
-    <link rel="alternate" type="text/plain" href="https://www.tailors.co.ke/llms.txt" title="LLMs.txt — AI Summary">
-
-    <!-- Geo targeting -->
-    <meta name="geo.region" content="KE">
-    <meta name="geo.placename" content="Nairobi, Kenya">
-    <meta name="geo.position" content="-1.286389;36.817223">
-    <meta name="ICBM" content="-1.286389, 36.817223">
-
-    <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Stitch &amp; Styles Kenya">
-    <meta property="og:url" content="https://www.tailors.co.ke/pricing.html">
-    <meta property="og:title" content="Pricing | Stitch &amp; Styles Kenya">
-    <meta property="og:description" content="Simple, transparent pricing for tailors. Start your 14-day free trial today and elevate your fashion business.">
-    <meta property="og:image" content="https://www.tailors.co.ke/hero_bg.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Stitch &amp; Styles Kenya — Pricing">
-    <meta property="og:locale" content="en_KE">
-
-    <!-- Twitter / X -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@stitch_and_styles_kenya">
-    <meta name="twitter:url" content="https://www.tailors.co.ke/pricing.html">
-    <meta name="twitter:title" content="Pricing | Stitch &amp; Styles Kenya">
-    <meta name="twitter:description" content="Simple, transparent pricing for tailors. Start your 14-day free trial today and elevate your fashion business.">
-    <meta name="twitter:image" content="https://www.tailors.co.ke/hero_bg.png">
-    <meta name="twitter:image:alt" content="Stitch &amp; Styles Kenya Pricing">
-    
-    <!-- PWA / Theme -->
-    <meta name="theme-color" content="#d4af37">
-    <link rel="icon" type="image/jpeg" href="logo.jpeg">
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Supabase Client -->
-    <script src="/js/lib/supabase.min.js"></script>
-    
-    <style>
-        /* ===== DESIGN TOKENS (Imported from index) ===== */
-        :root {
-            --bg-deep: #030712;
-            --bg-card: rgba(17, 24, 39, 0.7);
-            --bg-card-hover: rgba(31, 41, 55, 0.85);
-            --gold: #d4af37;
-            --gold-light: #f3cd57;
-            --gold-glow: rgba(212, 175, 55, 0.15);
-            --gold-border: rgba(212, 175, 55, 0.25);
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --text-slate: #d1d5db;
-            --border-glass: rgba(255, 255, 255, 0.08);
-            --shadow-premium: 0 20px 40px rgba(0, 0, 0, 0.5);
-            --font-display: 'Playfair Display', serif;
-            --font-sans: 'Plus Jakarta Sans', sans-serif;
-            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            --bg-header: rgba(3, 7, 18, 0.75);
-            --bg-header-scrolled: rgba(3, 7, 18, 0.9);
-        }
-
-        [data-theme="light"] {
-            --bg-deep: #ffffff;
-            --bg-card: #f9fafb;
-            --bg-card-hover: #f3f4f6;
-            --text-main: #111827;
-            --text-muted: #4b5563;
-            --text-slate: #374151;
-            --border-glass: rgba(0, 0, 0, 0.08);
-            --gold-glow: rgba(212, 175, 55, 0.1);
-            --bg-header: rgba(255, 255, 255, 0.75);
-            --bg-header-scrolled: rgba(255, 255, 255, 0.95);
-        }
-
-        /* ===== RESET & BASE ===== */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
-        body { font-family: var(--font-sans); background-color: var(--bg-deep); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
-
-        /* ===== HEADER ===== */
-        header {
-            position: fixed;
-            top: 0; left: 0; width: 100%;
-            padding: 10px 5%;
-            background: var(--bg-header);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border-glass);
-            transition: var(--transition-smooth);
-        }
-
-        header.scrolled {
-            padding: 8px 5%;
-            background: var(--bg-header-scrolled);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .logo-group { display: flex; flex-direction: column; text-decoration: none; }
-        .logo-text { font-family: var(--font-display); font-weight: 700; font-size: 1.35em; color: var(--gold); letter-spacing: 0.5px; text-transform: uppercase; }
-        .logo-sub { font-size: 0.55em; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-top: -2px; }
-
-        nav { display: flex; align-items: center; gap: 20px; }
-        .nav-links { display: flex; align-items: center; gap: 18px; }
-        .nav-links a { color: var(--text-slate); text-decoration: none; font-weight: 500; font-size: 0.86em; transition: var(--transition-smooth); position: relative; padding: 3px 0; }
-        .nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: var(--gold); transition: var(--transition-smooth); }
-        .nav-links a:hover { color: var(--gold); }
-        .nav-links a:hover::after { width: 100%; }
-
-        #nav-auth-area { display: flex; align-items: center; gap: 16px; }
-        .btn-login { color: var(--text-slate); text-decoration: none; font-weight: 600; font-size: 0.84em; transition: var(--transition-smooth); padding: 7px 12px; border-radius: 7px; }
-        .btn-login:hover { color: var(--gold); background: rgba(255, 255, 255, 0.03); }
-        .btn-signup { background: var(--gold); border: none; color: var(--bg-deep); padding: 7px 16px; border-radius: 7px; text-decoration: none; font-weight: 700; font-size: 0.84em; cursor: pointer; transition: var(--transition-smooth); box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2); }
         .btn-signup:hover { background: var(--gold-light); transform: translateY(-1px); }
         
         .mobile-menu-btn { display: none; background: none; border: none; color: var(--text-main); font-size: 1.5em; cursor: pointer; padding: 4px; z-index: 1010; }
@@ -288,7 +147,7 @@
 
         /* ===== PRICING HERO ===== */
         .pricing-hero {
-            padding: 80px 8% 20px;
+            padding: 100px 8% 30px;
             background: radial-gradient(circle at top center, rgba(212, 175, 55, 0.12) 0%, transparent 60%);
             text-align: center;
         }
@@ -326,9 +185,9 @@
         .pricing-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 30px;
             max-width: 1200px;
-            margin: 0 auto 60px;
+            margin: 0 auto 100px;
             padding: 0 5%;
         }
 
@@ -481,7 +340,7 @@
         /* ===== FAQ SECTION ===== */
         .faq-section {
             max-width: 800px;
-            margin: 0 auto 60px;
+            margin: 0 auto 100px;
             padding: 0 5%;
         }
 
@@ -532,7 +391,7 @@
 
         /* ===== CTA BANNER ===== */
         .cta-section {
-            margin: 0 8% 60px;
+            margin: 0 8% 100px;
             border-radius: 30px;
             background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.12), transparent), linear-gradient(135deg, #0f1626 0%, #030712 100%);
             border: 1px solid var(--border-glass);
@@ -551,7 +410,7 @@
         .btn-hero-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
 
         /* ===== FOOTER ===== */
-        footer { background: #020408; border-top: 1px solid var(--border-glass); padding: 50px 8% 30px; }
+        footer { background: #020408; border-top: 1px solid var(--border-glass); padding: 80px 8% 40px; }
         [data-theme="light"] footer { background: var(--bg-card); }
         .footer-inner { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 48px; margin-bottom: 60px; }
         .footer-brand p { color: var(--text-muted); font-size: 0.9em; margin-top: 16px; max-width: 280px; }
@@ -633,6 +492,113 @@
             }
         }
 
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header id="main-header">
+        <a href="index.html" class="logo-group" style="flex-direction: row; align-items: center; gap: 10px; text-decoration: none;">
+            <div style="width: 36px; height: 36px; border-radius: 8px; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15); border: 1px solid var(--gold-border); flex-shrink: 0;">
+                <img src="logo.jpeg" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <span class="logo-text" style="font-size: 1.1em; line-height: 1.1; margin-bottom: 1px;">Stitch &amp; Styles</span>
+                <span class="logo-sub" style="font-size: 0.5em; letter-spacing: 1.5px;">Find Your Perfect Fit</span>
+            </div>
+        </a>
+        
+        <nav id="main-nav">
+            <div class="nav-links">
+                <a href="index.html#categories-section">Categories</a>
+                <a href="index.html#providers-section">Providers</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="about.html">About Us</a>
+                <a href="views/client/blog.html">Style Blog</a>
+            </div>
+            
+            <div id="nav-auth-area">
+                <button class="theme-toggle" onclick="toggleTheme()" style="background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:1.2em; margin-right: 15px;"><i class="fas fa-moon theme-toggle-icon"></i></button>
+                <a href="./login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                <a href="./login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
+            </div>
+
+            <div class="mobile-actions">
+                <div id="mobile-quick-auth">
+                    <a href="./login.html" class="mobile-auth-icon" aria-label="Log In"><i class="fas fa-user-circle"></i></a>
+                </div>
+                <button class="mobile-menu-btn" id="mobile-toggle-btn" aria-label="Toggle Navigation Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ===== PRICING HERO ===== -->
+    <section class="pricing-hero">
+        <div class="trial-badge">14-Day Free Trial Available</div>
+        <h1>Simple, <em>Transparent</em> Pricing</h1>
+        <p>Choose the plan that fits your growing fashion business. No hidden fees. Cancel anytime.</p>
+    </section>
+
+    <!-- ===== PRICING CARDS ===== -->
+    <section class="pricing-grid">
+        <!-- Free Trial Tier -->
+        <div class="pricing-card" style="border-color: var(--gold-border);">
+            <div class="card-header">
+                <div class="tier-name">14-Day Free Trial</div>
+                <div class="tier-price">
+                    <span class="tier-currency">Ksh</span>0<span class="tier-period">/14 Days</span>
+                </div>
+                <p style="color: var(--gold); font-size: 0.9em; margin-top: 8px;">Experience all Premium features risk-free.</p>
+            </div>
+            <ul class="tier-features">
+                <li><i class="fas fa-check-circle" style="color:var(--gold);"></i> <strong>Full Premium Access</strong></li>
+                <li><i class="fas fa-check-circle"></i> Unlimited clients &amp; team member accounts</li>
+                <li><i class="fas fa-check-circle"></i> Live order trackings</li>
+                <li><i class="fas fa-check-circle"></i> Automated SMS &amp; email updates</li>
+                <li><i class="fas fa-check-circle"></i> Custom invoicing &amp; receipt generation</li>
+                <li><i class="fas fa-check-circle"></i> M-Pesa Payment integration</li>
+            </ul>
+            <a href="./login.html?mode=signup" class="btn-pricing btn-pricing-outline" style="border-color: var(--gold); color: var(--gold);">Start Free Trial</a>
+        </div>
+
+        <!-- Starter Tier -->
+        <div class="pricing-card">
+            <div class="card-header">
+                <div class="tier-name">Starter Shop</div>
+                <div class="tier-price">
+                    <span class="tier-currency">Ksh</span>1,000<span class="tier-period">/mo</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9em; margin-top: 8px;">Perfect for solo tailors ready to digitize.</p>
+            </div>
+            <ul class="tier-features">
+                <li><i class="fas fa-check-circle"></i> Single shop registration</li>
+                <li><i class="fas fa-check-circle"></i> Storefront features</li>
+                <li><i class="fas fa-check-circle"></i> Up to 100 Clients in CRM</li>
+                <li><i class="fas fa-check-circle"></i> Basic order management</li>
+                <li><i class="fas fa-check-circle"></i> Custom invoicing &amp; receipt generation</li>
+                <li><i class="fas fa-check-circle"></i> M-Pesa Payment integration</li>
+            </ul>
+            <a href="./login.html?mode=signup" class="btn-pricing btn-pricing-outline">Start Free Trial</a>
+        </div>
+
+        <!-- Premium Tier -->
+        <div class="pricing-card premium">
+            <div class="popular-badge">Most Popular</div>
+            <div class="card-header">
+                <div class="tier-name">Premium Studio</div>
+                <div class="tier-price">
+                    <span class="tier-currency">Ksh</span>2,000<span class="tier-period">/mo</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9em; margin-top: 8px;">For growing businesses ready to scale.</p>
+            </div>
+            <ul class="tier-features">
+                <li><i class="fas fa-check-circle" style="color:var(--gold);"></i> <strong>Everything in Starter, plus:</strong></li>
+                <li><i class="fas fa-check-circle"></i> Unlimited clients &amp; team member accounts</li>
+                <li><i class="fas fa-check-circle"></i> Live order trackings</li>
+                <li><i class="fas fa-check-circle"></i> Automated SMS &amp; email updates</li>
                 <li><i class="fas fa-check-circle"></i> Inventory management</li>
                 <li><i class="fas fa-check-circle"></i> Priority marketplace listings</li>
             </ul>
