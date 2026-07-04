@@ -4195,11 +4195,113 @@
         async function initiateEscrowPayment(orderId, amount) {
             alert('This payment feature is currently in final testing and will be officially releasing in September. Thank you for your patience!');
             return;
+            
+            try {
+                if (!currentUser) return alert("Please log in to make a payment.");
+                const email = currentUser.email || 'guest@example.com';
+                const phone = currentUser.phone || currentUser.user_metadata?.phone;
+
+                // 1. Call our Supabase Edge Function to initialize Paystack
+                const response = await fetch(`${supabaseUrl}/functions/v1/paystack-escrow/initialize-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${(await supabaseClient.auth.getSession()).data.session?.access_token || ''}`
+                    },
+                    body: JSON.stringify({ order_id: orderId, amount: amount, email: email, phone: phone })
+                });
+
+                if (!response.ok) throw new Error('Failed to initialize payment');
+                const data = await response.json();
+
+                // 2. Open Paystack Popup
+                let handler = PaystackPop.setup({
+                    key: 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxx', // Replace with real public key
+                    email: email,
+                    amount: amount * 100, // Paystack uses kobo/cents
+                    currency: 'KES',
+                    ref: data.reference,
+                    callback: function(response){
+                        alert('Payment complete! Reference: ' + response.reference);
+                        // The webhook will update the DB. We can reload the UI.
+                        loadClientOrders();
+                    },
+                    onClose: function(){
+                        console.log('Payment window closed.');
+                    }
+                });
+                handler.openIframe();
+            } catch (err) {
+                console.error('Payment Error:', err);
+                alert('Could not start payment: ' + err.message);
+            }
         }
 
         async function initiateMpesaPayment(orderId, amount, fallbackShopId) {
             alert('This M-Pesa payment feature is currently in final testing and will be officially releasing in September. Thank you for your patience!');
             return;
+
+            try {
+                if (!currentUser) return alert("Please log in to make a payment.");
+                
+                // Fetch the actual tailor ID for this order to prevent foreign key errors
+                let actualTailorId = fallbackShopId;
+                const { data: orderInfo } = await supabaseClient
+                    .from('orders')
+                    .select('manager_id, shop_id')
+                    .eq('id', orderId)
+                    .single();
+                    
+                if (orderInfo && orderInfo.manager_id) {
+                    actualTailorId = orderInfo.manager_id;
+                } else if (orderInfo && orderInfo.shop_id) {
+                    const { data: shopInfo } = await supabaseClient
+                        .from('shops')
+                        .select('owner_id')
+                        .eq('id', orderInfo.shop_id)
+                        .single();
+                    if (shopInfo) actualTailorId = shopInfo.owner_id;
+                }
+                
+                // Prompt user for phone number and amount
+                const phoneInput = prompt("Enter your Safaricom M-Pesa number (e.g., 0712345678 or 254712345678):", currentUser.phone || "");
+                if (!phoneInput) return;
+                
+                const amountInput = prompt(`Enter amount to pay (Full balance is ${amount}):`, amount);
+                if (!amountInput || isNaN(amountInput)) return;
+                
+                const finalAmount = parseFloat(amountInput);
+                const isDeposit = finalAmount < amount;
+
+                alert("Initializing M-Pesa STK Push. Please wait...");
+
+                // Call the new M-Pesa Edge Function
+                const response = await fetch(`${APP_CONFIG.supabaseUrl}/functions/v1/mpesa-stk-push`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${(await supabaseClient.auth.getSession()).data.session?.access_token || ''}`
+                    },
+                    body: JSON.stringify({ 
+                        order_id: orderId, 
+                        tailor_id: actualTailorId,
+                        amount: finalAmount, 
+                        phone_number: phoneInput,
+                        is_deposit: isDeposit
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to initialize M-Pesa payment');
+
+                alert("M-Pesa prompt sent to your phone! Please enter your PIN.");
+                console.log("CheckoutRequestID:", data.checkoutRequestId);
+                // Optionally start polling the DB to check when escrow_payments status changes to IN_ESCROW
+                
+            } catch (err) {
+                console.error('M-Pesa Error:', err);
+                alert('Could not start M-Pesa payment: ' + err.message);
+            }
         }
 
         async function approveOrder(orderId) {

@@ -3006,6 +3006,64 @@ window.downloadInvoicePDF = async function (orderId) {
 window.requestBalancePayment = async function(orderId, balanceAmount, shopId) {
     alert('This M-Pesa payment request feature is currently in final testing and will be officially releasing in September. Thank you for your patience!');
     return;
+    
+    if (!USER_PROFILE) return alert("Please log in first.");
+    
+    try {
+        // Fetch the order details to get the customer details
+        const { data: orderData, error: orderErr } = await supabaseClient
+            .from('orders')
+            .select('customer_name, customer_phone')
+            .eq('id', orderId)
+            .single();
+            
+        if (orderErr) throw orderErr;
+
+        if (!orderData.customer_phone) {
+            alert("This order does not have a customer phone number attached. Cannot send M-Pesa request.");
+            return;
+        }
+
+        const promptMsg = `Enter the amount to request from ${orderData.customer_name} (${orderData.customer_phone}):`;
+        let inputAmount = prompt(promptMsg, balanceAmount);
+        
+        if (inputAmount === null) return; // User clicked Cancel
+        
+        let requestAmount = parseFloat(inputAmount);
+        
+        if (isNaN(requestAmount) || requestAmount <= 0) {
+            alert("Please enter a valid amount greater than 0.");
+            return;
+        }
+
+        if (requestAmount > balanceAmount) {
+            if (!confirm(`The amount requested (Ksh ${requestAmount.toLocaleString()}) is greater than the remaining balance (Ksh ${balanceAmount.toLocaleString()}). Are you sure you want to proceed?`)) {
+                return;
+            }
+        }
+
+        // Trigger STK Push directly to the customer's phone!
+        // We invoke the edge function. The client_id will default to the admin's ID, which is fine for manual orders.
+        const { data, error } = await supabaseClient.functions.invoke('mpesa-stk-push', {
+            body: { 
+                order_id: orderId,
+                tailor_id: USER_PROFILE.id, 
+                amount: requestAmount,
+                phone_number: orderData.customer_phone
+            }
+        });
+
+        if (error) {
+            console.error("STK Push Error:", error);
+            alert("Failed to send M-Pesa prompt. Please check the phone number and try again.");
+            return;
+        }
+
+        alert(`Success! M-Pesa prompt for Ksh ${requestAmount.toLocaleString()} has been sent to ${orderData.customer_phone}. The balance will automatically update once they enter their PIN.`);
+
+    } catch (err) {
+        alert("Failed to send payment request. " + err.message);
+    }
 };
 
 
