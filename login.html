@@ -554,8 +554,9 @@
                 if (error) throw error;
                 if (!data.user) throw new Error("Could not complete registration.");
 
-                // 2. Insert Client Profile record
-                const { error: profileError } = await supabaseClient.from('user_profiles').insert([{
+                // 2. Insert Client Profile record using admin client to bypass RLS
+                const adminClient = getAdminClient();
+                const { error: profileError } = await adminClient.from('user_profiles').insert([{
                     id: data.user.id,
                     full_name: name,
                     role: 'client',
