@@ -57,6 +57,11 @@ We serve three types of users:
 - Marketplace (browse fashion & tailors): https://www.tailors.co.ke/views/client/marketplace.html
 - Blog: https://www.tailors.co.ke/views/client/blog.html
 - Login: https://www.tailors.co.ke/login.html
+- Pricing: https://www.tailors.co.ke/pricing.html
+- About Us: https://www.tailors.co.ke/about.html
+- Support: https://www.tailors.co.ke/support.html
+- Privacy Policy: https://www.tailors.co.ke/privacy.html
+- Terms & Conditions: https://www.tailors.co.ke/terms.html
 
 ## Technology
 
