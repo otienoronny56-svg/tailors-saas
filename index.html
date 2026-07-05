@@ -2601,7 +2601,7 @@
                 <a href="./login.html" class="btn-feature">See it in action <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="feature-image-wrap">
-                <div class="feature-mockup" style="background-image: url('https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&q=80&w=800');"></div>
+                <div class="feature-mockup" style="background-image: url('./assets/1.1.jpeg'); background-size: contain; background-repeat: no-repeat; background-position: center; cursor: pointer;" onclick="openSimpleImageModal('./assets/1.1.jpeg')"></div>
             </div>
         </div>
 
@@ -2620,7 +2620,7 @@
                 <a href="./login.html" class="btn-feature">See it in action <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="feature-image-wrap">
-                <div class="feature-mockup" style="background-image: url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=800');"></div>
+                <div class="feature-mockup" style="background-image: url('./assets/1.2.jpeg'); background-size: contain; background-repeat: no-repeat; background-position: center; cursor: pointer;" onclick="openSimpleImageModal('./assets/1.2.jpeg')"></div>
             </div>
         </div>
 
@@ -2639,7 +2639,7 @@
                 <a href="./login.html" class="btn-feature">See it in action <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="feature-image-wrap">
-                <div class="feature-mockup" style="background-image: url('https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=800');"></div>
+                <div class="feature-mockup" style="background-image: url('./assets/mpesa_integration.png'); background-size: contain; background-repeat: no-repeat; background-position: center; cursor: pointer;" onclick="openSimpleImageModal('./assets/mpesa_integration.png')"></div>
             </div>
         </div>
 
@@ -2658,7 +2658,7 @@
                 <a href="./login.html" class="btn-feature">See it in action <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="feature-image-wrap">
-                <div class="feature-mockup" style="background-image: url('https://images.unsplash.com/photo-1555421689-d68471e189f2?auto=format&fit=crop&q=80&w=800');"></div>
+                <div class="feature-mockup" style="background-image: url('./assets/automated_communications.png'); background-size: contain; background-repeat: no-repeat; background-position: center; cursor: pointer;" onclick="openSimpleImageModal('./assets/automated_communications.png')"></div>
             </div>
         </div>
 
@@ -2681,7 +2681,7 @@
                 <a href="views/client/marketplace.html" class="btn-feature">Explore Marketplace <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="feature-image-wrap">
-                <div class="feature-mockup" style="background-image: url('https://images.unsplash.com/photo-1617064295988-cbce66b88301?auto=format&fit=crop&q=80&w=800');"></div>
+                <div class="feature-mockup" style="background-image: url('./assets/real_time_tracking.png'); background-size: contain; background-repeat: no-repeat; background-position: center; cursor: pointer;" onclick="openSimpleImageModal('./assets/real_time_tracking.png')"></div>
             </div>
         </div>
 
@@ -3422,6 +3422,18 @@
     <a href="https://wa.me/254745806488" class="whatsapp-float" target="_blank" aria-label="Chat with us on WhatsApp">
         <i class="fab fa-whatsapp"></i>
     </a>
+
+    <!-- Simple Image Modal -->
+    <div id="simple-image-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center; cursor:zoom-out; flex-direction:column;" onclick="this.style.display='none'">
+        <img id="simple-image-modal-img" src="" style="max-width:90%; max-height:90%; object-fit:contain; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <p style="color:#fff; margin-top:15px; font-family:'Inter', sans-serif; opacity:0.7;">Click anywhere to close</p>
+    </div>
+    <script>
+        function openSimpleImageModal(src) {
+            document.getElementById('simple-image-modal-img').src = src;
+            document.getElementById('simple-image-modal').style.display = 'flex';
+        }
+    </script>
 
 </body>
 

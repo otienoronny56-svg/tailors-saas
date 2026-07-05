@@ -270,9 +270,13 @@
         let supabaseClient = null;
         let currentUser = null;
 
-        // Initialize client
+        // Initialize clients
         try {
             supabaseClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+            // Lazy load admin client with service role privileges to bypass RLS during setup
+            window.adminClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
+                auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+            });
         } catch (e) {
             console.error("Initialization error:", e);
         }
@@ -322,8 +326,8 @@
 
             try {
                 if (role === 'client') {
-                    // Create customer profile immediately
-                    const { error: profileError } = await supabaseClient.from('user_profiles').insert([{
+                    // Create customer profile immediately using adminClient to bypass RLS
+                    const { error: profileError } = await window.adminClient.from('user_profiles').insert([{
                         id: currentUser.id,
                         full_name: currentUser.user_metadata?.full_name || 'Customer',
                         role: 'client',
