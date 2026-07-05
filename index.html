@@ -2302,7 +2302,150 @@
                 font-size: 28px;
             }
         }
-
+        /* ===== TESTIMONIALS ===== */
+        .testimonials-section {
+            padding: 100px 20px;
+            background: var(--bg-deep);
+            text-align: center;
+        }
+        .testimonials-section h2 {
+            font-size: clamp(2em, 5vw, 3em);
+            color: var(--text-main);
+            margin-bottom: 60px;
+            font-family: var(--font-display);
+        }
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .testimonial-card {
+            background: var(--bg-card);
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border-glass);
+            text-align: left;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+        }
+        .testimonial-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold-border);
+            background: var(--bg-card-hover);
+        }
+        .testimonial-card::before {
+            content: '"';
+            font-size: 6em;
+            color: var(--gold);
+            opacity: 0.1;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-family: var(--font-display);
+            line-height: 1;
+        }
+        .testimonial-text {
+            font-size: 1.05em;
+            line-height: 1.7;
+            color: var(--text-slate);
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+            font-family: var(--font-sans);
+            font-weight: 300;
+        }
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .testimonial-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--gold-glow);
+            border: 2px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 1.2em;
+            flex-shrink: 0;
+            object-fit: cover;
+            font-family: var(--font-display);
+        }
+        .testimonial-info h4 {
+            margin: 0 0 4px 0;
+            color: var(--text-main);
+            font-size: 1.15em;
+            font-family: var(--font-display);
+            font-weight: 600;
+        }
+        .testimonial-info p {
+            margin: 0;
+            color: var(--gold);
+            font-size: 0.85em;
+            font-family: var(--font-sans);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .testimonial-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.75em;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            align-self: flex-start;
+            font-family: var(--font-sans);
+        }
+        .badge-tailor {
+            background: var(--gold-glow);
+            color: var(--gold);
+            border: 1px solid var(--gold-border);
+        }
+        .badge-client {
+            background: rgba(14, 165, 233, 0.1);
+            color: #38bdf8;
+            border: 1px solid rgba(14, 165, 233, 0.2);
+        }
+        [data-theme="light"] .badge-client {
+            color: #0284c7;
+            background: rgba(2, 132, 199, 0.1);
+            border-color: rgba(2, 132, 199, 0.2);
+        }
+        .btn-visit-shop {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 0.9em;
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid var(--gold-border);
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            align-self: flex-start;
+            background: transparent;
+            font-family: var(--font-sans);
+        }
+        .btn-visit-shop:hover {
+            background: var(--gold);
+            color: #111827;
+            border-color: var(--gold);
+        }
     </style>
     <link rel="manifest" href="manifest.json">
 </head>
@@ -2685,6 +2828,101 @@
             </div>
         </div>
 
+    </section>
+    <!-- ===== TESTIMONIALS SECTION ===== -->
+    <section class="testimonials-section">
+        <h2>What Our Community Says</h2>
+        <div class="testimonials-grid">
+            <!-- Tailor Testimonial 1 -->
+            <div class="testimonial-card">
+                <span class="testimonial-badge badge-tailor">Tailor / Shop</span>
+                <p class="testimonial-text">"Managing orders used to be a nightmare with scattered notebooks and missed WhatsApp messages. Stitch & Styles Kenya completely digitized my workflow. I can track every client measurement and invoice from my phone."</p>
+                <div>
+                    <div class="testimonial-author">
+                        <img src="./assets/logo.jpeg" alt="Rigo Wear Logo" class="testimonial-avatar" onerror="this.outerHTML='<div class=\'testimonial-avatar\'>RI</div>'">
+                        <div class="testimonial-info">
+                            <h4>Rigobert</h4>
+                            <p>RIGO WEAR</p>
+                        </div>
+                    </div>
+                    <a href="views/manager/shop.html?id=c2ba60d8-e375-45e6-a72e-d8a6ea21716a" class="btn-visit-shop">Visit Shop <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Tailor Testimonial 2 -->
+            <div class="testimonial-card">
+                <span class="testimonial-badge badge-tailor">Tailor / Shop</span>
+                <p class="testimonial-text">"The automated M-Pesa billing integration is an absolute game-changer. My clients receive professional digital invoices, and I can track their deposits instantly. It makes my tailoring business look and feel incredibly premium."</p>
+                <div>
+                    <div class="testimonial-author">
+                        <img src="./assets/logo.jpeg" alt="Ashley's Fashion Hub Logo" class="testimonial-avatar" onerror="this.outerHTML='<div class=\'testimonial-avatar\'>AS</div>'">
+                        <div class="testimonial-info">
+                            <h4>Ashley</h4>
+                            <p>ASHLEY'S FASHION HUB</p>
+                        </div>
+                    </div>
+                    <a href="views/manager/shop.html?id=17ed20e4-2ce6-484d-833f-08222717fe9c" class="btn-visit-shop">Visit Shop <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Tailor Testimonial 3 -->
+            <div class="testimonial-card">
+                <span class="testimonial-badge badge-tailor">Tailor / Shop</span>
+                <p class="testimonial-text">"Having a dedicated profile on the marketplace has completely transformed how I get new clients. It’s so easy to showcase my work, and customers feel secure knowing they are dealing with a verified provider."</p>
+                <div>
+                    <div class="testimonial-author">
+                        <img src="./assets/logo.jpeg" alt="Ashwin Hub Logo" class="testimonial-avatar" onerror="this.outerHTML='<div class=\'testimonial-avatar\'>AS</div>'">
+                        <div class="testimonial-info">
+                            <h4>Ashwin</h4>
+                            <p>ASHWIN HUB</p>
+                        </div>
+                    </div>
+                    <a href="views/manager/shop.html?id=19039853-b61a-44ed-b4dc-c1e6948ecc7d" class="btn-visit-shop">Visit Shop <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Tailor Testimonial 4 -->
+            <div class="testimonial-card">
+                <span class="testimonial-badge badge-tailor">Tailor / Shop</span>
+                <p class="testimonial-text">"The order tracking system is phenomenal. Clients no longer call me every day to check on their garments; they just check the link. It gives me peace of mind to focus entirely on luxury tailoring."</p>
+                <div>
+                    <div class="testimonial-author">
+                        <img src="./assets/logo.jpeg" alt="Modern Man Logo" class="testimonial-avatar" onerror="this.outerHTML='<div class=\'testimonial-avatar\'>MM</div>'">
+                        <div class="testimonial-info">
+                            <h4>Modern Man</h4>
+                            <p>Modern Man Clothing Ltd</p>
+                        </div>
+                    </div>
+                    <a href="views/manager/shop.html?id=eda4b7d0-9d9f-4a67-8c46-2bf1393a7496" class="btn-visit-shop">Visit Shop <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Client Testimonial 1 -->
+            <div class="testimonial-card">
+                <span class="testimonial-badge badge-client">Client / Shopper</span>
+                <p class="testimonial-text">"I love how easy it is to find talented tailors on the marketplace. I ordered a custom outfit, tracked its progress in real-time right on my phone, and picked it up exactly when it was ready."</p>
+                <div class="testimonial-author" style="margin-top:auto;">
+                    <div class="testimonial-avatar">TE</div>
+                    <div class="testimonial-info">
+                        <h4>Ted</h4>
+                        <p>Nairobi</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client Testimonial 2 -->
+            <div class="testimonial-card">
+                <span class="testimonial-badge badge-client">Client / Shopper</span>
+                <p class="testimonial-text">"No more guessing games! I can see the progress of my suits step-by-step. The quality of the tailors on this platform is unmatched, and the communication is seamless. Best platform in Kenya!"</p>
+                <div class="testimonial-author" style="margin-top:auto;">
+                    <div class="testimonial-avatar">EM</div>
+                    <div class="testimonial-info">
+                        <h4>Emmanuel</h4>
+                        <p>Mombasa</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- ===== CTA BANNER ===== -->

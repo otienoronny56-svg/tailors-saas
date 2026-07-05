@@ -245,6 +245,26 @@
             display: flex;
             flex-direction: column;
             gap: 25px;
+            position: sticky;
+            top: 100px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            align-self: flex-start;
+        }
+
+        /* Hide scrollbar for cleaner look on sidebar */
+        .shop-info-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .shop-info-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .shop-info-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        [data-theme="light"] .shop-info-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.1);
         }
 
         .shop-profile-card {
