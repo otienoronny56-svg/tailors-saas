@@ -326,11 +326,17 @@
                             </select>
                         </div>
 
-                        <!-- 2. TITLE AND CATEGORY -->
+                        <!-- 2. TITLE, SIZE CHART AND CATEGORY -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div class="form-group">
                                 <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Design Title *</label>
                                 <input type="text" id="list-title" placeholder="e.g. Royal Blue senator Suit" required style="margin: 0; width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Attach Size Chart <span style="color:#64748b; font-weight:400; font-size:0.85em;">(Optional)</span></label>
+                                <select id="list-size-chart" style="margin: 0; width: 100%;">
+                                    <option value="">-- No Size Chart --</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Category</label>
@@ -513,6 +519,7 @@
     <script>
         let listings = [];
         let shops = [];
+        let sizeCharts = [];
 
         // Wait for Supabase to be initialized via checkSession in app.js
         window.addEventListener('load', async () => {
@@ -578,10 +585,28 @@
                     }
                 }
 
+                // Fetch Size Charts for dropdown
+                const { data: sizes } = await supabaseClient
+                    .from('size_charts')
+                    .select('id, name')
+                    .or(`organization_id.eq.${USER_PROFILE.organization_id},organization_id.is.null`);
+                sizeCharts = sizes || [];
+
+                const sizeSelects = ['list-size-chart', 'edit-list-size-chart'];
+                sizeSelects.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.innerHTML = '<option value="">-- No Size Chart --</option>';
+                        sizeCharts.forEach(s => {
+                            el.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                        });
+                    }
+                });
+
                 // 2. Fetch Listings
                 const { data: listingsData, error: listingsErr } = await supabaseClient
                     .from('marketplace_listings')
-                    .select('*')
+                    .select('*, size_charts(name)')
                     .eq('organization_id', USER_PROFILE.organization_id)
                     .order('created_at', { ascending: false });
 
@@ -703,6 +728,8 @@
                 const title = document.getElementById('list-title').value.trim();
                 const category = document.getElementById('list-category').value;
                 const targetAudience = document.querySelector('input[name="list-audience"]:checked')?.value || 'Unisex';
+                const sizeChartIdVal = document.getElementById('list-size-chart').value;
+                const sizeChartId = sizeChartIdVal ? sizeChartIdVal : null;
                 const price = parseFloat(document.getElementById('list-price').value);
                 const originalPriceVal = document.getElementById('list-original-price').value.trim();
                 const originalPrice = originalPriceVal ? parseFloat(originalPriceVal) : null;
@@ -744,6 +771,7 @@
                         original_price: originalPrice,
                         description: desc,
                         image_urls: JSON.stringify([publicUrl]),
+                        size_chart_id: sizeChartId,
                         status: 'active'
                     }])
                     .select();
@@ -844,6 +872,12 @@
                 catSelect.value = listing.category || '';
             }
 
+            // Set size chart select
+            const sizeSelect = document.getElementById('edit-list-size-chart');
+            if (sizeSelect) {
+                sizeSelect.value = listing.size_chart_id || '';
+            }
+
             // Set target audience
             const audience = listing.target_audience || 'Unisex';
             const audienceRadios = document.querySelectorAll('input[name="edit-list-audience"]');
@@ -872,13 +906,15 @@
                 const originalPriceVal = document.getElementById('edit-listing-original-price').value.trim();
                 const originalPrice = originalPriceVal ? parseFloat(originalPriceVal) : null;
                 const category = document.getElementById('edit-listing-category').value;
+                const sizeChartIdVal = document.getElementById('edit-list-size-chart').value;
+                const sizeChartId = sizeChartIdVal ? sizeChartIdVal : null;
                 const targetAudience = document.querySelector('input[name="edit-list-audience"]:checked')?.value || 'Unisex';
 
                 if (!title) throw new Error('Title is required.');
 
                 const { error } = await supabaseClient
                     .from('marketplace_listings')
-                    .update({ title, description, price, original_price: originalPrice, category, target_audience: targetAudience })
+                    .update({ title, description, price, original_price: originalPrice, category, target_audience: targetAudience, size_chart_id: sizeChartId })
                     .eq('id', id);
 
                 if (error) throw error;
@@ -1059,9 +1095,16 @@
                                 <option value="Sandals &amp; Slippers">Sandals &amp; Slippers</option>
                                     <option value="Boots">Boots</option>
                                 </optgroup>
-                            </select>
-                        </div>
-                        <div>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Attach Size Chart <span style="color:#64748b; font-weight:400; font-size:0.85em;">(Optional)</span></label>
+                        <select id="edit-list-size-chart"
+                            style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9em; box-sizing:border-box; background:white;">
+                            <option value="">-- No Size Chart --</option>
+                        </select>
+                    </div>
+                    <div>
                             <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Price (Ksh)</label>
                             <input type="number" id="edit-listing-price" min="0" step="1"
                                 style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box; transition:border 0.2s;"

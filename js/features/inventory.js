@@ -42,6 +42,8 @@ async function loadInventoryScreen() {
         const shopMap = {};
         if (shops) shops.forEach(s => shopMap[s.id] = s.name);
 
+        await populateSizeChartDropdowns();
+
         // Update stats
         const totalItems = ALL_INVENTORY.length;
         const inStock = ALL_INVENTORY.filter(i => i.stock_quantity > i.low_stock_threshold).length;
@@ -122,9 +124,17 @@ async function addInventoryItem() {
     const name = document.getElementById('inv-name').value.trim();
     const category = document.getElementById('inv-category').value;
     const price = parseFloat(document.getElementById('inv-price').value) || 0;
-    const qty = parseInt(document.getElementById('inv-qty').value) || 0;
     const shopId = document.getElementById('inv-shop-select').value;
+    const sizeChartId = document.getElementById('inv-size-chart')?.value || null;
     const msgEl = document.getElementById('inv-add-msg');
+    
+    let qty = parseInt(document.getElementById('inv-qty').value) || 0;
+    let sizeQuantities = {};
+    if (sizeChartId) {
+        const collected = collectSizeQuantities('inv');
+        qty = collected.totalStock;
+        sizeQuantities = collected.sizeQuantities;
+    }
 
     if (!name || !shopId) {
         if (msgEl) { msgEl.textContent = '❌ Please fill in name and select a shop.'; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
@@ -138,7 +148,9 @@ async function addInventoryItem() {
             name: name,
             category: category,
             price: price,
-            stock_quantity: qty
+            stock_quantity: qty,
+            size_chart_id: sizeChartId,
+            size_quantities: sizeQuantities
         }]);
 
         if (error) throw error;
@@ -170,6 +182,24 @@ function openEditInventoryItem(itemId) {
     document.getElementById('edit-inv-price').value = item.price;
     document.getElementById('edit-inv-qty').value = item.stock_quantity;
     document.getElementById('edit-inv-threshold').value = item.low_stock_threshold || 5;
+    
+    const sizeChartEl = document.getElementById('edit-inv-size-chart');
+    if (sizeChartEl) {
+        sizeChartEl.value = item.size_chart_id || '';
+        handleSizeChartChange(item.size_chart_id, 'edit-inv');
+        
+        if (item.size_chart_id && item.size_quantities) {
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('.edit-inv-size-input');
+                inputs.forEach(input => {
+                    const size = input.getAttribute('data-size');
+                    if (item.size_quantities[size] !== undefined) {
+                        input.value = item.size_quantities[size];
+                    }
+                });
+            }, 50);
+        }
+    }
 
     document.getElementById('inv-edit-modal').classList.add('active');
 }
@@ -179,12 +209,20 @@ async function saveInventoryEdit() {
     const name = document.getElementById('edit-inv-name').value.trim();
     const category = document.getElementById('edit-inv-category').value;
     const price = parseFloat(document.getElementById('edit-inv-price').value) || 0;
-    const qty = parseInt(document.getElementById('edit-inv-qty').value) || 0;
+    let qty = parseInt(document.getElementById('edit-inv-qty').value) || 0;
     const threshold = parseInt(document.getElementById('edit-inv-threshold').value) || 5;
+    const sizeChartId = document.getElementById('edit-inv-size-chart')?.value || null;
+    let sizeQuantities = {};
+
+    if (sizeChartId) {
+        const collected = collectSizeQuantities('edit-inv');
+        qty = collected.totalStock;
+        sizeQuantities = collected.sizeQuantities;
+    }
 
     try {
         const { error } = await supabaseClient.from('inventory_items').update({
-            name, category, price, stock_quantity: qty, low_stock_threshold: threshold, updated_at: new Date().toISOString()
+            name, category, price, stock_quantity: qty, low_stock_threshold: threshold, size_chart_id: sizeChartId, size_quantities: sizeQuantities, updated_at: new Date().toISOString()
         }).eq('id', id);
 
         if (error) throw error;
@@ -292,6 +330,8 @@ async function loadManagerInventoryScreen() {
 
         if (error) throw error;
         MANAGER_INVENTORY = items || [];
+        
+        await populateSizeChartDropdowns();
 
         // Update stat cards
         const totalItems = MANAGER_INVENTORY.length;
@@ -375,9 +415,17 @@ async function addManagerInventoryItem() {
     const name = document.getElementById('inv-name').value.trim();
     const category = document.getElementById('inv-category').value;
     const price = parseFloat(document.getElementById('inv-price').value) || 0;
-    const qty = parseInt(document.getElementById('inv-qty').value) || 0;
+    const sizeChartId = document.getElementById('inv-size-chart')?.value || null;
     const msgEl = document.getElementById('inv-add-msg');
     const shopId = USER_PROFILE?.shop_id;
+
+    let qty = parseInt(document.getElementById('inv-qty').value) || 0;
+    let sizeQuantities = {};
+    if (sizeChartId) {
+        const collected = collectSizeQuantities('inv');
+        qty = collected.totalStock;
+        sizeQuantities = collected.sizeQuantities;
+    }
 
     if (!name || !shopId) {
         if (msgEl) { msgEl.textContent = '❌ Please fill in the item name.'; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
@@ -388,7 +436,7 @@ async function addManagerInventoryItem() {
         const { error } = await supabaseClient.from('inventory_items').insert([{
             organization_id: USER_PROFILE.organization_id,
             shop_id: shopId,
-            name, category, price, stock_quantity: qty
+            name, category, price, stock_quantity: qty, size_chart_id: sizeChartId, size_quantities: sizeQuantities
         }]);
 
         if (error) throw error;
@@ -415,6 +463,25 @@ function openManagerEditItem(itemId) {
     document.getElementById('edit-inv-price').value = item.price;
     document.getElementById('edit-inv-qty').value = item.stock_quantity;
     document.getElementById('edit-inv-threshold').value = item.low_stock_threshold || 5;
+
+    const sizeChartEl = document.getElementById('edit-inv-size-chart');
+    if (sizeChartEl) {
+        sizeChartEl.value = item.size_chart_id || '';
+        handleSizeChartChange(item.size_chart_id, 'edit-inv');
+        
+        if (item.size_chart_id && item.size_quantities) {
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('.edit-inv-size-input');
+                inputs.forEach(input => {
+                    const size = input.getAttribute('data-size');
+                    if (item.size_quantities[size] !== undefined) {
+                        input.value = item.size_quantities[size];
+                    }
+                });
+            }, 50);
+        }
+    }
+
     document.getElementById('inv-edit-modal').classList.add('active');
 }
 
@@ -423,12 +490,20 @@ async function saveManagerInventoryEdit() {
     const name = document.getElementById('edit-inv-name').value.trim();
     const category = document.getElementById('edit-inv-category').value;
     const price = parseFloat(document.getElementById('edit-inv-price').value) || 0;
-    const qty = parseInt(document.getElementById('edit-inv-qty').value) || 0;
+    let qty = parseInt(document.getElementById('edit-inv-qty').value) || 0;
     const threshold = parseInt(document.getElementById('edit-inv-threshold').value) || 5;
+    const sizeChartId = document.getElementById('edit-inv-size-chart')?.value || null;
+    let sizeQuantities = {};
+
+    if (sizeChartId) {
+        const collected = collectSizeQuantities('edit-inv');
+        qty = collected.totalStock;
+        sizeQuantities = collected.sizeQuantities;
+    }
 
     try {
         const { error } = await supabaseClient.from('inventory_items').update({
-            name, category, price, stock_quantity: qty, low_stock_threshold: threshold,
+            name, category, price, stock_quantity: qty, low_stock_threshold: threshold, size_chart_id: sizeChartId, size_quantities: sizeQuantities,
             updated_at: new Date().toISOString()
         }).eq('id', id);
 
@@ -488,4 +563,129 @@ function filterManagerInventoryTable() {
         row.style.display = show ? '' : 'none';
     });
 }
+
+// Helper to populate Size Chart dropdowns
+window.AVAILABLE_SIZE_CHARTS = [];
+
+async function populateSizeChartDropdowns() {
+    try {
+        const { data: sizeCharts, error } = await supabaseClient
+            .from('size_charts')
+            .select('id, name, size_data, target_gender')
+            .or(`organization_id.is.null,organization_id.eq.${USER_PROFILE.organization_id}`);
+            
+        if (error) throw error;
+        
+        window.AVAILABLE_SIZE_CHARTS = sizeCharts || [];
+        
+        const sizeChartSelect = document.getElementById('inv-size-chart');
+        const editSizeChartSelect = document.getElementById('edit-inv-size-chart');
+        const genderSelect = document.getElementById('inv-gender');
+        const editGenderSelect = document.getElementById('edit-inv-gender');
+        
+        if (sizeCharts) {
+            renderFilteredSizeCharts('inv');
+            renderFilteredSizeCharts('edit-inv');
+            
+            if (sizeChartSelect) {
+                sizeChartSelect.addEventListener('change', () => handleSizeChartChange(sizeChartSelect.value, 'inv'));
+            }
+            if (editSizeChartSelect) {
+                editSizeChartSelect.addEventListener('change', () => handleSizeChartChange(editSizeChartSelect.value, 'edit-inv'));
+            }
+            if (genderSelect) {
+                genderSelect.addEventListener('change', () => renderFilteredSizeCharts('inv'));
+            }
+            if (editGenderSelect) {
+                editGenderSelect.addEventListener('change', () => renderFilteredSizeCharts('edit-inv'));
+            }
+        }
+    } catch (err) {
+        console.error("Error loading size charts:", err);
+    }
+}
+
+function renderFilteredSizeCharts(prefix) {
+    const selectEl = document.getElementById(`${prefix}-size-chart`);
+    const genderEl = document.getElementById(`${prefix}-gender`);
+    if (!selectEl) return;
+    
+    const selectedGender = genderEl ? genderEl.value : '';
+    
+    let filteredCharts = window.AVAILABLE_SIZE_CHARTS;
+    if (selectedGender) {
+        filteredCharts = window.AVAILABLE_SIZE_CHARTS.filter(c => c.target_gender === selectedGender || c.target_gender === 'Unisex' || !c.target_gender);
+    }
+    
+    const currentValue = selectEl.value;
+    
+    selectEl.innerHTML = '<option value="">None (One Size / Custom)</option>' + 
+        filteredCharts.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        
+    // try to restore previous value if it still exists in the filtered list
+    if (filteredCharts.find(c => c.id === currentValue)) {
+        selectEl.value = currentValue;
+    } else {
+        selectEl.value = '';
+        handleSizeChartChange('', prefix);
+    }
+}
+
+function handleSizeChartChange(chartId, prefix) {
+    const qtyContainer = document.getElementById(`${prefix}-size-qty-container`);
+    const qtyGrid = document.getElementById(`${prefix}-size-qty-grid`);
+    const standardQtyDiv = document.getElementById(`${prefix}-standard-qty-div`);
+    const standardQtyInput = document.getElementById(`${prefix}-qty`);
+    
+    if (!chartId) {
+        // No size chart selected -> show standard quantity
+        if (qtyContainer) qtyContainer.style.display = 'none';
+        if (standardQtyDiv) standardQtyDiv.style.display = 'block';
+        if (qtyGrid) qtyGrid.innerHTML = '';
+        return;
+    }
+    
+    // Size chart selected -> hide standard quantity, show size inputs
+    const chart = window.AVAILABLE_SIZE_CHARTS.find(c => c.id === chartId);
+    if (!chart || !chart.size_data) return;
+    
+    const sizes = Object.keys(chart.size_data);
+    
+    if (sizes.length === 0) {
+        if (qtyContainer) qtyContainer.style.display = 'none';
+        if (standardQtyDiv) standardQtyDiv.style.display = 'block';
+        return;
+    }
+    
+    if (qtyContainer) qtyContainer.style.display = 'block';
+    if (standardQtyDiv) standardQtyDiv.style.display = 'none';
+    
+    // We store the values on standardQtyInput but set it to 0 and read from grid
+    if (standardQtyInput) standardQtyInput.value = 0;
+    
+    if (qtyGrid) {
+        qtyGrid.innerHTML = sizes.map(size => `
+            <div style="flex: 0 0 auto; width: 60px;">
+                <label style="font-size: 0.8em; color: #64748b;">${size}</label>
+                <input type="number" class="${prefix}-size-input" data-size="${size}" value="0" min="0" style="padding: 6px; width: 100%; box-sizing: border-box;">
+            </div>
+        `).join('');
+    }
+}
+
+function collectSizeQuantities(prefix) {
+    const inputs = document.querySelectorAll(`.${prefix}-size-input`);
+    const sizeQuantities = {};
+    let totalStock = 0;
+    
+    inputs.forEach(input => {
+        const size = input.getAttribute('data-size');
+        const qty = parseInt(input.value) || 0;
+        sizeQuantities[size] = qty;
+        totalStock += qty;
+    });
+    
+    return { sizeQuantities, totalStock };
+}
+
 

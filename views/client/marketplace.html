@@ -1120,7 +1120,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            overflow: hidden;
+            overflow-y: auto;
         }
         .listing-modal-close {
             position: absolute;
@@ -2405,8 +2405,9 @@
                 } catch (e) { /* silent — don't block navigation */ }
             }
             // Navigate to the action page after tracking
-            setTimeout(() => window.location.href = fallbackUrl, 120);
-        }
+            if (fallbackUrl && fallbackUrl !== 'undefined') {
+                setTimeout(() => window.location.href = fallbackUrl, 120);
+            }
     </script>
     <script>
         // Custom Pull to Refresh Logic for Mobile
@@ -2497,6 +2498,7 @@
 
             // Expose modal function
             window.openListingModal = function(listingId) {
+                if (typeof trackListingView === 'function') trackListingView(listingId);
                 console.log("Trying to open modal for ID:", listingId);
                 const list = allListings.find(l => String(l.id).trim() === String(listingId).trim());
                 if (!list) {
@@ -2541,9 +2543,83 @@
                 document.getElementById('modal-shop-avatar').innerHTML = avatarIconHtml;
                 document.getElementById('modal-shop-name').textContent = shopName;
 
+                // Handle Sizing
+                const sizingSection = document.getElementById('modal-listing-sizing-section');
+                const sizeSelect = document.getElementById('modal-listing-size');
+                const heightContainer = document.getElementById('modal-listing-height-container');
+                const heightSelect = document.getElementById('modal-listing-height');
+                const attachCheckbox = document.getElementById('modal-attach-measurements');
+                
+                // Reset sizing form
+                sizeSelect.innerHTML = '<option value="">Select Size...</option>';
+                heightSelect.innerHTML = '<option value="">Select Height...</option>';
+                attachCheckbox.checked = false;
+                
+                let hasSizing = false;
+                if (list.size_charts && list.size_charts.size_data) {
+                    hasSizing = true;
+                    // Populate sizes (keys of size_data, or from a structured array if it is one)
+                    let sizes = [];
+                    try {
+                        const sizeData = typeof list.size_charts.size_data === 'string' ? JSON.parse(list.size_charts.size_data) : list.size_charts.size_data;
+                        if (Array.isArray(sizeData)) {
+                            sizes = sizeData.map(s => s.size_name || s.size);
+                        } else {
+                            sizes = Object.keys(sizeData);
+                        }
+                    } catch (e) { console.error(e); }
+                    
+                    sizes.forEach(size => {
+                        if (size && size !== 'size_name' && size !== 'size') {
+                            sizeSelect.innerHTML += `<option value="${size}">${size}</option>`;
+                        }
+                    });
+                    
+                    // Populate heights if available
+                    let heights = [];
+                    try {
+                        const heightData = typeof list.size_charts.height_categories === 'string' ? JSON.parse(list.size_charts.height_categories) : list.size_charts.height_categories;
+                        heights = Array.isArray(heightData) ? heightData : (heightData ? Object.keys(heightData) : []);
+                    } catch (e) { console.error(e); }
+                    
+                    if (heights && heights.length > 0) {
+                        heightContainer.style.display = 'block';
+                        heights.forEach(h => {
+                            let hName = typeof h === 'object' ? h.name : h;
+                            if(hName) {
+                                heightSelect.innerHTML += `<option value="${hName}">${hName}</option>`;
+                            }
+                        });
+                    } else {
+                        heightContainer.style.display = 'none';
+                    }
+                }
+                
+                sizingSection.style.display = hasSizing ? 'block' : 'none';
+
                 const inquireBtn = document.getElementById('modal-inquire-btn');
-                inquireBtn.href = `../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}`;
-                inquireBtn.onclick = function() {
+                
+                function updateInquireHref() {
+                    let href = `../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}`;
+                    if (hasSizing) {
+                        const selSize = sizeSelect.value;
+                        const selHeight = heightSelect.value;
+                        const attach = attachCheckbox.checked;
+                        
+                        if (selSize) href += `&sz=${encodeURIComponent(selSize)}`;
+                        if (selHeight) href += `&ht=${encodeURIComponent(selHeight)}`;
+                        if (attach) href += `&attach=true`;
+                    }
+                    inquireBtn.href = href;
+                }
+                
+                sizeSelect.onchange = updateInquireHref;
+                heightSelect.onchange = updateInquireHref;
+                attachCheckbox.onchange = updateInquireHref;
+                
+                updateInquireHref(); // Initial set
+                
+                inquireBtn.onclick = function(e) {
                     trackListingView(list.id, inquireBtn.href);
                 };
 
@@ -2593,6 +2669,28 @@
                 <div id="modal-listing-price" style="margin-top: 5px;"></div>
                 <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.1); margin: 5px 0;"></div>
                 <p id="modal-listing-desc" style="color: var(--brand-slate); line-height: 1.6; font-size: 0.95em; flex-grow: 1; white-space: pre-wrap; overflow-y: auto; padding-right: 10px; margin-bottom: 0;"></p>
+                
+                <div id="modal-listing-sizing-section" style="display: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 0.9em; color: var(--brand-white);"><i class="fas fa-ruler"></i> Select Your Size</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                        <div>
+                            <label style="display: block; font-size: 0.8em; color: var(--brand-slate); margin-bottom: 4px;">Standard Size</label>
+                            <select id="modal-listing-size" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.9em;">
+                                <option value="">Select Size...</option>
+                            </select>
+                        </div>
+                        <div id="modal-listing-height-container" style="display:none;">
+                            <label style="display: block; font-size: 0.8em; color: var(--brand-slate); margin-bottom: 4px;">Height Option</label>
+                            <select id="modal-listing-height" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.9em;">
+                                <option value="">Select Height...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: var(--brand-slate); cursor: pointer;">
+                        <input type="checkbox" id="modal-attach-measurements" style="margin: 0; accent-color: var(--brand-gold);">
+                        Attach my saved custom measurements to this inquiry
+                    </label>
+                </div>
                 
                 <div class="modal-shop-info" style="justify-content: space-between;">
                     <div style="display:flex; align-items:center; gap: 12px;">

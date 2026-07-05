@@ -1677,7 +1677,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            overflow: hidden;
+            overflow-y: auto;
         }
         .listing-modal-close {
             position: absolute;
@@ -2133,6 +2133,20 @@
                         <div class="form-group">
                             <label>Phone Number</label>
                             <input type="tel" id="settings-phone" placeholder="e.g. +254712345678">
+                        </div>
+                        <div class="form-group">
+                            <label>Preferred Standard Size (Optional)</label>
+                            <input type="text" id="settings-standard-size" placeholder="e.g. L, 42, UK 10">
+                            <p style="font-size: 0.8em; color: var(--brand-slate); margin-top: 4px;">This will be used as your default size for ready-made items.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Preferred Height Option (Optional)</label>
+                            <select id="settings-standard-height" style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white; margin-top: 5px;">
+                                <option value="">Not Specified</option>
+                                <option value="Short">Short</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Tall">Tall</option>
+                            </select>
                         </div>
                         <button class="btn-save-settings" onclick="saveProfileSettings()">Save Details</button>
                         <p id="profile-success-msg" style="display: none;"></p>
@@ -3551,6 +3565,15 @@
 
                     document.getElementById('settings-email').value = currentUser.email || '';
                     document.getElementById('settings-phone').value = currentUser?.user_metadata?.phone || '';
+                    
+                    // Fetch profile to get standard sizing preferences
+                    supabaseClient.from('user_profiles').select('standard_size_preferences').eq('id', currentUser.id).single()
+                        .then(({data, error}) => {
+                            if (data && data.standard_size_preferences) {
+                                document.getElementById('settings-standard-size').value = data.standard_size_preferences.size || '';
+                                document.getElementById('settings-standard-height').value = data.standard_size_preferences.height || '';
+                            }
+                        });
                 }
                 loadClientMeasurements();
                 renderInquiriesSummaryList();
@@ -3617,9 +3640,16 @@
                 });
                 if (authError) throw authError;
 
+                const newSize = document.getElementById('settings-standard-size').value.trim();
+                const newHeight = document.getElementById('settings-standard-height').value;
+                const sizingPrefs = { size: newSize, height: newHeight };
+
                 const { error: profileError } = await supabaseClient
                     .from('user_profiles')
-                    .update({ full_name: newName })
+                    .update({ 
+                        full_name: newName,
+                        standard_size_preferences: sizingPrefs 
+                    })
                     .eq('id', currentUser.id);
                 if (profileError) throw profileError;
 
@@ -4363,7 +4393,9 @@
                 } catch (e) { /* silent — don't block navigation */ }
             }
             // Navigate to the action page after tracking
-            setTimeout(() => window.location.href = fallbackUrl, 120);
+            if (fallbackUrl && fallbackUrl !== 'undefined') {
+                setTimeout(() => window.location.href = fallbackUrl, 120);
+            }
         }
 
         // Back history navigation logic for mobile chat threads
@@ -4516,6 +4548,29 @@
                 <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.1); margin: 5px 0;"></div>
                 <p id="modal-listing-desc" style="color: var(--brand-slate); line-height: 1.6; font-size: 0.95em; flex-grow: 1; white-space: pre-wrap; overflow-y: auto; padding-right: 10px; margin-bottom: 0;"></p>
                 
+                <div id="modal-listing-sizing-section" style="display: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 10px; margin-bottom: 15px; margin-top: 15px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 0.9em; color: var(--brand-white);"><i class="fas fa-ruler"></i> Select Your Size</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                        <div>
+                            <label style="display: block; font-size: 0.8em; color: var(--brand-slate); margin-bottom: 4px;">Standard Size</label>
+                            <select id="modal-listing-size" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.9em;">
+                                <option value="">Select Size...</option>
+                            </select>
+                        </div>
+                        <div id="modal-listing-height-container" style="display:none;">
+                            <label style="display: block; font-size: 0.8em; color: var(--brand-slate); margin-bottom: 4px;">Height Option</label>
+                            <select id="modal-listing-height" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.9em;">
+                                <option value="">Select Height...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: var(--brand-slate); cursor: pointer;">
+                            <input type="checkbox" id="modal-attach-measurements" style="accent-color: var(--brand-gold); width: 16px; height: 16px; cursor: pointer;">
+                            Attach my saved measurements
+                        </label>
+                    </div>
+                </div>
                 <div class="modal-shop-info" style="justify-content: space-between;">
                     <div style="display:flex; align-items:center; gap: 12px;">
                         <div id="modal-shop-avatar" style="display:flex; align-items:center;"></div>

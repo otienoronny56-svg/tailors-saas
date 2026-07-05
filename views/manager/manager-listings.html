@@ -264,6 +264,12 @@
                             <input type="number" id="list-price" placeholder="e.g. 15000" required style="margin: 0;">
                         </div>
                         <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Attach Size Chart <span style="color:#64748b; font-weight:400; font-size:0.85em;">(Optional)</span></label>
+                            <select id="list-size-chart" style="margin: 0;">
+                                <option value="">-- No Standard Sizing --</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
                             <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Original Price (Ksh) <span style="color:#64748b; font-weight:400; font-size:0.85em;">(Optional)</span></label>
                             <input type="number" id="list-original-price" placeholder="e.g. 18000" style="margin: 0;">
                         </div>
@@ -414,17 +420,26 @@
                             </label>
                         </div>
                     </div>
-                    <div style="margin-top: 15px;">
-                        <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Price (Ksh)</label>
-                        <input type="number" id="edit-listing-price" min="0" step="1"
-                            style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box;"
-                            onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                        <div>
+                            <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Price (Ksh) *</label>
+                            <input type="number" id="edit-listing-price" min="0" step="1"
+                                style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box;"
+                                onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
+                        </div>
+                        <div>
+                            <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Original Price (Ksh)</label>
+                            <input type="number" id="edit-listing-original-price" min="0" step="1" placeholder="Optional"
+                                style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box;"
+                                onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
+                        </div>
                     </div>
                     <div>
-                        <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Original Price</label>
-                        <input type="number" id="edit-listing-original-price" min="0" step="1" placeholder="Optional"
-                            style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box;"
-                            onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
+                        <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Attach Size Chart <span style="color:#94a3b8; font-weight:400;">(Optional)</span></label>
+                        <select id="edit-listing-size-chart"
+                            style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9em; box-sizing:border-box; background:white;">
+                            <option value="">-- No Standard Sizing --</option>
+                        </select>
                     </div>
                 </div>
                 <div>
@@ -483,14 +498,27 @@
             }
 
             try {
-                const { data, error } = await supabaseClient
-                    .from('marketplace_listings')
-                    .select('*')
-                    .eq('shop_id', shopId)
-                    .order('created_at', { ascending: false });
+                const [listingsRes, chartsRes] = await Promise.all([
+                    supabaseClient.from('marketplace_listings').select('*').eq('shop_id', shopId).order('created_at', { ascending: false }),
+                    supabaseClient.from('size_charts').select('id, name, gender_target').or(`organization_id.eq.${USER_PROFILE.organization_id},organization_id.is.null`)
+                ]);
 
-                if (error) throw error;
-                managerListings = data || [];
+                if (listingsRes.error) throw listingsRes.error;
+                managerListings = listingsRes.data || [];
+
+                // Populate Size Chart Dropdowns
+                const charts = chartsRes.data || [];
+                const addSelect = document.getElementById('list-size-chart');
+                const editSelect = document.getElementById('edit-listing-size-chart');
+                const defaultOpt = '<option value="">-- No Standard Sizing --</option>';
+                
+                if (addSelect) {
+                    addSelect.innerHTML = defaultOpt + charts.map(c => `<option value="${c.id}">${c.name} (${c.gender_target || 'Unisex'})</option>`).join('');
+                }
+                if (editSelect) {
+                    editSelect.innerHTML = defaultOpt + charts.map(c => `<option value="${c.id}">${c.name} (${c.gender_target || 'Unisex'})</option>`).join('');
+                }
+
                 renderManagerListings();
             } catch (err) {
                 document.getElementById('listings-table-body').innerHTML =
@@ -577,6 +605,7 @@
                 const price = parseFloat(document.getElementById('list-price').value);
                 const originalPriceVal = document.getElementById('list-original-price').value.trim();
                 const originalPrice = originalPriceVal ? parseFloat(originalPriceVal) : null;
+                const sizeChartId = document.getElementById('list-size-chart').value || null;
                 const desc = document.getElementById('list-desc').value.trim();
                 const fileInput = document.getElementById('list-image-file');
                 const file = fileInput.files[0];
@@ -604,6 +633,7 @@
                         title, category, price,
                         target_audience: targetAudience,
                         original_price: originalPrice,
+                        size_chart_id: sizeChartId,
                         description: desc,
                         image_urls: JSON.stringify([urlData.publicUrl]),
                         status: 'active'
@@ -664,6 +694,9 @@
             const catSelect = document.getElementById('edit-listing-category');
             if (catSelect) catSelect.value = listing.category || '';
             
+            const sizeChartSelect = document.getElementById('edit-listing-size-chart');
+            if (sizeChartSelect) sizeChartSelect.value = listing.size_chart_id || '';
+            
             // Set target audience
             const audience = listing.target_audience || 'Unisex';
             const audienceRadios = document.querySelectorAll('input[name="edit-list-audience"]');
@@ -692,12 +725,13 @@
                 const originalPrice = originalPriceVal ? parseFloat(originalPriceVal) : null;
                 const category = document.getElementById('edit-listing-category').value;
                 const targetAudience = document.querySelector('input[name="edit-list-audience"]:checked')?.value || 'Unisex';
+                const sizeChartId = document.getElementById('edit-listing-size-chart').value || null;
 
                 if (!title) throw new Error('Title is required.');
 
                 const { error } = await supabaseClient
                     .from('marketplace_listings')
-                    .update({ title, description, price, original_price: originalPrice, category, target_audience: targetAudience })
+                    .update({ title, description, price, original_price: originalPrice, category, target_audience: targetAudience, size_chart_id: sizeChartId })
                     .eq('id', id);
                 if (error) throw error;
 

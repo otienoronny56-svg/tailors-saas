@@ -205,7 +205,7 @@ async function loadMarketplaceData() {
                 return res;
             }),
             // 2. Fetch active listings
-            supabaseClient.from('marketplace_listings').select('*, shops(name, profile_image)').eq('status', 'active'),
+            supabaseClient.from('marketplace_listings').select('*, shops(name, profile_image), size_charts(*)').eq('status', 'active'),
             // 3. Fetch reviews
             supabaseClient.from('vw_marketplace_reviews').select('*'),
             // 4. Fetch user likes
@@ -1086,6 +1086,7 @@ function getMockListings() {
 }
 
 window.openListingModal = function(listingId) {
+    if (typeof trackListingView === 'function') trackListingView(listingId);
     const list = allMarketplaceListings.find(l => l.id === listingId);
     if (!list) return;
 
@@ -1125,8 +1126,65 @@ window.openListingModal = function(listingId) {
     document.getElementById('modal-shop-avatar').innerHTML = avatarIconHtml;
     document.getElementById('modal-shop-name').textContent = shopName;
 
+    const sizingSection = document.getElementById('modal-listing-sizing-section');
+    const sizeSelect = document.getElementById('modal-listing-size');
+    const heightContainer = document.getElementById('modal-listing-height-container');
+    const heightSelect = document.getElementById('modal-listing-height');
+    const attachCheckbox = document.getElementById('modal-attach-measurements');
+    
+    let hasSizing = false;
+    if (sizingSection) {
+        // Reset sizing form
+        sizeSelect.innerHTML = '<option value="">Select Size...</option>';
+        heightSelect.innerHTML = '<option value="">Select Height...</option>';
+        attachCheckbox.checked = false;
+        
+        // Hide checkbox if no measurements saved
+        if (attachCheckbox && attachCheckbox.parentElement) {
+            const hasSavedMeasurements = window._allSavedMeasurementProfiles && Object.keys(window._allSavedMeasurementProfiles).length > 0;
+            attachCheckbox.parentElement.style.display = hasSavedMeasurements ? 'flex' : 'none';
+        }
+        
+        if (list.size_charts && list.size_charts.size_data) {
+            hasSizing = true;
+            let sizes = [];
+            if (Array.isArray(list.size_charts.size_data)) {
+                sizes = list.size_charts.size_data.map(item => item.size).filter(Boolean);
+            } else if (typeof list.size_charts.size_data === 'object') {
+                sizes = Object.keys(list.size_charts.size_data);
+            }
+            
+            sizes.forEach(sz => {
+                sizeSelect.innerHTML += `<option value="${sz}">${sz}</option>`;
+            });
+            
+            if (list.category && list.category.toLowerCase().includes('trouser') || list.category?.toLowerCase().includes('suit') || list.title?.toLowerCase().includes('trouser') || list.title?.toLowerCase().includes('suit')) {
+                heightContainer.style.display = 'block';
+                ['Short', 'Regular', 'Tall'].forEach(hName => {
+                    heightSelect.innerHTML += `<option value="${hName}">${hName}</option>`;
+                });
+            } else {
+                heightContainer.style.display = 'none';
+            }
+        }
+        
+        sizingSection.style.display = hasSizing ? 'block' : 'none';
+    }
+
     const inquireBtn = document.getElementById('modal-inquire-btn');
-    inquireBtn.href = `../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}`;
+    inquireBtn.onclick = function(e) {
+        e.preventDefault();
+        
+        let queryParams = `?id=${list.shop_id}&inquire=${list.id}`;
+        
+        if (hasSizing) {
+            if (sizeSelect.value) queryParams += `&sz=${encodeURIComponent(sizeSelect.value)}`;
+            if (heightSelect.value) queryParams += `&ht=${encodeURIComponent(heightSelect.value)}`;
+            if (attachCheckbox.checked) queryParams += `&attach=true`;
+        }
+        
+        window.location.href = `../../views/manager/shop.html${queryParams}`;
+    };
 
     const visitBtn = document.getElementById('modal-visit-shop-btn');
     if (visitBtn) {

@@ -1932,7 +1932,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace_listings')
-                    .select('*')
+                    .select('*, size_charts(*)')
                     .eq('shop_id', shopId)
                     .eq('status', 'active');
 
@@ -2295,7 +2295,7 @@
             });
         }
 
-        function selectListingForInquiry(id, title) {
+        function selectListingForInquiry(id, title, sz = null, ht = null, attach = null) {
             const select = document.getElementById('select-item');
             if (!select) return;
 
@@ -2308,7 +2308,23 @@
                     message.value = draft;
                     localStorage.removeItem('draft_inquiry_message');
                 } else {
-                    message.value = `Hi! I am interested in ordering/customizing your "${title}". Please contact me to discuss my measurements and pricing.`;
+                    let msg = `Hi! I am interested in ordering/customizing your "${title}". Please contact me to discuss my measurements and pricing.`;
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const finalSz = sz || urlParams.get('sz');
+                    const finalHt = ht || urlParams.get('ht');
+                    const finalAttach = (attach !== undefined && attach !== null) ? attach : (urlParams.get('attach') === 'true');
+                    
+                    window._shouldAttachMeasurements = finalAttach;
+
+                    if (finalSz || finalHt || finalAttach) {
+                        msg += `\n\nSizing Preferences:`;
+                        if (finalSz) msg += `\n- Selected Size: ${finalSz}`;
+                        if (finalHt) msg += `\n- Selected Height: ${finalHt}`;
+                        if (finalAttach) msg += `\n- Please use my attached saved measurements for this order.`;
+                    }
+                    
+                    message.value = msg;
                 }
             }
 
@@ -2483,8 +2499,22 @@
             const phone = document.getElementById('client-phone').value;
             const email = document.getElementById('client-email').value;
             const listingId = document.getElementById('select-item').value;
-            const messageText = document.getElementById('message').value;
+            let messageText = document.getElementById('message').value;
             const btn = document.getElementById('btn-submit');
+
+            let measurementPayload = null;
+            // Attach actual measurement data payload if requested
+            if (window._shouldAttachMeasurements) {
+                try {
+                    const { data: { user } } = await supabaseClient.auth.getUser();
+                    const allMeasurements = user?.user_metadata?.measurements;
+                    if (allMeasurements && Object.keys(allMeasurements).length > 0) {
+                        const profileName = Object.keys(allMeasurements)[0];
+                        const profileData = allMeasurements[profileName];
+                        measurementPayload = `[MEASUREMENT_SUBMISSION:${profileName}:${JSON.stringify(profileData)}]`;
+                    }
+                } catch(e) { console.error("Error attaching measurements", e); }
+            }
 
             btn.disabled = true;
             btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Submitting...`;
@@ -2502,7 +2532,40 @@
                         .maybeSingle();
 
                     if (existing) {
-                        // Already inquired — just show success without inserting again
+                        // Already inquired — append new message to existing inquiry thread
+                        try {
+                            const { data: shopManagers } = await supabaseClient
+                                .from('user_profiles')
+                                .select('id')
+                                .eq('shop_id', shopId)
+                                .in('role', ['manager', 'owner'])
+                                .limit(1);
+
+                            if (shopManagers && shopManagers.length > 0) {
+                                const inserts = [{
+                                    inquiry_id: existing.id,
+                                    sender_id: currentUser.id,
+                                    recipient_id: shopManagers[0].id,
+                                    message_text: messageText,
+                                    is_read: false
+                                }];
+                                
+                                if (measurementPayload) {
+                                    inserts.push({
+                                        inquiry_id: existing.id,
+                                        sender_id: currentUser.id,
+                                        recipient_id: shopManagers[0].id,
+                                        message_text: measurementPayload,
+                                        is_read: false
+                                    });
+                                }
+                                
+                                await supabaseClient.from('messages').insert(inserts);
+                            }
+                        } catch (e) {
+                            console.warn("Failed to append message to existing thread", e);
+                        }
+                        
                         showSuccess(currentUser);
                         return; // button stays disabled, preventing future re-submits
                     }
@@ -2537,15 +2600,23 @@
                             .limit(1);
 
                         if (shopManagers && shopManagers.length > 0) {
-                            await supabaseClient
-                                .from('messages')
-                                .insert([{
+                            const inserts = [{
+                                inquiry_id: insertedInquiry.id,
+                                sender_id: currentUser.id,
+                                recipient_id: shopManagers[0].id,
+                                message_text: messageText,
+                                is_read: false
+                            }];
+                            if (measurementPayload) {
+                                inserts.push({
                                     inquiry_id: insertedInquiry.id,
                                     sender_id: currentUser.id,
                                     recipient_id: shopManagers[0].id,
-                                    message_text: messageText,
+                                    message_text: measurementPayload,
                                     is_read: false
-                                }]);
+                                });
+                            }
+                            await supabaseClient.from('messages').insert(inserts);
                         }
                     } catch (e) {
                         console.warn("Failed to auto-start message thread", e);
@@ -2969,6 +3040,7 @@
         }
 
         window.openListingModal = function(listingId) {
+            if (typeof trackListingView === 'function') trackListingView(listingId);
             const list = shopListings.find(l => l.id === listingId);
             if(!list) return;
 
@@ -2988,11 +3060,55 @@
             
             document.getElementById('modal-listing-desc').textContent = list.description || 'Handcrafted bespoke garment designed and fit perfectly for you.';
             
+            const sizingSection = document.getElementById('modal-listing-sizing-section');
+            const sizeSelect = document.getElementById('modal-listing-size');
+            const heightContainer = document.getElementById('modal-listing-height-container');
+            const heightSelect = document.getElementById('modal-listing-height');
+            const attachCheckbox = document.getElementById('modal-attach-measurements');
+            
+            // Reset sizing form
+            sizeSelect.innerHTML = '<option value="">Select Size...</option>';
+            heightSelect.innerHTML = '<option value="">Select Height...</option>';
+            attachCheckbox.checked = false;
+            
+            let hasSizing = false;
+            if (list.size_charts && list.size_charts.size_data) {
+                hasSizing = true;
+                let sizes = [];
+                if (Array.isArray(list.size_charts.size_data)) {
+                    sizes = list.size_charts.size_data.map(item => item.size).filter(Boolean);
+                } else if (typeof list.size_charts.size_data === 'object') {
+                    sizes = Object.keys(list.size_charts.size_data);
+                }
+                
+                sizes.forEach(sz => {
+                    sizeSelect.innerHTML += `<option value="${sz}">${sz}</option>`;
+                });
+                
+                if (list.category && list.category.toLowerCase().includes('trouser') || list.category?.toLowerCase().includes('suit') || list.title?.toLowerCase().includes('trouser') || list.title?.toLowerCase().includes('suit')) {
+                    heightContainer.style.display = 'block';
+                    ['Short', 'Regular', 'Tall'].forEach(hName => {
+                        heightSelect.innerHTML += `<option value="${hName}">${hName}</option>`;
+                    });
+                } else {
+                    heightContainer.style.display = 'none';
+                }
+            }
+            
+            sizingSection.style.display = hasSizing ? 'block' : 'none';
+
             const inqBtn = document.getElementById('modal-inquire-btn');
             inqBtn.onclick = function(e) {
                 e.preventDefault();
                 closeListingModal();
-                selectListingForInquiry(list.id, list.title.replace(/'/g, "\\'"));
+                
+                let sz = null, ht = null, attach = null;
+                if (hasSizing) {
+                    sz = sizeSelect.value || null;
+                    ht = heightSelect.value || null;
+                    attach = attachCheckbox.checked;
+                }
+                selectListingForInquiry(list.id, list.title.replace(/'/g, "\\'"), sz, ht, attach);
             };
 
             document.getElementById('listing-modal-overlay').classList.add('active');
@@ -3029,6 +3145,29 @@
                 <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0;"></div>
                 <p id="modal-listing-desc" style="color: var(--brand-slate); line-height: 1.6; font-size: 0.95em; flex-grow: 1; white-space: pre-wrap;"></p>
                 
+                <div id="modal-listing-sizing-section" style="display: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 0.9em; color: var(--brand-white);"><i class="fas fa-ruler"></i> Select Your Size</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                        <div>
+                            <label style="display: block; font-size: 0.8em; color: var(--brand-slate); margin-bottom: 4px;">Standard Size</label>
+                            <select id="modal-listing-size" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.9em;">
+                                <option value="">Select Size...</option>
+                            </select>
+                        </div>
+                        <div id="modal-listing-height-container" style="display:none;">
+                            <label style="display: block; font-size: 0.8em; color: var(--brand-slate); margin-bottom: 4px;">Height Option</label>
+                            <select id="modal-listing-height" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.9em;">
+                                <option value="">Select Height...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: var(--brand-slate); cursor: pointer;">
+                            <input type="checkbox" id="modal-attach-measurements" style="accent-color: var(--brand-gold); width: 16px; height: 16px; cursor: pointer;">
+                            Attach my saved measurements
+                        </label>
+                    </div>
+                </div>
                 <a id="modal-inquire-btn" href="#" class="btn-primary" style="text-align: center; margin-top: 10px; padding: 12px; font-weight: 700; display: block; border-radius: 8px; background: var(--brand-gold); color: var(--brand-navy); text-decoration: none;">Inquire About This <i class="fas fa-envelope" style="margin-left: 8px;"></i></a>
             </div>
         </div>

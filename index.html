@@ -3514,6 +3514,7 @@
 
         // Expose modal function
         window.openListingModal = function(listingId) {
+            if (typeof trackListingView === 'function') trackListingView(listingId);
             const list = window.allListings && window.allListings.find(l => l.id === listingId);
             if (!list) return;
 
