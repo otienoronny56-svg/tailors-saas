@@ -656,6 +656,442 @@
                 font-size: 28px;
             }
         }
+
+        /* ===== MISSION & VISION ===== */
+        .mission-vision-section {
+            padding: 100px 8%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .mission-vision-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .mv-card {
+            background: rgba(3, 7, 18, 0.5);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 48px 36px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+        [data-theme="light"] .mv-card {
+            background: rgba(255,255,255,0.7);
+        }
+        .mv-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-border);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        .mv-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: var(--gold-glow);
+            border: 1px solid var(--gold-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 1.5em;
+            margin-bottom: 24px;
+        }
+        .mv-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.6em;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+        .mv-card p {
+            color: var(--text-muted);
+            font-size: 1em;
+            line-height: 1.8;
+        }
+        .mv-accent {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+        .mv-card:hover .mv-accent {
+            opacity: 1;
+        }
+
+        /* ===== IMPACT STATS ===== */
+        .stats-section {
+            padding: 100px 8%;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-glass);
+            border-bottom: 1px solid var(--border-glass);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .stat-card {
+            background: rgba(3, 7, 18, 0.5);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 40px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+        [data-theme="light"] .stat-card {
+            background: rgba(255,255,255,0.7);
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .stat-number {
+            font-family: var(--font-display);
+            font-size: clamp(2.5em, 5vw, 3.5em);
+            font-weight: 700;
+            color: var(--gold);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .stat-number::after {
+            content: '+';
+            font-size: 0.6em;
+            color: var(--gold-light);
+        }
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.95em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .stat-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2.5em;
+            color: rgba(212, 175, 55, 0.08);
+        }
+
+        /* ===== TEAM ===== */
+        .team-section {
+            padding: 100px 8%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .team-card {
+            background: rgba(3, 7, 18, 0.5);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+        [data-theme="light"] .team-card {
+            background: rgba(255,255,255,0.7);
+        }
+        .team-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-border);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        .team-img-wrap {
+            position: relative;
+            height: 280px;
+            overflow: hidden;
+        }
+        .team-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .team-card:hover .team-img-wrap img {
+            transform: scale(1.05);
+        }
+        .team-socials {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            background: linear-gradient(transparent, rgba(3, 7, 18, 0.85));
+            transform: translateY(100%);
+            transition: var(--transition-smooth);
+        }
+        .team-card:hover .team-socials {
+            transform: translateY(0);
+        }
+        .team-socials a {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+        .team-socials a:hover {
+            background: var(--gold);
+            color: var(--bg-deep);
+            transform: translateY(-3px);
+        }
+        .team-info {
+            padding: 24px;
+        }
+        .team-info h4 {
+            font-family: var(--font-display);
+            font-size: 1.25em;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        .team-role {
+            display: inline-block;
+            color: var(--gold);
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .team-info p {
+            color: var(--text-muted);
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        /* ===== TESTIMONIALS ===== */
+        .testimonials-section {
+            padding: 100px 8%;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-glass);
+            border-bottom: 1px solid var(--border-glass);
+        }
+        .testimonials-carousel {
+            max-width: 900px;
+            margin: 0 auto;
+            overflow: hidden;
+            position: relative;
+        }
+        .testimonial-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .testimonial-card {
+            min-width: 100%;
+            padding: 48px 40px;
+            background: rgba(3, 7, 18, 0.5);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            box-sizing: border-box;
+        }
+        [data-theme="light"] .testimonial-card {
+            background: rgba(255,255,255,0.7);
+        }
+        .testimonial-stars {
+            color: var(--gold);
+            font-size: 1.1em;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 4px;
+        }
+        .testimonial-text {
+            font-size: 1.15em;
+            color: var(--text-slate);
+            line-height: 1.8;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .testimonial-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gold-glow);
+            border: 2px solid var(--gold-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+        .testimonial-author strong {
+            display: block;
+            color: var(--text-main);
+            font-size: 1em;
+        }
+        .testimonial-author span {
+            color: var(--text-muted);
+            font-size: 0.85em;
+        }
+        .testimonial-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .testimonial-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--gold-border);
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            font-size: 1em;
+        }
+        .testimonial-btn:hover {
+            background: var(--gold);
+            color: var(--bg-deep);
+            transform: scale(1.1);
+        }
+        .testimonial-dots {
+            display: flex;
+            gap: 8px;
+        }
+        .testimonial-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--gold-border);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .testimonial-dot.active {
+            background: var(--gold);
+            transform: scale(1.2);
+        }
+
+        /* ===== SCROLL ANIMATIONS ===== */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== FAQ ACCORDION ===== */
+        .faq-accordion {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .faq-item {
+            background: rgba(3, 7, 18, 0.5);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+        [data-theme="light"] .faq-item {
+            background: rgba(255,255,255,0.7);
+        }
+        .faq-question {
+            padding: 20px 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1em;
+            color: var(--text-main);
+            transition: var(--transition-smooth);
+        }
+        .faq-question:hover {
+            color: var(--gold);
+        }
+        .faq-question i {
+            color: var(--gold);
+            font-size: 0.85em;
+            transition: transform 0.3s ease;
+        }
+        .faq-item.open .faq-question i {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            padding: 0 24px;
+            color: var(--text-muted);
+            font-size: 0.95em;
+            line-height: 1.7;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 300px;
+            padding: 0 24px 20px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .mission-vision-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            .stat-card {
+                padding: 30px 16px;
+            }
+            .testimonial-card {
+                padding: 30px 20px;
+            }
+            .team-img-wrap {
+                height: 220px;
+            }
+        }
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -744,7 +1180,7 @@
                 tailored platform that understands the real-world needs of fashion artisans, empowering them to manage
                 orders, billing, and customer profiles all from one screen.</p>
         </div>
-        <img src="./assets/about_modern_tailor.png" alt="Modern Tailor using app" class="story-image">
+        <img src="./assets/remove_the_drinks_2K_202607252231.jpeg" alt="Modern Tailor using app" class="story-image">
     </section>
 
     <!-- ===== CORE VALUES ===== -->
@@ -837,7 +1273,7 @@
     </section>
 
     <!-- ===== FREQUENTLY ASKED QUESTIONS (SEO FAQ ACCORDION) ===== -->
-    <section class="faq-section animate-on-scroll">
+    <section class="faq-section animate-on-scroll" style="padding: 100px 8%; max-width: 1200px; margin: 0 auto;">
         <div style="text-align: center; margin-bottom: 40px;">
             <span style="color: var(--gold); font-size: 0.85em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; display: inline-block; margin-bottom: 10px;">Got Questions?</span>
             <h2 style="font-family: var(--font-display); font-size: clamp(2em, 4vw, 2.8em); color: var(--text-main);">Frequently Asked Questions</h2>
@@ -883,6 +1319,222 @@
                 <div class="faq-answer">
                     We support seamless M-Pesa payments, bank transfers, and major credit cards. Client payments for custom orders are processed through secure milestone payments linked to order stage progress.
                 </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Can I track my order progress in real-time?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    Absolutely! Once your order is placed, you can follow every stage live on your client dashboard — from Order Placed → Fabric Sourcing → Cutting & Stitching → Quality Check → Ready for Collection/Delivery. You'll also receive email and SMS notifications at each milestone.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    How do I register my tailoring shop on the platform?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    Simply click "Sign Up" and choose the Tailor/Provider role. You'll be guided through a quick onboarding process where you set up your shop profile, upload your portfolio, and choose your subscription plan. New shops get a free trial period to explore all features.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MISSION & VISION ===== -->
+    <section class="mission-vision-section animate-on-scroll">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto 60px;">
+            <span style="color: var(--gold); font-size: 0.85em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; display: inline-block; margin-bottom: 12px;">Our Purpose</span>
+            <h2 style="font-family: var(--font-display); font-size: clamp(2em, 4vw, 3em); color: var(--text-main); margin-bottom: 16px;">Mission & Vision</h2>
+        </div>
+        <div class="mission-vision-grid">
+            <div class="mv-card animate-on-scroll">
+                <div class="mv-icon"><i class="fas fa-bullseye"></i></div>
+                <h3>Our Mission</h3>
+                <p>To digitize and elevate the African tailoring industry by providing smart, intuitive technology that empowers fashion artisans to manage their businesses efficiently, reach more clients, and deliver exceptional bespoke experiences — from Nairobi to every corner of Kenya and beyond.</p>
+                <div class="mv-accent"></div>
+            </div>
+            <div class="mv-card animate-on-scroll">
+                <div class="mv-icon"><i class="fas fa-eye"></i></div>
+                <h3>Our Vision</h3>
+                <p>To become Africa's leading fashion-tech platform — a continent where every skilled tailor has equal access to world-class digital tools, where every client can discover and commission bespoke garments with confidence, and where the rich heritage of African craftsmanship thrives in the modern digital economy.</p>
+                <div class="mv-accent"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== IMPACT STATS ===== -->
+    <section class="stats-section animate-on-scroll">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto 60px;">
+            <span style="color: var(--gold); font-size: 0.85em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; display: inline-block; margin-bottom: 12px;">Our Impact</span>
+            <h2 style="font-family: var(--font-display); font-size: clamp(2em, 4vw, 3em); color: var(--text-main); margin-bottom: 16px;">Growing Stronger Every Day</h2>
+            <p style="color: var(--text-muted); font-size: 1.05em; line-height: 1.7;">Numbers that reflect the trust and growth of Kenya's fashion community on our platform.</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card animate-on-scroll">
+                <div class="stat-number" data-target="150">0</div>
+                <div class="stat-label">Tailors Onboarded</div>
+                <div class="stat-icon"><i class="fas fa-cut"></i></div>
+            </div>
+            <div class="stat-card animate-on-scroll">
+                <div class="stat-number" data-target="3500">0</div>
+                <div class="stat-label">Orders Completed</div>
+                <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+            </div>
+            <div class="stat-card animate-on-scroll">
+                <div class="stat-number" data-target="28">0</div>
+                <div class="stat-label">Counties Reached</div>
+                <div class="stat-icon"><i class="fas fa-map-marked-alt"></i></div>
+            </div>
+            <div class="stat-card animate-on-scroll">
+                <div class="stat-number" data-target="12000">0</div>
+                <div class="stat-label">Happy Clients</div>
+                <div class="stat-icon"><i class="fas fa-heart"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MEET THE TEAM ===== -->
+    <section class="team-section animate-on-scroll">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto 60px;">
+            <span style="color: var(--gold); font-size: 0.85em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; display: inline-block; margin-bottom: 12px;">The People Behind The Platform</span>
+            <h2 style="font-family: var(--font-display); font-size: clamp(2em, 4vw, 3em); color: var(--text-main); margin-bottom: 16px;">Meet Our Team</h2>
+            <p style="color: var(--text-muted); font-size: 1.05em; line-height: 1.7;">A passionate crew of designers, developers, and fashion enthusiasts building the future of African tailoring.</p>
+        </div>
+        <div class="team-grid">
+            <div class="team-card animate-on-scroll">
+                <div class="team-img-wrap">
+                    <img src="./assets/2.7.jpeg" alt="Ronny Winstone Otieno - Founder & CEO" loading="lazy" style="object-position: center 15%; width: 90%; height: 90%; margin: 5%; border-radius: 8px;">
+                    <div class="team-socials">
+                        <a href="https://wa.me/254745806488" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.linkedin.com/in/ronny-winstone" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://ronnydevportfolio.vercel.app/" target="_blank" aria-label="Portfolio"><i class="fas fa-globe"></i></a>
+                    </div>
+                </div>
+                <div class="team-info">
+                    <h4>Ronny Winstone Otieno</h4>
+                    <span class="team-role">Founder & CEO</span>
+                    <p>Visionary leader driving the digital transformation of Kenya's bespoke tailoring industry.</p>
+                </div>
+            </div>
+
+            <div class="team-card animate-on-scroll">
+                <div class="team-img-wrap">
+                    <img src="./assets/ashley_onkendi.jpeg" alt="Acinath Onkendi - Head of Design" loading="lazy" style="object-position: top;">
+                    <div class="team-socials">
+                        <a href="https://www.linkedin.com/in/acinath-bochere-onkendi-631083345/" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="Dribbble"><i class="fab fa-dribbble"></i></a>
+                    </div>
+                </div>
+                <div class="team-info">
+                    <h4>Acinath Onkendi</h4>
+                    <span class="team-role">Head of Design</span>
+                    <p>Crafting the elegant user experiences that make our platform feel premium and intuitive.</p>
+                </div>
+            </div>
+
+            <div class="team-card animate-on-scroll">
+                <div class="team-img-wrap">
+                    <img src="./assets/team_developer.png" alt="Brian Kimani - Lead Developer" loading="lazy">
+                    <div class="team-socials">
+                        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="team-info">
+                    <h4>Brian Kimani</h4>
+                    <span class="team-role">Lead Developer</span>
+                    <p>Engineering the robust, secure systems that power every order, payment, and interaction.</p>
+                </div>
+            </div>
+
+            <div class="team-card animate-on-scroll">
+                <div class="team-img-wrap">
+                    <img src="./assets/team_marketing.png" alt="Faith Njeri - Growth & Marketing" loading="lazy">
+                    <div class="team-socials">
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="team-info">
+                    <h4>Faith Njeri</h4>
+                    <span class="team-role">Growth & Marketing</span>
+                    <p>Connecting tailors and clients across Kenya through strategic outreach and brand storytelling.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TESTIMONIALS ===== -->
+    <section class="testimonials-section animate-on-scroll">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto 60px;">
+            <span style="color: var(--gold); font-size: 0.85em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; display: inline-block; margin-bottom: 12px;">What People Say</span>
+            <h2 style="font-family: var(--font-display); font-size: clamp(2em, 4vw, 3em); color: var(--text-main); margin-bottom: 16px;">Voices from Our Community</h2>
+        </div>
+        <div class="testimonials-carousel" id="testimonials-carousel">
+            <div class="testimonial-track" id="testimonial-track">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"Stitch & Styles completely transformed how I run my tailoring shop. I used to juggle WhatsApp messages and paper notes — now everything is in one dashboard. My revenue has gone up 40% since I joined!"</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar"><i class="fas fa-user-tie"></i></div>
+                        <div>
+                            <strong>George Odhiambo</strong>
+                            <span>Owner, Sir George Suits — Nairobi CBD</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"I found my wedding dress tailor through this platform. The measurement vault saved so much time during fittings. The whole process felt so premium — from browsing designs to the final delivery. Highly recommend!"</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar"><i class="fas fa-user"></i></div>
+                        <div>
+                            <strong>Ashley Muthoni</strong>
+                            <span>Client — Westlands, Nairobi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="testimonial-text">"As a young tailor starting out in Mombasa, I couldn't afford a website or marketing. Stitch & Styles gave me a professional online storefront for free during my trial. Now clients find me from all over Kenya!"</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar"><i class="fas fa-user-tie"></i></div>
+                        <div>
+                            <strong>Hassan Abdullahi</strong>
+                            <span>Owner, Pretty Stitches — Mombasa</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"The order tracking feature is a game-changer. My clients can see exactly where their garments are in production. No more frantic calls asking 'Is my suit ready?' — it's all transparent on the dashboard."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar"><i class="fas fa-user-tie"></i></div>
+                        <div>
+                            <strong>Peter Wafula</strong>
+                            <span>Owner, Wafula Bespoke — Eldoret</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-nav">
+                <button class="testimonial-btn" onclick="slideTestimonial(-1)" aria-label="Previous testimonial"><i class="fas fa-chevron-left"></i></button>
+                <div class="testimonial-dots" id="testimonial-dots"></div>
+                <button class="testimonial-btn" onclick="slideTestimonial(1)" aria-label="Next testimonial"><i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
     </section>
@@ -958,7 +1610,7 @@
             }
         }
 
-        // Scroll Reveal Observer
+        // Scroll Reveal Observer + Animated Stat Counters
         document.addEventListener('DOMContentLoaded', () => {
             const observerOptions = { threshold: 0.15 };
             const observer = new IntersectionObserver((entries) => {
@@ -972,7 +1624,86 @@
             document.querySelectorAll('.animate-on-scroll, .animate-scale-in').forEach(el => {
                 observer.observe(el);
             });
+
+            // Animated stat counters
+            let statsCounted = false;
+            const statsObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !statsCounted) {
+                        statsCounted = true;
+                        document.querySelectorAll('.stat-number').forEach(counter => {
+                            const target = parseInt(counter.getAttribute('data-target'));
+                            const duration = 2000;
+                            const startTime = performance.now();
+                            
+                            function updateCounter(currentTime) {
+                                const elapsed = currentTime - startTime;
+                                const progress = Math.min(elapsed / duration, 1);
+                                // Ease out cubic
+                                const eased = 1 - Math.pow(1 - progress, 3);
+                                const current = Math.round(eased * target);
+                                counter.textContent = current.toLocaleString();
+                                
+                                if (progress < 1) {
+                                    requestAnimationFrame(updateCounter);
+                                }
+                            }
+                            requestAnimationFrame(updateCounter);
+                        });
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            const statsSection = document.querySelector('.stats-section');
+            if (statsSection) statsObserver.observe(statsSection);
+
+            // Testimonial carousel
+            initTestimonialCarousel();
         });
+
+        // Testimonial Carousel
+        let testimonialIndex = 0;
+        function initTestimonialCarousel() {
+            const track = document.getElementById('testimonial-track');
+            const dotsContainer = document.getElementById('testimonial-dots');
+            if (!track || !dotsContainer) return;
+
+            const cards = track.querySelectorAll('.testimonial-card');
+            dotsContainer.innerHTML = '';
+            cards.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = `testimonial-dot${i === 0 ? ' active' : ''}`;
+                dot.onclick = () => goToTestimonial(i);
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function slideTestimonial(dir) {
+            const track = document.getElementById('testimonial-track');
+            if (!track) return;
+            const cards = track.querySelectorAll('.testimonial-card');
+            testimonialIndex += dir;
+            if (testimonialIndex >= cards.length) testimonialIndex = 0;
+            if (testimonialIndex < 0) testimonialIndex = cards.length - 1;
+            updateTestimonialPosition();
+        }
+
+        function goToTestimonial(idx) {
+            testimonialIndex = idx;
+            updateTestimonialPosition();
+        }
+
+        function updateTestimonialPosition() {
+            const track = document.getElementById('testimonial-track');
+            if (!track) return;
+            track.style.transform = `translateX(-${testimonialIndex * 100}%)`;
+            document.querySelectorAll('.testimonial-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === testimonialIndex);
+            });
+        }
+
+        // Auto-advance testimonials every 6 seconds
+        setInterval(() => slideTestimonial(1), 6000);
 
         // Header scroll effect
         window.addEventListener('scroll', () => {
@@ -1146,9 +1877,7 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
-</body>
 
-</html>
 </body>
 
 </html>
