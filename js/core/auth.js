@@ -106,26 +106,193 @@ async function checkSession() {
         }
         } // End of if (!USER_PROFILE)
 
-        // 🛑 NEW: Check for pending shop owner approval (Enforcement)
-        if (USER_PROFILE.status === 'Pending' && USER_PROFILE.role === 'owner') {
-            document.body.innerHTML = `
-                <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #060c18; font-family: 'Montserrat', sans-serif; color: white;">
-                    <div style="text-align: center; background: rgba(17, 34, 64, 0.75); border: 1px solid rgba(212, 175, 55, 0.15); padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 450px; backdrop-filter: blur(10px);">
-                        <div style="font-size: 50px; color: #D4AF37; margin-bottom: 20px;"><i class="fas fa-store-slash"></i></div>
-                        <h1 style="color: var(--brand-gold); margin-bottom: 15px; font-family: 'Playfair Display', serif;">Awaiting Admin Approval</h1>
-                        <p style="color: var(--brand-slate); line-height: 1.6; margin-bottom: 25px;">
-                            We are setting up your shop! ✂️<br>
-                            Our team is currently verifying your shop details. We will notify you as soon as you are approved (usually within a few hours).
-                        </p>
-                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 0.95em; text-align: left;">
-                            <strong style="color: var(--brand-gold);">Shop Owner:</strong> ${USER_PROFILE.full_name || ''}<br>
-                            <strong style="color: var(--brand-gold);">Email:</strong> ${USER_PROFILE.email || ''}
+        // 🚀 14-DAY FREE TRIAL & SUBSCRIPTION LOCK SYSTEM (Applies ONLY to tailors registered from today onwards)
+        if (USER_PROFILE.role === 'owner' || USER_PROFILE.role === 'manager') {
+            const CUTOFF_DATE = new Date('2026-07-25T00:00:00Z');
+            const createdDate = USER_PROFILE.created_at ? new Date(USER_PROFILE.created_at) : new Date(0);
+            const isExistingUser = createdDate < CUTOFF_DATE;
+
+            const isPaid = isExistingUser || 
+                           USER_PROFILE.subscription_status === 'Active' || 
+                           USER_PROFILE.subscription_tier === 'Paid' || 
+                           USER_PROFILE.subscription_tier === 'Pro' || 
+                           USER_PROFILE.subscription_tier === 'Starter';
+
+            const daysElapsed = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+            const trialDaysRemaining = isExistingUser ? 14 : Math.max(0, 14 - daysElapsed);
+                           
+            window.TRIAL_INFO = {
+                daysRemaining: trialDaysRemaining,
+                isTrialActive: !isExistingUser && trialDaysRemaining > 0,
+                isExpired: !isExistingUser && trialDaysRemaining <= 0 && !isPaid,
+                isPaid: isPaid
+            };
+
+            // 🛑 LOCK DASHBOARD IF TRIAL EXPIRED & NOT PAID
+            if (trialDaysRemaining <= 0 && !isPaid && USER_PROFILE.role !== 'superadmin') {
+                document.body.innerHTML = `
+                    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #060c18; font-family: 'Plus Jakarta Sans', sans-serif; color: white; padding: 20px;">
+                        <div style="background: rgba(17, 34, 64, 0.9); border: 1px solid rgba(212, 175, 55, 0.3); padding: 40px 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); max-width: 520px; width: 100%; text-align: center; backdrop-filter: blur(15px);">
+                            <div style="width: 70px; height: 70px; background: rgba(212, 175, 55, 0.15); border: 2px solid #D4AF37; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 30px; color: #D4AF37;">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h1 style="color: #D4AF37; margin-bottom: 10px; font-family: 'Playfair Display', serif; font-size: 1.8em;">Your 14-Day Free Trial Has Ended</h1>
+                            <p style="color: #a8b2d1; font-size: 0.95em; line-height: 1.6; margin-bottom: 25px;">
+                                Your free trial period for <strong>${USER_PROFILE.full_name || 'your shop'}</strong> is complete. Select a plan below to unlock your shop dashboard, client inquiries, and order tracking.
+                            </p>
+
+                            <!-- Plan Selection Cards -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; text-align: left;">
+                                <div id="plan-starter" onclick="selectTrialPlan('Starter', 1500)" style="background: rgba(255,255,255,0.04); border: 2px solid #D4AF37; padding: 15px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+                                    <div style="font-weight: 700; font-size: 0.9em; color: #D4AF37;">Starter Tailor</div>
+                                    <div style="font-size: 1.2em; font-weight: 800; color: white; margin: 4px 0;">Ksh 1,500 <span style="font-size: 0.6em; color: #8892b0;">/mo</span></div>
+                                    <div style="font-size: 0.75em; color: #8892b0;">Up to 25 orders/mo, custom measurements, marketplace listing</div>
+                                </div>
+                                <div id="plan-pro" onclick="selectTrialPlan('Pro', 3500)" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+                                    <div style="font-weight: 700; font-size: 0.9em; color: white;">Pro Fashion House</div>
+                                    <div style="font-size: 1.2em; font-weight: 800; color: white; margin: 4px 0;">Ksh 3,500 <span style="font-size: 0.6em; color: #8892b0;">/mo</span></div>
+                                    <div style="font-size: 0.75em; color: #8892b0;">Unlimited orders, multi-worker tools, priority support</div>
+                                </div>
+                            </div>
+
+                            <!-- M-Pesa Payment Block -->
+                            <div style="background: rgba(6, 12, 24, 0.7); border: 1px solid rgba(212, 175, 55, 0.2); padding: 18px; border-radius: 12px; margin-bottom: 20px; text-align: left;">
+                                <label style="font-size: 0.8em; font-weight: 700; color: #D4AF37; display: block; margin-bottom: 8px; text-transform: uppercase;">M-Pesa Phone Number for Payment</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="tel" id="trial-mpesa-phone" placeholder="e.g. 0712345678 or 2547..." style="flex: 1; background: #0b132b; border: 1px solid rgba(255,255,255,0.15); padding: 12px; border-radius: 8px; color: white; font-size: 0.95em;">
+                                    <button onclick="processTrialMpesaPayment()" id="trial-pay-btn" style="background: #22c55e; color: white; border: none; padding: 12px 18px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.9em; white-space: nowrap;">
+                                        <i class="fas fa-mobile-screen"></i> Pay Ksh <span id="selected-plan-amount">1500</span>
+                                    </button>
+                                </div>
+                                <div id="trial-pay-status" style="font-size: 0.8em; color: #38bdf8; margin-top: 8px; display: none;"></div>
+                            </div>
+
+                            <button onclick="supabaseClient.auth.signOut().then(() => { sessionStorage.clear(); location.href='/index.html'; })" style="background: transparent; color: #8892b0; border: none; font-size: 0.85em; cursor: pointer; text-decoration: underline;">Logout & Return Home</button>
                         </div>
-                        <button onclick="supabaseClient.auth.signOut().then(() => { sessionStorage.clear(); location.href='/index.html'; })" class="small-btn" style="width: 100%; background: #ef4444; color: white; border: none; font-weight: bold; cursor: pointer; padding: 12px; border-radius: 8px; font-size: 1em;">Logout</button>
                     </div>
-                </div>
-            `;
-            return;
+                `;
+                
+                // Helper functions attached to window for lock modal interaction
+                window.selectedPlanTier = 'Starter';
+                window.selectedPlanPrice = 1500;
+                window.selectTrialPlan = function(tier, price) {
+                    window.selectedPlanTier = tier;
+                    window.selectedPlanPrice = price;
+                    document.getElementById('selected-plan-amount').textContent = price.toLocaleString();
+                    document.getElementById('plan-starter').style.border = tier === 'Starter' ? '2px solid #D4AF37' : '1px solid rgba(255,255,255,0.1)';
+                    document.getElementById('plan-pro').style.border = tier === 'Pro' ? '2px solid #D4AF37' : '1px solid rgba(255,255,255,0.1)';
+                };
+
+                window.processTrialMpesaPayment = async function() {
+                    const phoneInput = document.getElementById('trial-mpesa-phone');
+                    const statusEl = document.getElementById('trial-pay-status');
+                    const payBtn = document.getElementById('trial-pay-btn');
+                    let phone = phoneInput.value.trim();
+                    if (!phone) { alert("Please enter your M-Pesa phone number."); return; }
+                    if (phone.startsWith('0')) phone = '254' + phone.substring(1);
+                    if (phone.startsWith('+')) phone = phone.substring(1);
+
+                    statusEl.style.display = 'block';
+                    statusEl.style.color = '#38bdf8';
+                    statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending M-Pesa STK Push prompt to ' + phone + '...';
+                    payBtn.disabled = true;
+
+                    try {
+                        const { data: { session } } = await supabaseClient.auth.getSession();
+                        const token = session?.access_token;
+                        const res = await fetch(`${APP_CONFIG.supabaseUrl}/functions/v1/mpesa-stk-push`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ phone, amount: window.selectedPlanPrice, accountReference: 'Sub_' + USER_PROFILE.id.substring(0,6) })
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || 'STK Push failed');
+                        
+                        statusEl.style.color = '#22c55e';
+                        statusEl.innerHTML = '✅ M-Pesa prompt sent! Enter your PIN on your phone. Activating subscription...';
+                        
+                        // 1. Permanently update user_profiles table in Supabase
+                        await supabaseClient.from('user_profiles').update({ 
+                            status: 'Active', 
+                            subscription_status: 'Active', 
+                            subscription_tier: window.selectedPlanTier 
+                        }).eq('id', USER_PROFILE.id);
+
+                        // 2. Permanently update organizations table if linked
+                        if (USER_PROFILE.organization_id) {
+                            await supabaseClient.from('organizations').update({ 
+                                subscription_status: 'Active', 
+                                subscription_tier: window.selectedPlanTier 
+                            }).eq('id', USER_PROFILE.organization_id);
+                        }
+
+                        // 3. Clear session storage cache to prevent stale cache readings
+                        sessionStorage.removeItem('USER_PROFILE_' + USER_PROFILE.id);
+                        if (USER_PROFILE.organization_id) {
+                            sessionStorage.removeItem('ORG_STATUS_' + USER_PROFILE.organization_id);
+                        }
+                        
+                        // 4. Reload page after 3.5s — dashboard unlocks permanently!
+                        setTimeout(() => { location.reload(); }, 3500);
+                    } catch (err) {
+                        statusEl.style.color = '#ef4444';
+                        statusEl.innerHTML = '❌ Payment Prompt Error: ' + err.message;
+                        payBtn.disabled = false;
+                    }
+                };
+
+                return;
+            }
+
+            // 🌟 INJECT TRIAL / SUBSCRIPTION EXPIRATION BANNER
+            // Show if:
+            // 1. Free Trial is active (new user within 14 days) OR
+            // 2. Subscription/Trial is within 5 days of expiration (daysRemaining <= 5)
+            const daysRemaining = trialDaysRemaining;
+            const isUrgent = daysRemaining <= 5;
+            const showBanner = (trialDaysRemaining > 0 && !isPaid) || (isUrgent && daysRemaining > 0);
+            
+            if (showBanner && (window.location.pathname.includes('/admin/') || window.location.pathname.includes('/manager/'))) {
+                const injectBanner = () => {
+                    if (document.getElementById('trial-banner')) return;
+                    const banner = document.createElement('div');
+                    banner.id = 'trial-banner';
+                    
+                    const bgStyle = isUrgent 
+                        ? 'background: linear-gradient(90deg, #f59e0b 0%, #ef4444 100%); color: #ffffff;' 
+                        : 'background: linear-gradient(90deg, #D4AF37 0%, #f3cd57 100%); color: #030712;';
+
+                    const messageText = isUrgent
+                        ? `⚠️ <strong>Subscription Expiring Soon</strong> &mdash; Only <strong>${daysRemaining} day(s) remaining</strong> before dashboard lock.`
+                        : `🎉 <strong>14-Day Free Trial Active</strong> &mdash; <strong>${trialDaysRemaining} day(s) remaining</strong> on your free trial.`;
+
+                    const btnText = isUrgent ? 'Renew / Pay Plan Now &rarr;' : 'Unlock Unlimited Plan &rarr;';
+                    const btnStyle = isUrgent
+                        ? 'background: #ffffff; color: #dc2626; padding: 4px 12px; border-radius: 6px; text-decoration: none; font-size: 0.82em; font-weight: 800;'
+                        : 'background: #030712; color: #D4AF37; padding: 4px 12px; border-radius: 6px; text-decoration: none; font-size: 0.82em; font-weight: 800;';
+
+                    banner.style.cssText = `position: fixed; top: 0; left: 0; right: 0; width: 100%; height: 38px; ${bgStyle} padding: 0 20px; font-size: 0.85em; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 999999;`;
+                    banner.innerHTML = `
+                        <span>${messageText}</span>
+                        <a href="/pricing.html" style="${btnStyle}">${btnText}</a>
+                    `;
+                    document.body.appendChild(banner);
+                    
+                    // Adjust body or header layout so top content is not obscured
+                    const mainHeader = document.getElementById('main-header') || document.querySelector('header');
+                    if (mainHeader) {
+                        mainHeader.style.marginTop = '38px';
+                    } else {
+                        const appContainer = document.querySelector('.app-container') || document.querySelector('.dashboard-container') || document.body;
+                        if (appContainer) appContainer.style.marginTop = '38px';
+                    }
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', injectBanner);
+                } else {
+                    injectBanner();
+                }
+            }
         }
 
         // 🛑 NEW: Check for suspension (Enforcement)

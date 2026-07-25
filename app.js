@@ -1,16 +1,45 @@
 // ==========================================
-// ðŸ“‹ COPY & SHARE FUNCTIONS (FINAL CLEAN)
+// 📋 COPY & SHARE FUNCTIONS (FINAL CLEAN)
 // ==========================================
 
 
 
 
 // ==========================================
-// ðŸ› ï¸ CORE UTILITIES
+// 🛠️ CORE UTILITIES
 // ==========================================
 // ==========================================
 
 function initDebugger() { }
+
+window.cycleCardImage = function(listingId, direction) {
+    const wrap = document.getElementById(`card-img-wrap-${listingId}`);
+    if (!wrap) return;
+    const imagesStr = wrap.getAttribute('data-images');
+    if (!imagesStr) return;
+    
+    try {
+        const images = JSON.parse(imagesStr);
+        if (images.length <= 1) return;
+        
+        let currentIndex = parseInt(wrap.getAttribute('data-current-idx') || '0');
+        currentIndex += direction;
+        
+        if (currentIndex >= images.length) currentIndex = 0;
+        if (currentIndex < 0) currentIndex = images.length - 1;
+        
+        wrap.setAttribute('data-current-idx', currentIndex);
+        
+        const newImgUrl = images[currentIndex];
+        const imgEl = wrap.querySelector('.listing-img');
+        const blurEl = wrap.querySelector('.listing-img-blur');
+        
+        if (imgEl) imgEl.style.backgroundImage = `url('${newImgUrl}')`;
+        if (blurEl) blurEl.style.backgroundImage = `url('${newImgUrl}')`;
+    } catch (e) {
+        console.error("Error cycling image:", e);
+    }
+};
 
 function formatMeasurements(json) {
     try {

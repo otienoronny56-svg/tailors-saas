@@ -1263,6 +1263,40 @@
             transition: all 0.2s;
         }
         .listing-modal-close:hover { background: #ef4444; transform: scale(1.1); }
+
+        /* Card Image Cycle Buttons */
+        .card-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(217, 177, 56, 0.4);
+            color: #fce786;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 12px;
+            backdrop-filter: blur(4px);
+            transition: all 0.2s ease;
+            opacity: 0.8;
+        }
+        .listing-card:hover .card-nav-btn,
+        .card:hover .card-nav-btn {
+            opacity: 1;
+        }
+        .card-nav-btn:hover {
+            background: rgba(217, 177, 56, 0.95);
+            color: #0f172a;
+            transform: translateY(-50%) scale(1.1);
+            opacity: 1;
+        }
+        .card-nav-btn.prev { left: 8px; }
+        .card-nav-btn.next { right: 8px; }
     </style>
     <link rel="manifest" href="../../manifest.json">
     <script>
@@ -2187,12 +2221,26 @@
                     }
                 }
 
+                let imgUrls = null;
+                if (list.image_urls) {
+                    try { imgUrls = typeof list.image_urls === 'string' ? JSON.parse(list.image_urls) : list.image_urls; } catch(e){}
+                }
+                
+                let galleryButtonsHtml = '';
+                if (imgUrls && imgUrls.length > 1) {
+                    galleryButtonsHtml = `
+                        <button type="button" class="card-nav-btn prev" onclick="event.stopPropagation(); cycleCardImage('${list.id}', -1)"><i class="fas fa-chevron-left"></i></button>
+                        <button type="button" class="card-nav-btn next" onclick="event.stopPropagation(); cycleCardImage('${list.id}', 1)"><i class="fas fa-chevron-right"></i></button>
+                    `;
+                }
+
                 return `
                     <div class="listing-card" id="listing-card-${list.id}">
-                        <div class="listing-img-wrap" onclick="openListingModal('${list.id}')" style="cursor:pointer;">
+                        <div class="listing-img-wrap" id="card-img-wrap-${list.id}" data-current-idx="0" data-images="${imgUrls ? JSON.stringify(imgUrls).replace(/"/g, '&quot;') : ''}" onclick="openListingModal('${list.id}')" style="cursor:pointer;">
                             ${badgeHtml}
                             <div class="listing-img-blur" style="background-image: url('${imageUrl}')"></div>
                             <div class="listing-img" style="background-image: url('${imageUrl}')"></div>
+                            ${galleryButtonsHtml}
                         </div>
                         <div class="listing-body">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px;">

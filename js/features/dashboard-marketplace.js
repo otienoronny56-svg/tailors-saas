@@ -361,12 +361,26 @@ function getListingCardHtml(list) {
         }
     }
 
+    let imgUrls = null;
+    if (list.image_urls) {
+        try { imgUrls = typeof list.image_urls === 'string' ? JSON.parse(list.image_urls) : list.image_urls; } catch(e){}
+    }
+    
+    let galleryButtonsHtml = '';
+    if (imgUrls && imgUrls.length > 1) {
+        galleryButtonsHtml = `
+            <button type="button" class="card-nav-btn prev" onclick="event.stopPropagation(); cycleCardImage('${list.id}', -1)"><i class="fas fa-chevron-left"></i></button>
+            <button type="button" class="card-nav-btn next" onclick="event.stopPropagation(); cycleCardImage('${list.id}', 1)"><i class="fas fa-chevron-right"></i></button>
+        `;
+    }
+
     return `
         <div class="card listing-card" style="cursor: pointer;" onclick="openListingModal('${list.id}')">
-            <div class="card-banner-wrap">
+            <div class="card-banner-wrap" id="card-img-wrap-${list.id}" data-current-idx="0" data-images="${imgUrls ? JSON.stringify(imgUrls).replace(/"/g, '&quot;') : ''}">
                 ${badgeHtml}
-                <div class="card-banner-blur" style="background-image: url('${imageUrl}')"></div>
-                <div class="card-banner" style="background-image: url('${imageUrl}')"></div>
+                <div class="card-banner-blur listing-img-blur" style="background-image: url('${imageUrl}')"></div>
+                <div class="card-banner listing-img" style="background-image: url('${imageUrl}')"></div>
+                ${galleryButtonsHtml}
             </div>
             <div class="card-body" style="padding-top: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px;">

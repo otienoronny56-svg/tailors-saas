@@ -1224,6 +1224,40 @@
             color: var(--bg-dark);
             transform: rotate(90deg);
         }
+
+        /* Card Image Cycle Buttons */
+        .card-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(217, 177, 56, 0.4);
+            color: #fce786;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 12px;
+            backdrop-filter: blur(4px);
+            transition: all 0.2s ease;
+            opacity: 0.8;
+        }
+        .listing-card:hover .card-nav-btn,
+        .card:hover .card-nav-btn {
+            opacity: 1;
+        }
+        .card-nav-btn:hover {
+            background: rgba(217, 177, 56, 0.95);
+            color: #0f172a;
+            transform: translateY(-50%) scale(1.1);
+            opacity: 1;
+        }
+        .card-nav-btn.prev { left: 8px; }
+        .card-nav-btn.next { right: 8px; }
         .modal-shop-info {
             display: flex;
             align-items: center;
@@ -2049,12 +2083,27 @@
                 }
             }
 
+            let imgUrls = null;
+            if (list.image_urls) {
+                try { imgUrls = typeof list.image_urls === 'string' ? JSON.parse(list.image_urls) : list.image_urls; } catch(e){}
+            }
+            
+            let galleryButtonsHtml = '';
+            if (imgUrls && imgUrls.length > 1) {
+                galleryButtonsHtml = `
+                    <button type="button" class="card-nav-btn prev" onclick="event.stopPropagation(); cycleCardImage('${list.id}', -1)"><i class="fas fa-chevron-left"></i></button>
+                    <button type="button" class="card-nav-btn next" onclick="event.stopPropagation(); cycleCardImage('${list.id}', 1)"><i class="fas fa-chevron-right"></i></button>
+                `;
+            }
+
             return `
                 <div class="card listing-card" style="cursor: pointer;" onclick="openListingModal('${list.id}')">
-                    <div class="card-banner-wrap">
+                    <div class="card-banner-wrap" id="card-img-wrap-${list.id}" data-current-idx="0" data-images="${imgUrls ? JSON.stringify(imgUrls).replace(/"/g, '&quot;') : ''}">
                         ${badgeHtml}
-                        <div class="card-banner-blur" style="background-image: url('${imageUrl}')"></div>
-                        <div class="card-banner" style="background-image: url('${imageUrl}')"></div>
+                        ${list.is_featured ? `<div style="position:absolute;top:16px;right:16px;z-index:4;background:var(--brand-gold);color:var(--bg-dark);border-radius:40px;padding:4px 12px;font-size:0.7em;font-weight:800;letter-spacing:1px;">FEATURED</div>` : ''}
+                        <div class="card-banner-blur listing-img-blur" style="background-image: url('${imageUrl}')"></div>
+                        <div class="card-banner listing-img" style="background-image: url('${imageUrl}')"></div>
+                        ${galleryButtonsHtml}
                     </div>
                     <div class="card-body">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px;">

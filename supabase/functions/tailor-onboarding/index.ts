@@ -48,7 +48,7 @@ serve(async (req) => {
       .single()
     if (shopErr) throw new Error('Failed to create shop: ' + shopErr.message)
 
-    // 5. Create/Update User Profile (Pending Approval)
+    // 5. Create/Update User Profile (Active status for 14-day free trial)
     const { error: profileErr } = await adminClient
       .from('user_profiles')
       .upsert({
@@ -57,8 +57,9 @@ serve(async (req) => {
         shop_id: shopData.id,
         full_name: fullName,
         role: 'owner',
-        status: 'Pending',
-        email: user.email
+        status: 'Active',
+        email: user.email,
+        created_at: new Date().toISOString()
       })
     if (profileErr) throw new Error('Failed to create profile: ' + profileErr.message)
 
