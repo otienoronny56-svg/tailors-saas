@@ -1227,12 +1227,13 @@
         .modal-shop-info {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px;
+            gap: 10px;
+            padding: 8px 10px;
             background: rgba(255,255,255,0.03);
-            border-radius: 12px;
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.05);
             margin-top: auto;
+            flex-shrink: 0;
         }
     </style>
     <link rel="manifest" href="../../manifest.json">
@@ -2845,19 +2846,17 @@
                 </div>
                 
                 <div class="modal-shop-info" style="justify-content: space-between;">
-                    <div style="display:flex; align-items:center; gap: 12px;">
+                    <div style="display:flex; align-items:center; gap: 10px;">
                         <div id="modal-shop-avatar" style="display:flex; align-items:center;"></div>
                         <div style="display:flex; flex-direction:column;">
-                            <span style="font-size: 0.75em; color: var(--brand-slate); text-transform: uppercase; letter-spacing: 1px;">Crafted By</span>
-                            <span id="modal-shop-name" style="font-weight: 600; color: var(--brand-white);"></span>
+                            <span style="font-size: 0.7em; color: var(--brand-slate, #64748b); text-transform: uppercase; letter-spacing: 1px;">Crafted By</span>
+                            <span id="modal-shop-name" style="font-weight: 600; font-size: 0.88em; color: var(--brand-white, #0f172a);"></span>
                         </div>
                     </div>
-                    <a id="modal-visit-shop-btn" href="#" style="background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 8px; font-size: 0.85em; font-weight: 600; color: var(--brand-gold); text-decoration: none; border: 1px solid rgba(212, 175, 55, 0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(212, 175, 55, 0.1)';" onmouseout="this.style.background='rgba(255,255,255,0.05)';">Visit Shop <i class="fas fa-arrow-right"></i></a>
+                    <a id="modal-visit-shop-btn" href="#" style="background: rgba(255,255,255,0.05); padding: 5px 12px; border-radius: 8px; font-size: 0.78em; font-weight: 600; color: var(--brand-gold); text-decoration: none; border: 1px solid rgba(212, 175, 55, 0.2); transition: all 0.2s; white-space: nowrap;" onmouseover="this.style.background='rgba(212, 175, 55, 0.1)';" onmouseout="this.style.background='rgba(255,255,255,0.05)';">Visit Shop <i class="fas fa-arrow-right"></i></a>
                 </div>
                 
-                <a id="modal-inquire-btn" href="#" style="text-align: center; margin-top: 15px; padding: 14px 24px; font-weight: 800; font-size: 1.05em; display: block; border-radius: 12px; background: linear-gradient(135deg, var(--brand-gold) 0%, #f3e5ab 50%, var(--brand-gold) 100%); color: #060c18; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px) scale(1.02)'; this.style.boxShadow='0 12px 30px rgba(212, 175, 55, 0.5)';" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(212, 175, 55, 0.3)';">
-                    Inquire About This <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>
-                </a>
+                <a id="modal-inquire-btn" href="#" style="text-align: center; margin-top: 6px; padding: 10px 20px; font-weight: 800; font-size: 0.92em; display: block; border-radius: 10px; background: linear-gradient(135deg, var(--brand-gold) 0%, #f3e5ab 50%, var(--brand-gold) 100%); color: #060c18; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 6px 18px rgba(212, 175, 55, 0.3); transition: all 0.3s ease; flex-shrink: 0;" onmouseover="this.style.transform='translateY(-2px) scale(1.02)'; this.style.boxShadow='0 10px 24px rgba(212, 175, 55, 0.5)';" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 6px 18px rgba(212, 175, 55, 0.3)';">Inquire About This <i class="fas fa-paper-plane" style="margin-left: 6px;"></i></a>
             </div>
         </div>
     </div>
