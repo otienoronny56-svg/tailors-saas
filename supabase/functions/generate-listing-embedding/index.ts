@@ -47,29 +47,37 @@ serve(async (req) => {
     // 2. Prepare text for embedding
     const textToEmbed = `Title: ${listing.title} | Category: ${listing.category} | Description: ${listing.description || ""}`;
 
-    // 3. Request embedding from Gemini API
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        content: {
-          parts: [{ text: textToEmbed }]
-        }
-      })
-    });
+    // 3. Request embedding from Gemini API (returns 3072 dimension)
+    const EMBEDDING_MODELS = ['gemini-embedding-001', 'text-embedding-004'];
+    let embeddingValues: number[] | null = null;
+    let embedErr = '';
 
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Gemini Embedding API responded with status ${response.status}: ${errText}`);
+    for (const model of EMBEDDING_MODELS) {
+      try {
+        const payload: any = { content: { parts: [{ text: textToEmbed }] } };
+        if (model === 'text-embedding-004') payload.outputDimensionality = 3072;
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          const embData = await res.json();
+          const vals = embData.embedding?.values;
+          if (vals && Array.isArray(vals) && vals.length === 3072) {
+            embeddingValues = vals;
+            break;
+          }
+        } else {
+          embedErr = await res.text();
+        }
+      } catch (e: any) {
+        embedErr = e.message;
+      }
     }
 
-    const data = await response.json();
-    const embeddingValues = data.embedding?.values;
-
-    if (!embeddingValues || !Array.isArray(embeddingValues) || embeddingValues.length !== 3072) {
-      throw new Error(`Failed to retrieve valid 3072-dimension embedding values from Gemini. Got length: ${embeddingValues ? embeddingValues.length : 'null'}, raw: ${JSON.stringify(data)}`);
+    if (!embeddingValues) {
+      throw new Error(`Failed to retrieve valid 3072-dimension embedding values from Gemini. Last error: ${embedErr}`);
     }
 
     // 4. Save embedding values to the database

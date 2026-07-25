@@ -18,7 +18,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { history, message } = body;
+    const { history, message, userName, userGender, userPreferences } = body;
 
     if (!message) {
       throw new Error('message is required');
@@ -34,27 +34,47 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // 1. Generate Embedding for the user's message
-    const embeddingResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            content: { parts: [{ text: message }] }
-        })
-    });
+    // 1. Generate Embedding for the user's message using candidate models
+    const GEMINI_TEXT_MODELS = [
+      'gemini-2.0-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-2.5-flash',
+      'gemini-1.5-flash-001',
+      'gemini-1.5-flash-002',
+      'gemini-1.5-flash'
+    ];
 
-    if (!embeddingResponse.ok) {
-        const errText = await embeddingResponse.text();
-        throw new Error(`Gemini Embedding API responded with status ${embeddingResponse.status}: ${errText}`);
+    const EMBEDDING_MODELS = ['gemini-embedding-001', 'text-embedding-004'];
+
+    let queryEmbedding: number[] | null = null;
+    let embedErr = '';
+
+    for (const model of EMBEDDING_MODELS) {
+      try {
+        const payload: any = { content: { parts: [{ text: message }] } };
+        if (model === 'text-embedding-004') payload.outputDimensionality = 3072;
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          const embData = await res.json();
+          const vals = embData.embedding?.values;
+          if (vals && Array.isArray(vals) && vals.length === 3072) {
+            queryEmbedding = vals;
+            break;
+          }
+        } else {
+          embedErr = await res.text();
+        }
+      } catch (e: any) {
+        embedErr = e.message;
+      }
     }
 
-    const embeddingData = await embeddingResponse.json();
-    const queryEmbedding = embeddingData.embedding?.values;
-
-    if (!queryEmbedding || !Array.isArray(queryEmbedding) || queryEmbedding.length !== 3072) {
-        throw new Error(`Failed to retrieve valid 3072-dimension embedding values from Gemini.`);
+    if (!queryEmbedding) {
+      throw new Error(`Failed to retrieve valid 3072-dimension embedding values from Gemini. Last error: ${embedErr}`);
     }
 
     // 2. Query Postgres pgvector RPC function match_listings
@@ -80,6 +100,10 @@ serve(async (req) => {
 
     const systemInstruction = `
       You are an expert fashion stylist for a high-end tailored clothing marketplace in Kenya.
+      ${userName ? `The client you are advising is named "${userName}". Address them naturally and warmly by name (e.g., "Hello ${userName}", "Sure ${userName}").` : ''}
+      ${userGender ? `Client style category preference: ${userGender}.` : ''}
+      ${userPreferences ? `Client measurement/sizing context: ${JSON.stringify(userPreferences)}.` : ''}
+
       CRITICAL INSTRUCTIONS:
       1. Keep your responses conversational, friendly, and short.
       2. If you recommend items, you MUST ONLY USE the items listed in the "CURRENT AVAILABLE INVENTORY" below.
@@ -117,21 +141,32 @@ serve(async (req) => {
       }
     };
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    });
+    let data: any = null;
+    let genErr = '';
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Gemini API Error:", errText);
-      throw new Error(`Gemini API responded with status ${response.status}: ${errText}`);
+    for (const model of GEMINI_TEXT_MODELS) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          data = await res.json();
+          break;
+        } else {
+          genErr = await res.text();
+          console.warn(`Gemini model ${model} failed (${res.status}): ${genErr}`);
+        }
+      } catch (e: any) {
+        genErr = e.message;
+      }
     }
 
-    const data = await response.json();
+    if (!data) {
+      throw new Error(`Gemini API call failed across all candidate models. Last error: ${genErr}`);
+    }
+
     let textResult = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
     
     console.log("Raw AI response:", textResult);

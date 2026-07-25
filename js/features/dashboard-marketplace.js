@@ -583,7 +583,40 @@ function renderMarketplaceListings(listings) {
     const container = document.getElementById('marketplace-listings-container');
     if (!container) return;
     if (listings.length === 0) {
-        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--brand-slate);">No designs found.</div>`;
+        if (activeMarketplaceMode === 'favourites') {
+            const hasAnyFavs = (userLikes.length > 0 || userFavoriteShops.length > 0);
+            container.innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--brand-slate);">
+                    <div style="width: 70px; height: 70px; border-radius: 50%; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.25); display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+                        <i class="fas fa-heart-broken" style="font-size: 2.2em; color: var(--brand-gold);"></i>
+                    </div>
+                    <h3 style="color: var(--brand-white); font-family: 'Playfair Display', serif; font-size: 1.4em; margin-bottom: 8px;">No Saved Favourites Found</h3>
+                    <p style="font-size: 0.9em; max-width: 420px; margin: 0 auto 20px auto; color: var(--brand-slate); line-height: 1.5;">
+                        ${hasAnyFavs 
+                            ? 'Your search or category filter is filtering out your saved items. Click below to clear filters.' 
+                            : 'Click the heart <i class="fas fa-heart" style="color:#ef4444;"></i> icon on any garment design or pin <i class="fas fa-thumbtack" style="color:var(--brand-gold);"></i> any shop to save them here!'}
+                    </p>
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        ${hasAnyFavs ? `
+                            <button onclick="resetMarketplaceFilters(); filterMarketplace();" class="btn-primary" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 9px 18px; border-radius: 8px; font-size: 0.88em; cursor: pointer;">
+                                <i class="fas fa-undo"></i> Clear Search Filters
+                            </button>
+                        ` : ''}
+                        <button onclick="setMarketplaceMode('listings')" class="btn-primary" style="background: var(--brand-gold); color: var(--brand-navy); font-weight: 700; border: none; padding: 9px 20px; border-radius: 8px; font-size: 0.88em; cursor: pointer;">
+                            Explore Creations <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>`;
+        } else {
+            container.innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:50px 20px; color:var(--brand-slate);">
+                    <i class="fas fa-search" style="font-size: 2em; color: var(--brand-slate); margin-bottom: 12px; opacity: 0.5;"></i>
+                    <p style="margin-bottom: 15px;">No creations match your search criteria or active filters.</p>
+                    <button onclick="resetMarketplaceFilters(); filterMarketplace();" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: var(--brand-white); padding: 8px 16px; border-radius: 6px; font-size: 0.85em; cursor: pointer;">
+                        <i class="fas fa-undo"></i> Reset Filters
+                    </button>
+                </div>`;
+        }
         return;
     }
 
@@ -690,19 +723,38 @@ async function handleSearchInput() {
     }, 600); // 600ms debounce
 }
 
+function resetMarketplaceFilters() {
+    const qEl = document.getElementById('marketplace-search-query') || document.getElementById('mkt-search-query');
+    const locEl = document.getElementById('marketplace-search-location') || document.getElementById('mkt-search-location');
+    const catEl = document.getElementById('marketplace-category-filter') || document.getElementById('mkt-category-filter');
+    const favEl = document.getElementById('marketplace-favorites-filter') || document.getElementById('mkt-favorites-filter');
+    const audEl = document.getElementById('marketplace-audience-filter') || document.getElementById('mkt-audience-filter');
+
+    if (qEl) qEl.value = '';
+    if (locEl) locEl.value = '';
+    if (catEl) catEl.value = '';
+    if (favEl) favEl.checked = false;
+    if (audEl) audEl.value = '';
+
+    semanticSearchResults = null;
+}
+
 function filterMarketplace() {
     marketplaceDisplayLimit = 20; // Reset pagination on new search
     renderSidebarCategories();
-    const query = document.getElementById('marketplace-search-query').value.toLowerCase().trim();
-    const location = document.getElementById('marketplace-search-location').value.toLowerCase().trim();
-    const categoryFilterEl = document.getElementById('marketplace-category-filter');
+    const queryEl = document.getElementById('marketplace-search-query') || document.getElementById('mkt-search-query');
+    const query = queryEl ? queryEl.value.toLowerCase().trim() : '';
+    const locEl = document.getElementById('marketplace-search-location') || document.getElementById('mkt-search-location');
+    const location = locEl ? locEl.value.toLowerCase().trim() : '';
+    const categoryFilterEl = document.getElementById('marketplace-category-filter') || document.getElementById('mkt-category-filter');
     const category = categoryFilterEl ? categoryFilterEl.value : '';
-    const favoritesFilterEl = document.getElementById('marketplace-favorites-filter');
+    const favoritesFilterEl = document.getElementById('marketplace-favorites-filter') || document.getElementById('mkt-favorites-filter');
     const showFavoritesOnly = favoritesFilterEl ? favoritesFilterEl.checked : false;
 
     if (activeMarketplaceMode === 'shops') {
         const filteredShops = allMarketplaceShops.filter(shop => {
-            if (showFavoritesOnly && !userFavoriteShops.includes(shop.id)) return false;
+            const isFavShop = userFavoriteShops.some(id => String(id).trim() === String(shop.id).trim());
+            if (showFavoritesOnly && !isFavShop) return false;
 
             const nameMatch = !query ||
                 (shop.name && shop.name.toLowerCase().includes(query)) ||
@@ -721,20 +773,21 @@ function filterMarketplace() {
         renderMarketplaceShops(filteredShops);
     } else {
         const filteredListings = allMarketplaceListings.filter(list => {
+            const isLiked = userLikes.some(id => String(id).trim() === String(list.id).trim());
+            const isShopFav = userFavoriteShops.some(id => String(id).trim() === String(list.shop_id).trim());
+
             if (activeMarketplaceMode === 'favourites') {
-                if (!userLikes.includes(list.id)) return false;
+                if (!isLiked && !isShopFav) return false;
             }
 
-            if (showFavoritesOnly && !userFavoriteShops.includes(list.shop_id)) return false;
+            if (showFavoritesOnly && !isShopFav) return false;
 
             let queryMatch = false;
             if (!query) {
                 queryMatch = true;
             } else if (semanticSearchResults) {
-                // Semantic Match: Check if the listing is in our semantic search results
-                queryMatch = semanticSearchResults.some(sr => sr.id === list.id);
+                queryMatch = semanticSearchResults.some(sr => String(sr.id).trim() === String(list.id).trim());
             } else {
-                // Fallback: standard keyword matching
                 queryMatch = (list.title && list.title.toLowerCase().includes(query)) ||
                     (list.description && list.description.toLowerCase().includes(query)) ||
                     (list.category && list.category.toLowerCase().includes(query));
@@ -742,7 +795,7 @@ function filterMarketplace() {
 
             const categoryMatch = !category || list.category === category;
 
-            const audienceFilterEl = document.getElementById('marketplace-audience-filter');
+            const audienceFilterEl = document.getElementById('marketplace-audience-filter') || document.getElementById('mkt-audience-filter');
             const audience = audienceFilterEl ? audienceFilterEl.value : '';
             let isAudienceMatch = true;
             if (audience) {
@@ -750,7 +803,7 @@ function filterMarketplace() {
                 isAudienceMatch = (itemAudience === audience);
             }
 
-            const shop = allMarketplaceShops.find(s => s.id === list.shop_id);
+            const shop = allMarketplaceShops.find(s => String(s.id).trim() === String(list.shop_id).trim());
             const locMatch = !location || (shop && (
                 (shop.location_name && shop.location_name.toLowerCase().includes(location)) ||
                 (shop.location && shop.location.toLowerCase().includes(location))
@@ -762,10 +815,9 @@ function filterMarketplace() {
         // Sort by semantic similarity if semantic search results exist, otherwise sort by bespoke score
         if (query && semanticSearchResults) {
             filteredListings.sort((a, b) => {
-                const simA = semanticSearchResults.find(sr => sr.id === a.id)?.similarity || 0;
-                const simB = semanticSearchResults.find(sr => sr.id === b.id)?.similarity || 0;
+                const simA = semanticSearchResults.find(sr => String(sr.id).trim() === String(a.id).trim())?.similarity || 0;
+                const simB = semanticSearchResults.find(sr => String(sr.id).trim() === String(b.id).trim())?.similarity || 0;
                 if (simB !== simA) return simB - simA; // Higher similarity first
-                // Tie breaker: calculateBespokeScore
                 return calculateBespokeScore(b, allMarketplaceShops, allMarketplaceReviews, globalLikesCount, userFavoriteShops) - calculateBespokeScore(a, allMarketplaceShops, allMarketplaceReviews, globalLikesCount, userFavoriteShops);
             });
         } else {
@@ -1085,6 +1137,39 @@ function getMockListings() {
     ];
 }
 
+window.currentGalleryImages = [];
+window.currentGalleryIndex = 0;
+
+window.navigateModalGallery = function(direction) {
+    if (!window.currentGalleryImages || window.currentGalleryImages.length <= 1) return;
+    window.currentGalleryIndex = (window.currentGalleryIndex + direction + window.currentGalleryImages.length) % window.currentGalleryImages.length;
+    const currentUrl = window.currentGalleryImages[window.currentGalleryIndex];
+    
+    const imgEl = document.getElementById('modal-listing-image');
+    const blurEl = document.getElementById('modal-listing-image-blur');
+    if (imgEl) imgEl.src = currentUrl;
+    if (blurEl) blurEl.src = currentUrl;
+
+    document.querySelectorAll('.modal-thumb-dot').forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === window.currentGalleryIndex);
+    });
+};
+
+window.setModalGalleryImage = function(index) {
+    if (!window.currentGalleryImages || !window.currentGalleryImages[index]) return;
+    window.currentGalleryIndex = index;
+    const currentUrl = window.currentGalleryImages[index];
+    
+    const imgEl = document.getElementById('modal-listing-image');
+    const blurEl = document.getElementById('modal-listing-image-blur');
+    if (imgEl) imgEl.src = currentUrl;
+    if (blurEl) blurEl.src = currentUrl;
+
+    document.querySelectorAll('.modal-thumb-dot').forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === index);
+    });
+};
+
 window.openListingModal = function(listingId) {
     if (typeof trackListingView === 'function') trackListingView(listingId);
     const list = allMarketplaceListings.find(l => l.id === listingId);
@@ -1100,7 +1185,52 @@ window.openListingModal = function(listingId) {
         ? `<img src="${avatarImgUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; border: 1px solid var(--brand-gold);">`
         : `<i class="fas fa-store" style="color:var(--brand-gold); font-size: 1.2em;"></i>`;
 
-    const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || `https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800`;
+    // Extract all images
+    let images = [];
+    if (list.image_urls) {
+        try {
+            images = typeof list.image_urls === 'string' ? JSON.parse(list.image_urls) : list.image_urls;
+        } catch(e) {
+            images = [list.image_url || 'https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800'];
+        }
+    } else if (list.image_url) {
+        images = [list.image_url];
+    } else {
+        images = ['https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800'];
+    }
+
+    if (!Array.isArray(images) || images.length === 0) {
+        images = ['https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800'];
+    }
+
+    window.currentGalleryImages = images;
+    window.currentGalleryIndex = 0;
+
+    const mainImageUrl = images[0];
+    document.getElementById('modal-listing-image').src = mainImageUrl;
+    document.getElementById('modal-listing-image-blur').src = mainImageUrl;
+
+    const prevBtn = document.getElementById('modal-gallery-prev');
+    const nextBtn = document.getElementById('modal-gallery-next');
+    const thumbsContainer = document.getElementById('modal-gallery-thumbnails');
+
+    if (images.length > 1) {
+        if (prevBtn) prevBtn.style.display = 'flex';
+        if (nextBtn) nextBtn.style.display = 'flex';
+        if (thumbsContainer) {
+            thumbsContainer.style.display = 'flex';
+            thumbsContainer.innerHTML = images.map((url, idx) => `
+                <img src="${url}" class="modal-thumb-dot ${idx === 0 ? 'active' : ''}" onclick="setModalGalleryImage(${idx})" alt="Angle ${idx + 1}">
+            `).join('');
+        }
+    } else {
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+        if (thumbsContainer) {
+            thumbsContainer.style.display = 'none';
+            thumbsContainer.innerHTML = '';
+        }
+    }
 
     let priceHtml = '';
     if (list.original_price && parseFloat(list.original_price) > parseFloat(list.price)) {
@@ -1116,8 +1246,6 @@ window.openListingModal = function(listingId) {
         `;
     }
 
-    document.getElementById('modal-listing-image').src = imageUrl;
-    document.getElementById('modal-listing-image-blur').src = imageUrl;
     document.getElementById('modal-listing-title').textContent = list.title || 'Listing Details';
     document.getElementById('modal-listing-desc').textContent = list.description || 'No description provided.';
     document.getElementById('modal-listing-category').textContent = list.category || 'Fashion';

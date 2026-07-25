@@ -929,8 +929,8 @@ async function createShopAndManager(e) {
         const user = edgeData ? edgeData.data.user : null;
         if (authError) throw authError;
 
-        // 2. Create Shop
-        const { data: shop, error: shopError } = await admin.from('shops').insert([{ name: shopName }]).select().single();
+        // 2. Create Shop (Public on Marketplace by default)
+        const { data: shop, error: shopError } = await admin.from('shops').insert([{ name: shopName, is_public: true }]).select().single();
         if (shopError) throw shopError;
 
         // 3. Create Profile
@@ -1208,7 +1208,8 @@ async function handleAddShopAndManager(e) {
         const shopPayload = {
             organization_id: USER_PROFILE.organization_id,
             name: shopName,
-            business_type: businessType
+            business_type: businessType,
+            is_public: true
         };
 
         // Add coordinates if we have them

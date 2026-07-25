@@ -730,11 +730,54 @@ if (typeof loadAdminOrderDetails !== 'undefined') {
 // CUSTOM INVOICE GENERATOR (Admin Dashboard)
 // ============================================
 
-window.openCustomInvoiceModal = function () {
+window.calcCustomInvoiceTotals = function () {
+    const qty = parseFloat(document.getElementById('ci-qty')?.value) || 1;
+    const unitPrice = parseFloat(document.getElementById('ci-amount')?.value) || 0;
+    const discount = parseFloat(document.getElementById('ci-discount')?.value) || 0;
+    const deposit = parseFloat(document.getElementById('ci-deposit')?.value) || 0;
+
+    const subtotal = qty * unitPrice;
+    const balance = Math.max(0, subtotal - discount - deposit);
+
+    const balanceInput = document.getElementById('ci-balance');
+    if (balanceInput) {
+        balanceInput.value = balance.toFixed(2);
+    }
+};
+
+window.openCustomInvoiceModal = async function () {
     const modal = document.getElementById('custom-invoice-modal');
     if (modal) {
         // Pre-fill today's date
-        document.getElementById('ci-date').value = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('ci-date');
+        if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+        // Attempt to auto-prefill shop payment details from database
+        try {
+            if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE?.shop_id && typeof supabaseClient !== 'undefined') {
+                const { data: shop } = await supabaseClient.from('shops')
+                    .select('name, paybill_number, till_number, account_number, bank_details, payment_type')
+                    .eq('id', USER_PROFILE.shop_id)
+                    .single();
+                if (shop) {
+                    if (document.getElementById('ci-business-name')) document.getElementById('ci-business-name').value = shop.name || '';
+                    if (document.getElementById('ci-bank')) document.getElementById('ci-bank').value = shop.bank_details || '';
+                    if (document.getElementById('ci-account-no')) document.getElementById('ci-account-no').value = shop.account_number || '';
+
+                    let mpesaInfo = '';
+                    if (shop.payment_type === 'till' && shop.till_number) {
+                        mpesaInfo = 'Till: ' + shop.till_number;
+                    } else if (shop.paybill_number) {
+                        mpesaInfo = 'Paybill: ' + shop.paybill_number + (shop.account_number ? ' (Acc: ' + shop.account_number + ')' : '');
+                    }
+                    if (document.getElementById('ci-mpesa')) document.getElementById('ci-mpesa').value = mpesaInfo;
+                }
+            }
+        } catch (e) {
+            console.error("Error pre-filling shop invoice details:", e);
+        }
+
+        calcCustomInvoiceTotals();
         modal.style.display = 'flex';
     }
 };
@@ -744,147 +787,252 @@ window.closeCustomInvoiceModal = function () {
     if (modal) {
         modal.style.display = 'none';
         // Clear form
-        document.getElementById('ci-billed-to').value = '';
-        document.getElementById('ci-description').value = '';
-        document.getElementById('ci-amount').value = '';
-        document.getElementById('ci-notes').value = '';
+        if (document.getElementById('ci-billed-to')) document.getElementById('ci-billed-to').value = '';
+        if (document.getElementById('ci-phone')) document.getElementById('ci-phone').value = '';
+        if (document.getElementById('ci-email')) document.getElementById('ci-email').value = '';
+        if (document.getElementById('ci-description')) document.getElementById('ci-description').value = '';
+        if (document.getElementById('ci-qty')) document.getElementById('ci-qty').value = '1';
+        if (document.getElementById('ci-amount')) document.getElementById('ci-amount').value = '';
+        if (document.getElementById('ci-discount')) document.getElementById('ci-discount').value = '0.00';
+        if (document.getElementById('ci-deposit')) document.getElementById('ci-deposit').value = '0.00';
+        if (document.getElementById('ci-notes')) document.getElementById('ci-notes').value = '';
     }
 };
 
 window.generateCustomInvoice = async function () {
     try {
-        const billedTo = document.getElementById('ci-billed-to').value.trim();
-        const description = document.getElementById('ci-description').value.trim();
-        const amountStr = document.getElementById('ci-amount').value;
-        const dateVal = document.getElementById('ci-date').value;
-        const notes = document.getElementById('ci-notes').value.trim();
+        const billedTo = document.getElementById('ci-billed-to')?.value.trim() || '';
+        const clientPhone = document.getElementById('ci-phone')?.value.trim() || '';
+        const clientEmail = document.getElementById('ci-email')?.value.trim() || '';
+        const description = document.getElementById('ci-description')?.value.trim() || '';
+        const qtyStr = document.getElementById('ci-qty')?.value || '1';
+        const amountStr = document.getElementById('ci-amount')?.value || '0';
+        const dateVal = document.getElementById('ci-date')?.value || new Date().toISOString().split('T')[0];
+        const discountStr = document.getElementById('ci-discount')?.value || '0';
+        const depositStr = document.getElementById('ci-deposit')?.value || '0';
+        const businessName = document.getElementById('ci-business-name')?.value.trim() || ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appName) ? APP_CONFIG.appName : "Gentleman Standards");
+        const bankName = document.getElementById('ci-bank')?.value.trim() || '';
+        const accountNo = document.getElementById('ci-account-no')?.value.trim() || '';
+        const mpesaDetails = document.getElementById('ci-mpesa')?.value.trim() || '';
+        const notes = document.getElementById('ci-notes')?.value.trim() || '';
 
         if (!billedTo || !description || !amountStr || !dateVal) {
-            return alert("Please fill in all required fields.");
+            return alert("Please fill in all required fields (Billed To, Description, Unit Price, and Date).");
         }
 
-        const amount = parseFloat(amountStr);
-        const dateStr = new Date(dateVal).toLocaleDateString();
-        const shopName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appName) ? APP_CONFIG.appName.toUpperCase() : "FASHION HOUSE";
+        const qty = parseFloat(qtyStr) || 1;
+        const unitPrice = parseFloat(amountStr) || 0;
+        const subtotal = qty * unitPrice;
+        const discount = parseFloat(discountStr) || 0;
+        const depositPaid = parseFloat(depositStr) || 0;
+        const balanceDue = Math.max(0, subtotal - discount - depositPaid);
+
+        const dateStr = new Date(dateVal).toLocaleDateString('en-GB');
         const invoiceId = 'CUST-' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
 
-        // Build HTML
-        const invoiceHTML = `
-            <div id="temp-custom-invoice-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; background: #fff;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                        ${(typeof APP_CONFIG !== 'undefined' && APP_CONFIG.logoPath) ? `<img src="${APP_CONFIG.logoPath}" alt="Logo" style="height: 60px; width: auto; object-fit: contain;">` : ''}
-                        <div>
-                            <h1 style="margin: 0; font-size: 2em; letter-spacing: 2px; color: #000;">${shopName}</h1>
-                            <p style="margin: 5px 0 0 0; color: #666;">Official Invoice</p>
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <h2 style="margin: 0; font-size: 1.8em; color: #3b82f6; text-transform: uppercase;">INVOICE</h2>
-                        <p style="margin: 5px 0 2px 0;"><strong>Date:</strong> ${dateStr}</p>
-                        <p style="margin: 0;"><strong>Invoice:</strong> #${invoiceId}</p>
-                    </div>
-                </div>
+        const btn = document.querySelector('#custom-invoice-modal button[type="submit"]');
+        const origText = btn ? btn.innerHTML : '';
+        if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...'; btn.disabled = true; }
 
-                <div style="margin-bottom: 40px;">
-                    <h3 style="margin: 0 0 10px 0; color: #666; font-size: 0.9em; text-transform: uppercase;">Billed To:</h3>
-                    <p style="margin: 0; font-size: 1.2em; font-weight: bold;">${billedTo}</p>
-                </div>
-
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-                    <thead>
-                        <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
-                            <th style="padding: 12px; text-align: left; font-weight: bold; color: #475569;">Description</th>
-                            <th style="padding: 12px; text-align: right; font-weight: bold; color: #475569;">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="padding: 15px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 500;">${description}</td>
-                            <td style="padding: 15px 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${formatCurrency(amount)}</td>
-                        </tr>
-                        ${notes ? `
-                        <tr>
-                            <td colspan="2" style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-style: italic; color: #64748b; font-size: 0.9em;">
-                                Notes: ${notes}
-                            </td>
-                        </tr>
-                        ` : ''}
-                    </tbody>
-                </table>
-
-                <div style="display: flex; justify-content: flex-end;">
-                    <table style="width: 300px; border-collapse: collapse;">
-                        <tr>
-                            <td style="padding: 15px 12px; font-weight: bold; font-size: 1.2em; color: #0f172a;">Total Due:</td>
-                            <td style="padding: 15px 12px; text-align: right; font-weight: bold; font-size: 1.2em; color: #0f172a;">${formatCurrency(amount)}</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; color: #64748b; font-size: 0.9em;">
-                    <p style="margin: 0;">Thank you for your business.</p>
-                </div>
-            </div>
-        `;
-
-        // Inject temporarily into DOM to print
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = invoiceHTML;
-        wrapper.style.position = 'absolute';
-        wrapper.style.left = '-9999px';
-        document.body.appendChild(wrapper);
-
-        const element = wrapper.firstElementChild;
-        let cName = billedTo.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-
-        const opt = {
-            margin: 0.3,
-            filename: `Invoice_${cName}_${invoiceId}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 3,
-                useCORS: true,
-                width: 680,
-                windowWidth: 700
-            },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
-
-        // Download and cleanup
-        if (typeof html2canvas === 'undefined' || typeof html2pdf === 'undefined') {
-            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
-            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+        // Load jsPDF if not already loaded
+        if (typeof window.jspdf === 'undefined') {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
         }
 
-        const btn = document.querySelector('#custom-invoice-modal button[type="submit"]');
-        const origText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-        btn.disabled = true;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-        // NUCLEAR FIX: Wait for assets
-        try {
-            if (document.fonts) await document.fonts.ready;
-            // Small layout settle delay
-            await new Promise(r => setTimeout(r, 400));
-        } catch (e) { console.error("Asset wait error", e); }
+        // A4 = 210mm wide. 15mm margins = 180mm content width
+        const pageW = 210;
+        const margin = 15;
+        const contentW = pageW - (margin * 2);
+        let y = margin;
 
-        await html2pdf().set(opt).from(element).save();
+        const fmt = (n) => 'Ksh ' + Number(n).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const fmtNeg = (n) => '-Ksh ' + Number(n).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        btn.innerHTML = origText;
-        btn.disabled = false;
+        // ─── HEADER ─────────────────────────────────────────────────────────
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(20);
+        doc.setTextColor(15, 23, 42);
+        doc.text(businessName, margin, y + 8);
 
-        document.body.removeChild(wrapper);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text('OFFICIAL INVOICE', margin, y + 14);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(180, 83, 9);
+        doc.text('INVOICE', pageW - margin, y + 8, { align: 'right' });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(51, 65, 85);
+        doc.text('Date: ' + dateStr, pageW - margin, y + 15, { align: 'right' });
+        doc.text('Invoice ID: #' + invoiceId, pageW - margin, y + 21, { align: 'right' });
+
+        y += 28;
+        doc.setDrawColor(15, 23, 42);
+        doc.setLineWidth(0.5);
+        doc.line(margin, y, pageW - margin, y);
+        y += 8;
+
+        // ─── BILL TO ────────────────────────────────────────────────────────
+        const billLines = [clientPhone, clientEmail].filter(Boolean).length;
+        const billBoxH = 18 + (billLines * 5);
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(margin, y, contentW, billBoxH, 2, 2, 'F');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text('BILL TO', margin + 5, y + 6);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(15, 23, 42);
+        doc.text(billedTo, margin + 5, y + 13);
+
+        let billY = y + 13;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(51, 65, 85);
+        if (clientPhone) { billY += 5; doc.text('Phone: ' + clientPhone, margin + 5, billY); }
+        if (clientEmail) { billY += 5; doc.text('Email: ' + clientEmail, margin + 5, billY); }
+        y += billBoxH + 8;
+
+        // ─── ITEMS TABLE ─────────────────────────────────────────────────────
+        const colQty = margin + 95;
+        const colUnit = margin + 125;
+        const colAmt = pageW - margin;
+
+        doc.setFillColor(15, 23, 42);
+        doc.rect(margin, y, contentW, 9, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255);
+        doc.text('Description', margin + 3, y + 6);
+        doc.text('Qty', colQty, y + 6, { align: 'center' });
+        doc.text('Unit Price', colUnit + 12, y + 6, { align: 'right' });
+        doc.text('Amount', colAmt, y + 6, { align: 'right' });
+        y += 9;
+
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(203, 213, 225);
+        doc.setLineWidth(0.3);
+        doc.rect(margin, y, contentW, 10, 'FD');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(15, 23, 42);
+        doc.text(description, margin + 3, y + 7);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(51, 65, 85);
+        doc.text(String(qty), colQty, y + 7, { align: 'center' });
+        doc.text(fmt(unitPrice), colUnit + 12, y + 7, { align: 'right' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text(fmt(subtotal), colAmt, y + 7, { align: 'right' });
+        y += 10;
+
+        if (notes) {
+            doc.setFillColor(248, 250, 252);
+            doc.rect(margin, y, contentW, 8, 'F');
+            doc.setFont('helvetica', 'italic');
+            doc.setFontSize(9);
+            doc.setTextColor(71, 85, 105);
+            doc.text('Notes: ' + notes, margin + 3, y + 5);
+            y += 8;
+        }
+        y += 10;
+
+        // ─── TOTALS ──────────────────────────────────────────────────────────
+        const totalsX = margin + 90;
+
+        const drawRow = (label, value, color, bold, topBorder) => {
+            if (topBorder) {
+                doc.setDrawColor(15, 23, 42);
+                doc.setLineWidth(0.5);
+                doc.line(totalsX, y, pageW - margin, y);
+                y += 3;
+            }
+            doc.setFont('helvetica', bold ? 'bold' : 'normal');
+            doc.setFontSize(bold ? 12 : 10);
+            doc.setTextColor(color[0], color[1], color[2]);
+            doc.text(label, totalsX, y + 5);
+            doc.text(value, pageW - margin, y + 5, { align: 'right' });
+            y += 8;
+        };
+
+        drawRow('Subtotal:', fmt(subtotal), [71, 85, 105], false, false);
+        if (discount > 0) drawRow('Discount:', fmtNeg(discount), [220, 38, 38], false, false);
+        if (depositPaid > 0) drawRow('Deposit Paid:', fmtNeg(depositPaid), [22, 163, 74], false, false);
+        drawRow('Balance Due:', fmt(balanceDue), [15, 23, 42], true, true);
+        y += 8;
+
+        // ─── PAYMENT DETAILS ─────────────────────────────────────────────────
+        const payFields = [businessName, bankName, accountNo, mpesaDetails].filter(Boolean);
+        if (payFields.length) {
+            const payBoxH = 14 + (payFields.length * 7);
+            doc.setFillColor(255, 253, 245);
+            doc.roundedRect(margin, y, contentW, payBoxH, 2, 2, 'F');
+            doc.setDrawColor(253, 230, 138);
+            doc.setLineWidth(0.3);
+            doc.roundedRect(margin, y, contentW, payBoxH, 2, 2);
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.setTextColor(146, 64, 14);
+            doc.text('PAYMENT DETAILS', margin + 5, y + 7);
+            doc.line(margin + 5, y + 9, pageW - margin - 5, y + 9);
+
+            let py = y + 14;
+            doc.setFontSize(10);
+            doc.setTextColor(30, 41, 59);
+
+            const payLine = (label, val) => {
+                doc.setFont('helvetica', 'bold');
+                const lw = doc.getTextWidth(label);
+                doc.text(label, margin + 5, py);
+                doc.setFont('helvetica', 'normal');
+                doc.text(val, margin + 5 + lw + 1, py);
+                py += 7;
+            };
+
+            if (businessName) payLine('Business Name: ', businessName);
+            if (bankName) payLine('Bank: ', bankName);
+            if (accountNo) payLine('Account No.: ', accountNo);
+            if (mpesaDetails) payLine('M-Pesa Paybill/Till: ', mpesaDetails);
+
+            y += payBoxH + 8;
+        }
+
+        // ─── FOOTER ──────────────────────────────────────────────────────────
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.3);
+        doc.line(margin, y, pageW - margin, y);
+        y += 6;
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Thank you for choosing ' + businessName + '. We appreciate your business!', pageW / 2, y, { align: 'center' });
+
+        // ─── SAVE ────────────────────────────────────────────────────────────
+        let cName = billedTo.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        doc.save('Invoice_' + cName + '_' + invoiceId + '.pdf');
+
+        if (btn) { btn.innerHTML = origText; btn.disabled = false; }
         closeCustomInvoiceModal();
 
     } catch (error) {
         logDebug("Error generating custom invoice", error, 'error');
-        alert("An error occurred while generating the invoice.");
+        alert("An error occurred while generating the invoice: " + error.message);
         const btn = document.querySelector('#custom-invoice-modal button[type="submit"]');
-        if (btn) {
-            btn.innerHTML = '<i class="fas fa-download"></i> Download PDF Invoice';
-            btn.disabled = false;
-        }
+        if (btn) { btn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF Invoice'; btn.disabled = false; }
     }
 };
 

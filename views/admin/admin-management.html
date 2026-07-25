@@ -785,26 +785,39 @@
     </div>
 
     <!-- Edit Shop Details Modal -->
-    <!-- Edit Shop Details Modal -->
-        <div id="edit-shop-modal" class="modal">
-        <div class="modal-content" style="max-width: 600px; padding: 40px; border-radius: 16px;">
-            <span class="close" onclick="closeEditShopModal()">&times;</span>
+    <div id="edit-shop-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px; padding: 35px; border-radius: 16px; background: #111c38; color: #f8fafc; border: 1px solid rgba(212, 175, 55, 0.25); box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
+            <span class="close" onclick="closeEditShopModal()" style="color: #cbd5e1;">&times;</span>
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
                 <i class="fas fa-store" style="font-size: 2em; color: var(--brand-gold);"></i>
-                <h2 style="margin: 0; color: #0f172a; font-family: 'Playfair Display', serif;">Shop Settings</h2>
+                <h2 style="margin: 0; color: #ffffff; font-family: 'Playfair Display', serif;">Shop Settings</h2>
             </div>
             
             <style>
                 .shop-tabs {
-                    display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; overflow-x: auto;
+                    display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px; overflow-x: auto;
                 }
                 .shop-tab-btn {
-                    background: transparent; border: none; padding: 10px 15px; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 8px; transition: all 0.2s; white-space: nowrap;
+                    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 16px; font-weight: 600; color: #94a3b8; cursor: pointer; border-radius: 8px; transition: all 0.2s; white-space: nowrap;
                 }
-                .shop-tab-btn:hover { background: #f8fafc; color: var(--brand-navy); }
-                .shop-tab-btn.active { background: var(--brand-navy-light); color: var(--brand-gold); }
+                .shop-tab-btn:hover { background: rgba(255,255,255,0.1); color: #ffffff; }
+                .shop-tab-btn.active { background: rgba(212, 175, 55, 0.2); color: #fce786; border-color: rgba(212, 175, 55, 0.5); }
                 .shop-tab-content { display: none; flex-direction: column; gap: 20px; }
                 .shop-tab-content.active { display: flex; }
+                .modal-content input[type="text"], 
+                .modal-content input[type="tel"], 
+                .modal-content input[type="email"], 
+                .modal-content input[type="password"], 
+                .modal-content select, 
+                .modal-content textarea {
+                    background: rgba(15, 23, 42, 0.7) !important;
+                    color: #ffffff !important;
+                    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                }
+                .modal-content input::placeholder, 
+                .modal-content textarea::placeholder {
+                    color: #94a3b8 !important;
+                }
             </style>
 
             <div class="shop-tabs">
@@ -819,19 +832,19 @@
                 <!-- TAB 1: BASIC INFO -->
                 <div id="tab-basic" class="shop-tab-content active">
                     <div class="form-group" style="position: relative; margin-bottom: 15px;">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Name *</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Name *</label>
                         <i class="fas fa-signature" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                        <input type="text" id="edit-shop-name" placeholder="Shop Name" required style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
+                        <input type="text" id="edit-shop-name" placeholder="Shop Name" required style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none;">
                     </div>
 
                     <div class="form-group" style="position: relative; margin-bottom: 15px;">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Physical Address or City</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Physical Address or City</label>
                         
                         <!-- DISPLAY MODE -->
-                        <div id="display-location-container" style="display: flex; gap: 10px; align-items: center; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+                        <div id="display-location-container" style="display: flex; gap: 10px; align-items: center; padding: 12px 15px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(15, 23, 42, 0.7);">
                             <i class="fas fa-map-marker-alt" style="color: var(--brand-gold); font-size: 1.2em;"></i>
-                            <span id="saved-shop-address-display" style="flex: 1; color: #334155; font-weight: 500;">No location set</span>
-                            <button type="button" onclick="toggleLocationEditMode()" style="background: transparent; color: var(--brand-navy); border: 1px solid var(--brand-navy); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">
+                            <span id="saved-shop-address-display" style="flex: 1; color: #ffffff; font-weight: 500;">No location set</span>
+                            <button type="button" onclick="toggleLocationEditMode()" style="background: transparent; color: var(--brand-gold); border: 1px solid var(--brand-gold); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s;">
                                 Change Location
                             </button>
                         </div>
@@ -840,7 +853,7 @@
                         <div id="edit-location-container" style="display: none; gap: 10px; align-items: stretch;">
                             <div style="position: relative; flex: 1;">
                                 <i class="fas fa-map-marker-alt" style="position: absolute; left: 15px; top: 12px; color: var(--brand-gold); z-index: 5;"></i>
-                                <input type="text" id="edit-shop-address" placeholder="e.g. Kilimani, Nairobi" oninput="document.getElementById('edit-shop-lat').value=''; document.getElementById('edit-shop-lng').value='';" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #ffffff; color: #334155; outline: none; height: 100%; box-sizing: border-box;">
+                                <input type="text" id="edit-shop-address" placeholder="e.g. Kilimani, Nairobi" oninput="document.getElementById('edit-shop-lat').value=''; document.getElementById('edit-shop-lng').value='';" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none; height: 100%; box-sizing: border-box;">
                                 <input type="hidden" id="edit-shop-lat">
                                 <input type="hidden" id="edit-shop-lng">
                             </div>
@@ -852,14 +865,14 @@
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 5px;">
                         <div class="form-group" style="position: relative; margin-bottom: 0;">
-                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Phone Number</label>
+                            <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Phone Number</label>
                             <i class="fas fa-phone" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <input type="text" id="edit-shop-phone" placeholder="e.g. 0712345678" required style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
+                            <input type="text" id="edit-shop-phone" placeholder="e.g. 0712345678" required style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none;">
                         </div>
                         <div class="form-group" style="position: relative; margin-bottom: 0;">
-                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">WhatsApp (Optional)</label>
+                            <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">WhatsApp (Optional)</label>
                             <i class="fab fa-whatsapp" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <input type="text" id="edit-shop-whatsapp" placeholder="e.g. 0712345678" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
+                            <input type="text" id="edit-shop-whatsapp" placeholder="e.g. 0712345678" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none;">
                         </div>
                     </div>
                 </div>
@@ -867,9 +880,9 @@
                 <!-- TAB 2: PAYMENTS -->
                 <div id="tab-payments" class="shop-tab-content">
                     <div class="form-group" style="position: relative;">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Payment Method</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Payment Method</label>
                         <i class="fas fa-money-bill-wave" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                        <select id="edit-shop-payment-type" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none; appearance: none; cursor: pointer;">
+                        <select id="edit-shop-payment-type" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none; appearance: none; cursor: pointer;">
                             <option value="paybill">Paybill</option>
                             <option value="till">Buy Goods (Till Number)</option>
                             <option value="pochi">Pochi La Biashara</option>
@@ -879,75 +892,75 @@
 
                     <div id="payment-fields-paybill" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div class="form-group" style="position: relative;">
-                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Paybill Number</label>
+                            <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Paybill Number</label>
                             <i class="fas fa-hashtag" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <input type="text" id="edit-shop-paybill" placeholder="e.g. 247247" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
+                            <input type="text" id="edit-shop-paybill" placeholder="e.g. 247247" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none;">
                         </div>
                         <div class="form-group" style="position: relative;">
-                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Account Number</label>
+                            <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Account Number</label>
                             <i class="fas fa-user-circle" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <input type="text" id="edit-shop-account" placeholder="e.g. 0110001234" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
+                            <input type="text" id="edit-shop-account" placeholder="e.g. 0110001234" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none;">
                         </div>
                     </div>
 
                     <div id="payment-fields-till" style="display: none; position: relative;">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Till Number</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Till Number</label>
                         <i class="fas fa-hashtag" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                        <input type="text" id="edit-shop-till" placeholder="e.g. 123456" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
+                        <input type="text" id="edit-shop-till" placeholder="e.g. 123456" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none;">
                     </div>
 
                     <div id="payment-fields-pochi" style="display: none; position: relative;">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Pochi La Biashara Number</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Pochi La Biashara Number</label>
                         <i class="fas fa-mobile-alt" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                        <input type="text" id="edit-shop-pochi" placeholder="e.g. 0712345678" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
+                        <input type="text" id="edit-shop-pochi" placeholder="e.g. 0712345678" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none;">
                     </div>
 
                     <div class="form-group" style="position: relative;">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Bank Details (Optional)</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Bank Details (Optional)</label>
                         <i class="fas fa-university" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                        <input type="text" id="edit-shop-bank" placeholder="e.g. KCB, Branch, Acc 123..." style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
+                        <input type="text" id="edit-shop-bank" placeholder="e.g. KCB, Branch, Acc 123..." style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none;">
                     </div>
 
                     <div class="form-group" style="position: relative;">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Custom Receipt Footer Message</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Custom Receipt Footer Message</label>
                         <i class="fas fa-file-invoice" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                        <input type="text" id="edit-shop-receipt" placeholder="e.g. Thank you for choosing us!" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
+                        <input type="text" id="edit-shop-receipt" placeholder="e.g. Thank you for choosing us!" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none;">
                     </div>
                 </div>
 
                 <!-- TAB 3: MARKETPLACE & BRANDING -->
                 <div id="tab-marketplace" class="shop-tab-content">
-                    <label style="display: flex; align-items: center; gap: 10px; padding: 15px; background: #fdfbf7; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
-                        <input type="checkbox" id="edit-shop-is-public" style="width: 20px; height: 20px; accent-color: var(--brand-gold);">
-                        <span style="font-weight: 600; color: var(--brand-navy);">Show on public Marketplace (Stitch & Styles)</span>
+                    <label style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 10px; cursor: pointer;">
+                        <input type="checkbox" id="edit-shop-is-public" style="width: 20px; height: 20px; accent-color: var(--brand-gold); cursor: pointer;">
+                        <span style="font-weight: 600; color: #ffffff; font-size: 0.95em;">Show on public Marketplace (Stitch & Styles)</span>
                     </label>
 
                     <div class="form-group" style="position: relative;">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Specialization</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Specialization</label>
                         <i class="fas fa-star" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                        <input type="text" id="edit-shop-specialization" placeholder="e.g. Men's Suits, Bridal Wear" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
+                        <input type="text" id="edit-shop-specialization" placeholder="e.g. Men's Suits, Bridal Wear" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none;">
                     </div>
 
                     <div class="form-group" style="position: relative;">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Logo</label>
-                        <input type="file" id="edit-shop-logo-file" accept="image/*" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;" onchange="const f=this.files[0]; if(f){const p=document.getElementById('edit-shop-logo-preview'); p.src=URL.createObjectURL(f); p.style.display='block';}">
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Logo</label>
+                        <input type="file" id="edit-shop-logo-file" accept="image/*" style="width: 100%; padding: 12px; border-radius: 8px; font-size: 1em; outline: none;" onchange="const f=this.files[0]; if(f){const p=document.getElementById('edit-shop-logo-preview'); p.src=URL.createObjectURL(f); p.style.display='block';}">
                         <div style="display: flex; gap: 15px; align-items: center; margin-top: 10px;">
                             <img id="edit-shop-logo-preview" src="" style="display:none; max-height: 60px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.1);">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
                                 <button type="button" onclick="uploadShopLogoAction()" style="background: var(--brand-navy); border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 700;">
                                     <i class="fas fa-upload"></i> Upload Logo
                                 </button>
-                                <small style="color: #64748b;">Recommended: Transparent PNG, under 2MB.</small>
+                                <small style="color: #94a3b8;">Recommended: Transparent PNG, under 2MB.</small>
                             </div>
                         </div>
                         <div id="upload-logo-status" style="margin-top: 10px; font-size: 0.85em; font-weight: 600;"></div>
                     </div>
 
                     <div class="form-group">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Profile Avatar Image</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Profile Avatar Image</label>
                         <div style="display: flex; gap: 15px; align-items: center;">
-                            <input type="file" id="shop-profile-upload" accept="image/png, image/jpeg, image/webp" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; padding: 10px; border-radius: 8px; flex-grow: 1; outline: none;">
-                            <button type="button" onclick="uploadShopProfileImage()" class="btn-modern btn-primary" style="width: auto; padding: 6px 12px; margin: 0; background: var(--brand-gold); color: var(--brand-navy); font-weight: 700; font-size: 0.85em; white-space: nowrap;">
+                            <input type="file" id="shop-profile-upload" accept="image/png, image/jpeg, image/webp" style="padding: 10px; border-radius: 8px; flex-grow: 1; outline: none;">
+                            <button type="button" onclick="uploadShopProfileImage()" class="btn-modern btn-primary" style="width: auto; padding: 6px 12px; margin: 0; background: var(--brand-gold); color: #0f172a; font-weight: 700; font-size: 0.85em; white-space: nowrap;">
                                 <i class="fas fa-upload"></i> Upload
                             </button>
                         </div>
@@ -956,10 +969,10 @@
                     </div>
 
                     <div class="form-group">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Banner Image (Large Banner)</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Banner Image (Large Banner)</label>
                         <div style="display: flex; gap: 15px; align-items: center;">
-                            <input type="file" id="shop-banner-upload" accept="image/png, image/jpeg, image/webp" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; padding: 10px; border-radius: 8px; flex-grow: 1; outline: none;">
-                            <button type="button" onclick="uploadShopBannerImage()" class="btn-modern btn-primary" style="width: auto; padding: 6px 12px; margin: 0; background: var(--brand-gold); color: var(--brand-navy); font-weight: 700; font-size: 0.85em; white-space: nowrap;">
+                            <input type="file" id="shop-banner-upload" accept="image/png, image/jpeg, image/webp" style="padding: 10px; border-radius: 8px; flex-grow: 1; outline: none;">
+                            <button type="button" onclick="uploadShopBannerImage()" class="btn-modern btn-primary" style="width: auto; padding: 6px 12px; margin: 0; background: var(--brand-gold); color: #0f172a; font-weight: 700; font-size: 0.85em; white-space: nowrap;">
                                 <i class="fas fa-upload"></i> Upload
                             </button>
                         </div>
@@ -969,24 +982,24 @@
                     </div>
 
                     <div class="form-group" style="position: relative;">
-                        <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Description / Bio</label>
+                        <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Description / Bio</label>
                         <i class="fas fa-align-left" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                        <textarea id="edit-shop-desc" rows="3" placeholder="Describe your shop, specializations, and turnaround time..." style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+                        <textarea id="edit-shop-desc" rows="3" placeholder="Describe your shop, specializations, and turnaround time..." style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; font-size: 1em; outline: none; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
                     </div>
 
                     <div class="form-group">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0; display: block;">Weekly Working Hours</label>
+                            <label style="color: #cbd5e1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0; display: block;">Weekly Working Hours</label>
                             <button type="button" onclick="setEditShopOpen247()" style="background: transparent; border: 1px solid var(--brand-gold); color: var(--brand-gold); border-radius: 6px; padding: 4px 10px; font-size: 0.75em; font-weight: 700; cursor: pointer;">SET OPEN 24/7</button>
                         </div>
-                        <div style="background: #fdfbf7; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; gap: 10px;" id="edit-working-hours-container">
+                        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; gap: 10px; color: #ffffff;" id="edit-working-hours-container">
                             <!-- Populated via JS -->
                         </div>
                     </div>
                 </div>
 
                 <div style="margin-top: 30px; display: flex; justify-content: flex-end;">
-                    <button type="submit" id="btn-edit-shop" style="background: var(--brand-gold); color: #fff; border: none; padding: 15px 30px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; transition: background 0.3s ease; display: flex; align-items: center; gap: 10px;">
+                    <button type="submit" id="btn-edit-shop" style="background: var(--brand-gold); color: #0f172a; border: none; padding: 15px 30px; border-radius: 8px; font-size: 1em; font-weight: 700; cursor: pointer; transition: background 0.3s ease; display: flex; align-items: center; gap: 10px;">
                         <i class="fas fa-save"></i> Save Settings
                     </button>
                 </div>
@@ -996,32 +1009,32 @@
 
     <!-- Assign Manager Modal -->
     <div id="assign-manager-modal" class="modal">
-        <div class="modal-content" style="max-width: 450px; padding: 30px;">
+        <div class="modal-content" style="max-width: 450px; padding: 30px; background: #111c38; color: #f8fafc; border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: var(--brand-navy); margin: 0; font-family: 'Playfair Display', serif;"><i
+                <h2 style="color: #ffffff; margin: 0; font-family: 'Playfair Display', serif;"><i
                         class="fas fa-user-plus" style="color: #10b981;"></i> Assign Manager</h2>
                 <span class="close-btn" onclick="document.getElementById('assign-manager-modal').style.display='none'"
-                    style="font-size: 1.5em; cursor: pointer;">&times;</span>
+                    style="font-size: 1.5em; cursor: pointer; color: #cbd5e1;">&times;</span>
             </div>
 
-            <p style="color: #64748b; margin-bottom: 20px; text-align: center;">Assigning to: <strong id="assign-manager-shop-name"
-                    style="color: var(--brand-navy);">Shop</strong></p>
+            <p style="color: #cbd5e1; margin-bottom: 20px; text-align: center;">Assigning to: <strong id="assign-manager-shop-name"
+                    style="color: var(--brand-gold);">Shop</strong></p>
             
             <form id="assign-manager-form" onsubmit="handleAssignManagerToShop(event)">
                 <input type="hidden" id="assign-manager-shop-id">
                 <div class="form-group" style="margin-bottom: 15px;">
-                    <i class="fas fa-user-tie"></i>
+                    <i class="fas fa-user-tie" style="color: var(--brand-gold);"></i>
                     <input type="text" id="assign-manager-name" placeholder="Manager Full Name" required>
                 </div>
                 <div class="form-group" style="margin-bottom: 15px;">
-                    <i class="fas fa-envelope"></i>
+                    <i class="fas fa-envelope" style="color: var(--brand-gold);"></i>
                     <input type="email" id="assign-manager-email" placeholder="Manager Email Address" required>
                 </div>
                 <div class="form-group" style="margin-bottom: 25px;">
-                    <i class="fas fa-lock"></i>
+                    <i class="fas fa-lock" style="color: var(--brand-gold);"></i>
                     <input type="password" id="assign-manager-password" placeholder="Initial Password (min 6 chars)" required minlength="6">
                 </div>
-                <button type="submit" class="btn-modern btn-primary" style="width: 100%; justify-content: center; background: #10b981; border: none;">
+                <button type="submit" class="btn-modern btn-primary" style="width: 100%; justify-content: center; background: #10b981; color: #ffffff; border: none; font-weight: 700;">
                     <i class="fas fa-user-plus"></i> Assign Manager
                 </button>
                 <p id="assign-manager-message" style="text-align: center; margin-top: 15px; font-weight: 600; font-size: 0.9em;"></p>

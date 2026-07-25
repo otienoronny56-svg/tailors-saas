@@ -311,8 +311,13 @@
         }
 
         .search-group select option, .search-group select optgroup {
-            background-color: var(--brand-navy-light);
-            color: var(--brand-white);
+            background-color: #1e293b;
+            color: #ffffff;
+        }
+        [data-theme="light"] .search-group select option,
+        [data-theme="light"] .search-group select optgroup {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
         }
 
         /* Toggle Buttons */
@@ -1113,6 +1118,68 @@
             filter: blur(20px);
             opacity: 0.6;
             transform: scale(1.1);
+        }
+        .gallery-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(217, 177, 56, 0.5);
+            color: #fce786;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 16px;
+            backdrop-filter: blur(8px);
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        }
+        .gallery-nav-btn:hover {
+            background: rgba(217, 177, 56, 0.95);
+            color: #0f172a;
+            transform: translateY(-50%) scale(1.12);
+            box-shadow: 0 6px 20px rgba(217, 177, 56, 0.6);
+        }
+        .gallery-nav-btn.prev { left: 14px; }
+        .gallery-nav-btn.next { right: 14px; }
+        
+        .modal-gallery-thumbnails {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 8px;
+            z-index: 10;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(217, 177, 56, 0.3);
+            max-width: 90%;
+            overflow-x: auto;
+        }
+        .modal-thumb-dot {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            opacity: 0.65;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .modal-thumb-dot.active, .modal-thumb-dot:hover {
+            opacity: 1;
+            border-color: #d9b138;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(217, 177, 56, 0.7);
         }
         .listing-modal-details {
             flex: 1;
@@ -2323,18 +2390,19 @@
                 renderShops(filteredShops);
             } else {
                 const filteredListings = allListings.filter(list => {
+                    const isLiked = userLikes.some(id => String(id).trim() === String(list.id).trim());
+                    const isShopFav = typeof userFavoriteShops !== 'undefined' && userFavoriteShops.some(id => String(id).trim() === String(list.shop_id).trim());
+
                     if (activeMode === 'favourites') {
-                        if (!userLikes.includes(list.id)) return false;
+                        if (!isLiked && !isShopFav) return false;
                     }
 
                     let queryMatch = false;
                     if (!query) {
                         queryMatch = true;
                     } else if (semanticSearchResults) {
-                        // Semantic Match: Check if the listing is in our semantic search results
-                        queryMatch = semanticSearchResults.some(sr => sr.id === list.id);
+                        queryMatch = semanticSearchResults.some(sr => String(sr.id).trim() === String(list.id).trim());
                     } else {
-                        // Fallback: standard keyword matching
                         queryMatch = (list.title && list.title.toLowerCase().includes(query)) ||
                             (list.description && list.description.toLowerCase().includes(query)) ||
                             (list.category && list.category.toLowerCase().includes(query));
@@ -2342,16 +2410,13 @@
 
                     const categoryMatch = !category || list.category === category;
                     
-                    // Let's refine audience logic:
-                    // If user selects "Men", show "Men" and "Unisex".
-                    // If user selects "Unisex", show only "Unisex".
                     let isAudienceMatch = true;
                     if (audience) {
                         const itemAudience = list.target_audience || 'Unisex';
                         isAudienceMatch = (itemAudience === audience);
                     }
 
-                    const shop = allShops.find(s => s.id === list.shop_id);
+                    const shop = allShops.find(s => String(s.id).trim() === String(list.shop_id).trim());
                     const locMatch = !location || (shop && (
                         (shop.location_name && shop.location_name.toLowerCase().includes(location)) ||
                         (shop.location && shop.location.toLowerCase().includes(location))
@@ -2518,7 +2583,52 @@
                     ? `<img src="${avatarImgUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; border: 1px solid var(--brand-gold);">`
                     : `<i class="fas fa-store" style="color:var(--brand-gold); font-size: 1.2em;"></i>`;
 
-                const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || `https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800`;
+                // Extract all images for gallery
+                let images = [];
+                if (list.image_urls) {
+                    try {
+                        images = typeof list.image_urls === 'string' ? JSON.parse(list.image_urls) : list.image_urls;
+                    } catch(e) {
+                        images = [list.image_url || 'https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800'];
+                    }
+                } else if (list.image_url) {
+                    images = [list.image_url];
+                } else {
+                    images = ['https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800'];
+                }
+
+                if (!Array.isArray(images) || images.length === 0) {
+                    images = ['https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800'];
+                }
+
+                window.currentGalleryImages = images;
+                window.currentGalleryIndex = 0;
+
+                const mainImageUrl = images[0];
+                document.getElementById('modal-listing-image').src = mainImageUrl;
+                document.getElementById('modal-listing-image-blur').src = mainImageUrl;
+
+                const prevBtn = document.getElementById('modal-gallery-prev');
+                const nextBtn = document.getElementById('modal-gallery-next');
+                const thumbsContainer = document.getElementById('modal-gallery-thumbnails');
+
+                if (images.length > 1) {
+                    if (prevBtn) prevBtn.style.display = 'flex';
+                    if (nextBtn) nextBtn.style.display = 'flex';
+                    if (thumbsContainer) {
+                        thumbsContainer.style.display = 'flex';
+                        thumbsContainer.innerHTML = images.map((url, idx) => `
+                            <img src="${url}" class="modal-thumb-dot ${idx === 0 ? 'active' : ''}" onclick="setModalGalleryImage(${idx})" alt="Angle ${idx + 1}">
+                        `).join('');
+                    }
+                } else {
+                    if (prevBtn) prevBtn.style.display = 'none';
+                    if (nextBtn) nextBtn.style.display = 'none';
+                    if (thumbsContainer) {
+                        thumbsContainer.style.display = 'none';
+                        thumbsContainer.innerHTML = '';
+                    }
+                }
 
                 let priceHtml = '';
                 if (list.original_price && parseFloat(list.original_price) > parseFloat(list.price)) {
@@ -2533,9 +2643,6 @@
                         <span style="color: var(--brand-gold); font-weight: 800; font-size: 1.5em; line-height: 1;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
                     `;
                 }
-
-                document.getElementById('modal-listing-image').src = imageUrl;
-                document.getElementById('modal-listing-image-blur').src = imageUrl;
                 document.getElementById('modal-listing-title').textContent = list.title || 'Listing Details';
                 document.getElementById('modal-listing-desc').textContent = list.description || 'No description provided.';
                 document.getElementById('modal-listing-category').textContent = list.category || 'Fashion';
@@ -2660,6 +2767,11 @@
             <div class="listing-modal-image-container">
                 <img id="modal-listing-image-blur" class="listing-modal-image-blur" src="" alt="Blur Backdrop">
                 <img id="modal-listing-image" class="listing-modal-image" src="" alt="Listing Image" style="object-fit: contain; z-index: 1;">
+                
+                <button id="modal-gallery-prev" class="gallery-nav-btn prev" onclick="navigateModalGallery(-1)" title="Previous photo"><i class="fas fa-chevron-left"></i></button>
+                <button id="modal-gallery-next" class="gallery-nav-btn next" onclick="navigateModalGallery(1)" title="Next photo"><i class="fas fa-chevron-right"></i></button>
+                
+                <div id="modal-gallery-thumbnails" class="modal-gallery-thumbnails"></div>
             </div>
             <div class="listing-modal-details">
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -2732,157 +2844,359 @@
             transition: all 0.3s ease;
             border: none;
         }
+        .ai-chat-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d9b138, #b5891a);
+            color: #0b1120;
+            box-shadow: 0 8px 25px rgba(217, 177, 56, 0.4), 0 0 15px rgba(217, 177, 56, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 9999;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
         .ai-chat-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+            transform: scale(1.12) rotate(8deg);
+            box-shadow: 0 12px 30px rgba(217, 177, 56, 0.6), 0 0 25px rgba(217, 177, 56, 0.4);
         }
         .ai-chat-window {
             position: fixed;
-            bottom: 100px;
+            bottom: 30px;
             right: 30px;
-            width: 350px;
-            height: 500px;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 1000;
+            width: 440px;
+            max-width: calc(100vw - 30px);
+            height: 600px;
+            max-height: calc(100vh - 60px);
+            background: linear-gradient(160deg, rgba(15, 23, 42, 0.98), rgba(23, 32, 51, 0.97));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(217, 177, 56, 0.3);
+            border-radius: 24px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.65), 0 0 35px rgba(217, 177, 56, 0.15);
+            z-index: 10000;
             display: none;
             flex-direction: column;
             overflow: hidden;
             opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
+            transform: translateY(25px) scale(0.96);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: 'Inter', sans-serif;
         }
         .ai-chat-window.active {
             display: flex;
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
         .ai-chat-header {
-            padding: 15px 20px;
-            background: rgba(255,255,255,0.05);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 16px 20px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(217, 177, 56, 0.08));
+            border-bottom: 1px solid rgba(217, 177, 56, 0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: white;
+        }
+        .ai-header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ai-badge-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(217, 177, 56, 0.25), rgba(217, 177, 56, 0.08));
+            border: 1px solid rgba(217, 177, 56, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fce786;
+            font-size: 17px;
+        }
+        .ai-header-titles {
+            display: flex;
+            flex-direction: column;
+        }
+        .ai-header-title {
             font-family: 'Playfair Display', serif;
-            font-weight: 600;
-            font-size: 1.1em;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #ffffff;
+            letter-spacing: 0.3px;
+        }
+        .ai-header-subtitle {
+            font-size: 0.72rem;
+            color: #d9b138;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+        .ai-status-dot {
+            width: 7px;
+            height: 7px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
         }
         .ai-chat-close {
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: rgba(255,255,255,0.7);
             cursor: pointer;
-            font-size: 18px;
-            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
         }
-        .ai-chat-close:hover { color: white; }
+        .ai-chat-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+            transform: rotate(90deg);
+        }
         .ai-chat-messages {
             flex: 1;
-            padding: 15px;
+            padding: 18px 16px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 14px;
+            scroll-behavior: smooth;
         }
-        .ai-msg {
-            max-width: 85%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 0.9em;
-            line-height: 1.4;
-            color: white;
-            word-wrap: break-word;
+        /* Custom Scrollbar for Chat Window */
+        .ai-chat-messages::-webkit-scrollbar {
+            width: 5px;
         }
-        .ai-msg.user {
-            align-self: flex-end;
-            background: var(--brand-gold);
-            color: var(--brand-navy);
-            border-bottom-right-radius: 4px;
+        .ai-chat-messages::-webkit-scrollbar-track {
+            background: transparent;
         }
-        .ai-msg.bot {
-            align-self: flex-start;
-            background: rgba(255,255,255,0.1);
-            border-bottom-left-radius: 4px;
+        .ai-chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(217, 177, 56, 0.25);
+            border-radius: 10px;
         }
-        .ai-chat-input-area {
-            padding: 15px;
-            background: rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(255,255,255,0.1);
+        .ai-chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(217, 177, 56, 0.5);
+        }
+        .ai-msg-wrapper {
             display: flex;
             gap: 10px;
+            align-items: flex-start;
+            max-width: 90%;
+        }
+        .ai-msg-wrapper.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .ai-msg-wrapper.bot {
+            align-self: flex-start;
+        }
+        .ai-msg-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(217, 177, 56, 0.2);
+            border: 1px solid rgba(217, 177, 56, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fce786;
+            font-size: 13px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .ai-msg {
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.92rem;
+            line-height: 1.55;
+            word-wrap: break-word;
+        }
+        .ai-msg-wrapper.user .ai-msg {
+            background: linear-gradient(135deg, #d9b138, #b88a18);
+            color: #0b1120;
+            font-weight: 600;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(217, 177, 56, 0.25);
+        }
+        .ai-msg-wrapper.bot .ai-msg {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            color: #f1f5f9;
+            border-bottom-left-radius: 4px;
+        }
+        
+        /* Item Recommendation Link Pill */
+        .ai-item-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(217, 177, 56, 0.22), rgba(217, 177, 56, 0.08));
+            border: 1px solid rgba(217, 177, 56, 0.45);
+            color: #fce786 !important;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-decoration: none !important;
+            margin: 4px 2px;
+            transition: all 0.25s ease;
+            font-size: 0.88rem;
+        }
+        .ai-item-pill:hover {
+            transform: translateY(-2px);
+            background: rgba(217, 177, 56, 0.35);
+            box-shadow: 0 4px 14px rgba(217, 177, 56, 0.3);
+            color: #ffffff !important;
+        }
+
+        /* Quick Suggestions Chips */
+        .ai-quick-chips {
+            padding: 8px 16px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            background: rgba(0,0,0,0.15);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .ai-quick-chips::-webkit-scrollbar { display: none; }
+        .ai-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(217, 177, 56, 0.25);
+            color: #cbd5e1;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.78rem;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .ai-chip:hover {
+            background: rgba(217, 177, 56, 0.2);
+            color: #fce786;
+            border-color: rgba(217, 177, 56, 0.5);
+        }
+
+        .ai-chat-input-area {
+            padding: 14px 16px;
+            background: rgba(0,0,0,0.25);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
         .ai-chat-input {
             flex: 1;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 10px 15px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 24px;
+            padding: 11px 18px;
             color: white;
             font-family: 'Inter', sans-serif;
-            font-size: 0.9em;
+            font-size: 0.9rem;
             outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .ai-chat-input:focus { border-color: var(--brand-gold); }
+        .ai-chat-input::placeholder { color: rgba(255,255,255,0.4); }
+        .ai-chat-input:focus {
+            border-color: #d9b138;
+            box-shadow: 0 0 12px rgba(217, 177, 56, 0.25);
+        }
         .ai-chat-send {
-            background: var(--brand-gold);
-            color: var(--brand-navy);
+            background: linear-gradient(135deg, #d9b138, #b88a18);
+            color: #0b1120;
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(217, 177, 56, 0.3);
         }
-        .ai-chat-send:hover { transform: scale(1.1); }
+        .ai-chat-send:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 18px rgba(217, 177, 56, 0.5);
+        }
         .ai-typing {
-            font-size: 0.8em;
-            color: rgba(255,255,255,0.5);
-            align-self: flex-start;
-            padding: 5px 10px;
+            font-size: 0.78rem;
+            color: #d9b138;
+            padding: 4px 16px 8px 16px;
             display: none;
+            font-style: italic;
         }
 
-        /* Mobile Adjustments for AI Wand */
+        /* Mobile Responsive Adjustments */
         @media (max-width: 768px) {
             .ai-chat-btn {
-                bottom: 90px;
+                bottom: 85px;
                 right: 20px;
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
+                width: 54px;
+                height: 54px;
+                font-size: 22px;
             }
             .ai-chat-window {
-                bottom: 80px;
-                right: 10px;
-                left: 10px;
-                width: auto;
-                height: calc(100dvh - 90px);
-                max-height: calc(100dvh - 90px);
+                top: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                width: 100%;
+                max-width: 100%;
+                height: 100dvh;
+                max-height: 100dvh;
+                border-radius: 0;
+                z-index: 10000;
             }
         }
     </style>
 
-    <button class="ai-chat-btn" onclick="toggleAIChat()">
+    <button class="ai-chat-btn" onclick="toggleAIChat()" title="AI Style Assistant">
         <i class="fas fa-magic"></i>
     </button>
 
     <div class="ai-chat-window" id="ai-chat-window">
         <div class="ai-chat-header">
-            <span><i class="fas fa-magic" style="color: var(--brand-gold); margin-right: 8px;"></i> Style Assistant</span>
+            <div class="ai-header-brand">
+                <div class="ai-badge-icon">
+                    <i class="fas fa-magic"></i>
+                </div>
+                <div class="ai-header-titles">
+                    <span class="ai-header-title">Style Assistant</span>
+                    <span class="ai-header-subtitle"><span class="ai-status-dot"></span> Powered by Stitch &amp; Styles AI</span>
+                </div>
+            </div>
             <button class="ai-chat-close" onclick="toggleAIChat()"><i class="fas fa-times"></i></button>
         </div>
+        
         <div class="ai-chat-messages" id="ai-chat-messages">
-            <div class="ai-msg bot">Hi there! I'm your personal style assistant. Need outfit ideas or help finding something specific?</div>
+            <div class="ai-msg-wrapper bot">
+                <div class="ai-msg-avatar"><i class="fas fa-robot"></i></div>
+                <div class="ai-msg">Hi there! I'm your personal style assistant. Need outfit ideas or help finding something specific?</div>
+            </div>
         </div>
-        <div class="ai-typing" id="ai-typing">Assistant is typing...</div>
+        
+        <div class="ai-typing" id="ai-typing"><i class="fas fa-spinner fa-spin"></i> Style Assistant is thinking...</div>
+
+        <div class="ai-quick-chips">
+            <div class="ai-chip" onclick="quickAISuggestion('What should I wear to a wedding?')">✨ Wedding Guest</div>
+            <div class="ai-chip" onclick="quickAISuggestion('Show me gentlemen\'s tailored suits')">👔 Men's Suits</div>
+            <div class="ai-chip" onclick="quickAISuggestion('Find elegant dinner dresses')">👗 Dinner Dresses</div>
+        </div>
+
         <div class="ai-chat-input-area">
             <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="E.g. What to wear to a wedding?" onkeypress="if(event.key === 'Enter') sendAIMessage()">
             <button class="ai-chat-send" onclick="sendAIMessage()">
@@ -2895,17 +3209,35 @@
         let aiChatHistory = [];
         
         function toggleAIChat() {
-            const window = document.getElementById('ai-chat-window');
+            const windowEl = document.getElementById('ai-chat-window');
             const btn = document.querySelector('.ai-chat-btn');
-            if(window.classList.contains('active')) {
-                window.classList.remove('active');
-                setTimeout(() => window.style.display = 'none', 300);
+            if(windowEl.classList.contains('active')) {
+                windowEl.classList.remove('active');
+                setTimeout(() => windowEl.style.display = 'none', 300);
                 if (btn) btn.style.display = 'flex';
             } else {
-                window.style.display = 'flex';
-                setTimeout(() => window.classList.add('active'), 10);
+                windowEl.style.display = 'flex';
+                setTimeout(() => windowEl.classList.add('active'), 10);
                 if (btn) btn.style.display = 'none';
                 document.getElementById('ai-chat-input').focus();
+
+                // Personalize initial greeting if client name is available
+                if (aiChatHistory.length === 0 && typeof currentUser !== 'undefined' && currentUser) {
+                    const fullName = currentUser.user_metadata?.full_name || currentUser.full_name || '';
+                    const firstName = fullName ? fullName.split(' ')[0] : '';
+                    const botMsgEl = document.querySelector('#ai-chat-messages .ai-msg-wrapper.bot .ai-msg');
+                    if (botMsgEl && firstName) {
+                        botMsgEl.textContent = `Hi ${firstName}! I'm your personal style assistant. Need outfit ideas or help finding something specific?`;
+                    }
+                }
+            }
+        }
+
+        function quickAISuggestion(text) {
+            const input = document.getElementById('ai-chat-input');
+            if (input) {
+                input.value = text;
+                sendAIMessage();
             }
         }
 
@@ -2927,8 +3259,12 @@
             try {
                 if(!supabaseClient) throw new Error("Supabase client not initialized");
                 
+                const clientName = (typeof currentUser !== 'undefined' && currentUser) 
+                    ? (currentUser.user_metadata?.full_name || currentUser.full_name || currentUser.email?.split('@')[0])
+                    : '';
+
                 const response = await supabaseClient.functions.invoke('ai-style-assistant', {
-                    body: { message, history: aiChatHistory }
+                    body: { message, history: aiChatHistory, userName: clientName }
                 });
 
                 typingInd.style.display = 'none';
@@ -2955,17 +3291,36 @@
 
         function appendAIMessage(text, sender) {
             const container = document.getElementById('ai-chat-messages');
+            const wrapper = document.createElement('div');
+            wrapper.className = `ai-msg-wrapper ${sender}`;
+            
+            if (sender === 'bot') {
+                const avatar = document.createElement('div');
+                avatar.className = 'ai-msg-avatar';
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                wrapper.appendChild(avatar);
+            }
+
             const msgDiv = document.createElement('div');
-            msgDiv.className = `ai-msg ${sender}`;
+            msgDiv.className = 'ai-msg';
             
-            // Parse simple newlines, bold text, and markdown links
+            // Clean up raw markdown and replace item links with luxury gold pills
             let formattedText = text
-                .replace(/\\n/g, '<br>')
-                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                .replace(/\[([^\]]+)\]\(#listing-([^\)]+)\)/g, '<a href="#" onclick="window.closeListingModal(); setTimeout(()=>window.openListingModal(\'$2\'), 100); return false;" style="color:#10b981; font-weight:bold; text-decoration:underline;">$1</a>');
+                .replace(/\\n/g, '\n')
+                .replace(/\[([^\]]+)\]\(#listing-([^\)]+)\)/g, (match, title, id) => {
+                    return `<a href="#" class="ai-item-pill" onclick="if(window.toggleAIChat && document.getElementById('ai-chat-window').classList.contains('active')) toggleAIChat(); if(window.closeListingModal) window.closeListingModal(); setTimeout(()=> { if(window.openListingModal) window.openListingModal('${id}'); }, 150); return false;"><i class="fas fa-gem"></i> ${title}</a>`;
+                })
+                .replace(/\*\*\s*(.*?)\s*\*\*/g, '<strong>$1</strong>')
+                .replace(/(^|\n)\s*\*\s*(<a class="ai-item-pill".*?<\/a>)/gi, '$1$2')
+                .replace(/\*\s*(<a class="ai-item-pill".*?<\/a>)\s*\*/gi, '$1')
+                .replace(/(^|\n)\s*\*\s+/g, '$1• ')
+                .replace(/\n/g, '<br>')
+                .replace(/(<br>\s*){3,}/gi, '<br><br>');
+
             msgDiv.innerHTML = formattedText;
+            wrapper.appendChild(msgDiv);
             
-            container.appendChild(msgDiv);
+            container.appendChild(wrapper);
             container.scrollTop = container.scrollHeight;
         }
     </script>

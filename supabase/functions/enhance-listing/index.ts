@@ -61,21 +61,41 @@ serve(async (req) => {
       }
     };
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    });
+    const GEMINI_TEXT_MODELS = [
+      'gemini-2.0-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-2.5-flash',
+      'gemini-1.5-flash-001',
+      'gemini-1.5-flash-002',
+      'gemini-1.5-flash'
+    ];
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Gemini API Error:", errText);
-      throw new Error(`Gemini API responded with status ${response.status}: ${errText}`);
+    let data: any = null;
+    let genErr = '';
+
+    for (const model of GEMINI_TEXT_MODELS) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          data = await res.json();
+          break;
+        } else {
+          genErr = await res.text();
+          console.warn(`Gemini model ${model} failed (${res.status}): ${genErr}`);
+        }
+      } catch (e: any) {
+        genErr = e.message;
+      }
     }
 
-    const data = await response.json();
+    if (!data) {
+      throw new Error(`Gemini API call failed across all candidate models. Last error: ${genErr}`);
+    }
+
     let textResult = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
     
     // Clean up potential markdown formatting just in case

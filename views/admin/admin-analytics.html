@@ -413,12 +413,27 @@
             document.getElementById('bi-speed').innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 0.8em; color: #cbd5e1;"></i>';
 
             try {
+                const orgId = USER_PROFILE?.organization_id;
+                const isSuperAdmin = USER_PROFILE?.role === 'super_admin';
+
+                let ordersQ = supabaseClient.from('orders').select('*');
+                let paymentsQ = supabaseClient.from('payments').select('*').is('deleted_at', null);
+                let expensesQ = supabaseClient.from('expenses').select('*');
+                let clientsQ = supabaseClient.from('clients').select('id, name, phone');
+
+                if (!isSuperAdmin && orgId) {
+                    ordersQ = ordersQ.eq('organization_id', orgId);
+                    paymentsQ = paymentsQ.eq('organization_id', orgId);
+                    expensesQ = expensesQ.eq('organization_id', orgId);
+                    clientsQ = clientsQ.eq('organization_id', orgId);
+                }
+
                 // 1. Fetch all data concurrently including the actual clients table
                 const [ordersRes, paymentsRes, expensesRes, clientsRes, profilesRes] = await Promise.all([
-                    supabaseClient.from('orders').select('*'),
-                    supabaseClient.from('payments').select('*').is('deleted_at', null),
-                    supabaseClient.from('expenses').select('*'),
-                    supabaseClient.from('clients').select('id, name, phone'),
+                    ordersQ,
+                    paymentsQ,
+                    expensesQ,
+                    clientsQ,
                     supabaseClient.from('user_profiles').select('id, full_name, email, role').eq('role', 'client')
                 ]);
 

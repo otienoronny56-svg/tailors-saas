@@ -40,10 +40,10 @@ serve(async (req) => {
       .single()
     if (orgErr) throw new Error('Failed to create organization: ' + orgErr.message)
 
-    // 4. Create Shop
+    // 4. Create Shop (Public on Marketplace by default)
     const { data: shopData, error: shopErr } = await adminClient
       .from('shops')
-      .insert([{ organization_id: orgData.id, name: shopName }])
+      .insert([{ organization_id: orgData.id, name: shopName, is_public: true }])
       .select()
       .single()
     if (shopErr) throw new Error('Failed to create shop: ' + shopErr.message)

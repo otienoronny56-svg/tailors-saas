@@ -132,6 +132,9 @@ function setupClientSearch(inputId) {
 
         try {
             let query = supabaseClient.from('clients').select('*');
+            if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE?.organization_id) {
+                query = query.eq('organization_id', USER_PROFILE.organization_id);
+            }
 
             if (val.length >= 3) {
                 query = query.or(`name.ilike.%${val}%,phone.ilike.%${val}%`).limit(5);

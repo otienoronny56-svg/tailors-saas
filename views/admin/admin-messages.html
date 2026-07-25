@@ -2003,46 +2003,22 @@
                 let clientObj = existingClients && existingClients[0] ? existingClients[0] : null;
 
                 if (!clientObj) {
-                    // Try searching globally by phone to see if they exist in another tenant/shop
-                    let { data: globalClients } = await supabaseClient
+                    // Create a new client record for this organization and shop
+                    const { data: newClients, error: createErr } = await supabaseClient
                         .from('clients')
-                        .select('*')
-                        .eq('phone', clientPhone);
+                        .insert([{
+                            organization_id: orgId,
+                            shop_id: shopId,
+                            name: clientName,
+                            phone: clientPhone,
+                            last_garment_type: garmentType,
+                            last_visit: new Date().toISOString(),
+                            measurements_history: []
+                        }])
+                        .select();
 
-                    if (globalClients && globalClients[0]) {
-                        // Customer exists in another tenant; adopt them into this organization/shop
-                        const { data: adoptedClients, error: adoptErr } = await supabaseClient
-                            .from('clients')
-                            .update({
-                                organization_id: orgId,
-                                shop_id: shopId,
-                                name: clientName,
-                                last_garment_type: garmentType,
-                                last_visit: new Date().toISOString()
-                            })
-                            .eq('id', globalClients[0].id)
-                            .select();
-
-                        if (adoptErr) throw adoptErr;
-                        clientObj = adoptedClients && adoptedClients[0] ? adoptedClients[0] : null;
-                    } else {
-                        // Create a new client record
-                        const { data: newClients, error: createErr } = await supabaseClient
-                            .from('clients')
-                            .insert([{
-                                organization_id: orgId,
-                                shop_id: shopId,
-                                name: clientName,
-                                phone: clientPhone,
-                                last_garment_type: garmentType,
-                                last_visit: new Date().toISOString(),
-                                measurements_history: []
-                            }])
-                            .select();
-
-                        if (createErr) throw createErr;
-                        clientObj = newClients && newClients[0] ? newClients[0] : null;
-                    }
+                    if (createErr) throw createErr;
+                    clientObj = newClients && newClients[0] ? newClients[0] : null;
                 }
 
                 if (!clientObj) throw new Error("Failed to initialize client profile object.");

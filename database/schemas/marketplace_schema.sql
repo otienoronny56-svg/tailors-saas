@@ -5,7 +5,7 @@
 -- 1. EXTEND SHOPS WITH PUBLIC PROFILE FIELDS
 -- ==========================================================
 ALTER TABLE public.shops 
-ADD COLUMN IF NOT EXISTS is_public boolean DEFAULT false,
+ADD COLUMN IF NOT EXISTS is_public boolean DEFAULT true,
 ADD COLUMN IF NOT EXISTS description text,
 ADD COLUMN IF NOT EXISTS profile_image text,
 ADD COLUMN IF NOT EXISTS banner_image text,

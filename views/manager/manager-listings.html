@@ -277,9 +277,9 @@
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
                         <div class="form-group">
-                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Upload Product Photo *</label>
-                            <input type="file" id="list-image-file" accept="image/*" required style="margin: 0; padding-top: 8px;">
-                            <small style="color: #64748b; margin-top: 5px; display:block;">Images are stored securely in marketplace storage.</small>
+                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Upload Product Photos (Up to 4) *</label>
+                            <input type="file" id="list-image-file" accept="image/*" multiple required style="margin: 0; padding-top: 8px;">
+                            <small style="color: #64748b; margin-top: 5px; display:block;">Select 1-4 photos (Front, Rear/Back, Side, Details).</small>
                         </div>
                         <div class="form-group">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
@@ -608,21 +608,26 @@
                 const sizeChartId = document.getElementById('list-size-chart').value || null;
                 const desc = document.getElementById('list-desc').value.trim();
                 const fileInput = document.getElementById('list-image-file');
-                const file = fileInput.files[0];
+                const files = Array.from(fileInput.files || []).slice(0, 4);
 
-                if (!file) throw new Error('Product photo is required!');
+                if (files.length === 0) throw new Error('At least 1 product photo is required!');
 
-                // Upload image
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${shopId}_listing_${Date.now()}.${fileExt}`;
-                const { error: uploadError } = await supabaseClient.storage
-                    .from('marketplace-assets')
-                    .upload(fileName, file, { upsert: true });
-                if (uploadError) throw uploadError;
+                // Upload all selected images (up to 4 angles)
+                const publicUrls = [];
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${shopId}_listing_${Date.now()}_${i}.${fileExt}`;
+                    const { error: uploadError } = await supabaseClient.storage
+                        .from('marketplace-assets')
+                        .upload(fileName, file, { upsert: true });
+                    if (uploadError) throw uploadError;
 
-                const { data: urlData } = supabaseClient.storage
-                    .from('marketplace-assets')
-                    .getPublicUrl(fileName);
+                    const { data: urlData } = supabaseClient.storage
+                        .from('marketplace-assets')
+                        .getPublicUrl(fileName);
+                    publicUrls.push(urlData.publicUrl);
+                }
 
                 // Insert listing
                 const { data: insertedData, error: insertErr } = await supabaseClient
@@ -635,7 +640,7 @@
                         original_price: originalPrice,
                         size_chart_id: sizeChartId,
                         description: desc,
-                        image_urls: JSON.stringify([urlData.publicUrl]),
+                        image_urls: JSON.stringify(publicUrls),
                         status: 'active'
                     }])
                     .select();

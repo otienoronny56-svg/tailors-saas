@@ -2226,6 +2226,68 @@
             opacity: 0.6;
             transform: scale(1.1);
         }
+        .gallery-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(217, 177, 56, 0.5);
+            color: #fce786;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 16px;
+            backdrop-filter: blur(8px);
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        }
+        .gallery-nav-btn:hover {
+            background: rgba(217, 177, 56, 0.95);
+            color: #0f172a;
+            transform: translateY(-50%) scale(1.12);
+            box-shadow: 0 6px 20px rgba(217, 177, 56, 0.6);
+        }
+        .gallery-nav-btn.prev { left: 14px; }
+        .gallery-nav-btn.next { right: 14px; }
+        
+        .modal-gallery-thumbnails {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 8px;
+            z-index: 10;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(217, 177, 56, 0.3);
+            max-width: 90%;
+            overflow-x: auto;
+        }
+        .modal-thumb-dot {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            opacity: 0.65;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .modal-thumb-dot.active, .modal-thumb-dot:hover {
+            opacity: 1;
+            border-color: #d9b138;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(217, 177, 56, 0.7);
+        }
         .listing-modal-details {
             flex: 1;
             padding: 30px;
@@ -3528,7 +3590,52 @@
                 ? `<img src="${avatarImgUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; border: 1px solid var(--brand-gold);">`
                 : `<i class="fas fa-store" style="color:var(--brand-gold); font-size: 1.2em;"></i>`;
 
-            const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || `https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800`;
+            // Extract all images for gallery
+            let images = [];
+            if (list.image_urls) {
+                try {
+                    images = typeof list.image_urls === 'string' ? JSON.parse(list.image_urls) : list.image_urls;
+                } catch(e) {
+                    images = [list.image_url || 'https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800'];
+                }
+            } else if (list.image_url) {
+                images = [list.image_url];
+            } else {
+                images = ['https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800'];
+            }
+
+            if (!Array.isArray(images) || images.length === 0) {
+                images = ['https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800'];
+            }
+
+            window.currentGalleryImages = images;
+            window.currentGalleryIndex = 0;
+
+            const mainImageUrl = images[0];
+            document.getElementById('modal-listing-image').src = mainImageUrl;
+            document.getElementById('modal-listing-image-blur').src = mainImageUrl;
+
+            const prevBtn = document.getElementById('modal-gallery-prev');
+            const nextBtn = document.getElementById('modal-gallery-next');
+            const thumbsContainer = document.getElementById('modal-gallery-thumbnails');
+
+            if (images.length > 1) {
+                if (prevBtn) prevBtn.style.display = 'flex';
+                if (nextBtn) nextBtn.style.display = 'flex';
+                if (thumbsContainer) {
+                    thumbsContainer.style.display = 'flex';
+                    thumbsContainer.innerHTML = images.map((url, idx) => `
+                        <img src="${url}" class="modal-thumb-dot ${idx === 0 ? 'active' : ''}" onclick="setModalGalleryImage(${idx})" alt="Angle ${idx + 1}">
+                    `).join('');
+                }
+            } else {
+                if (prevBtn) prevBtn.style.display = 'none';
+                if (nextBtn) nextBtn.style.display = 'none';
+                if (thumbsContainer) {
+                    thumbsContainer.style.display = 'none';
+                    thumbsContainer.innerHTML = '';
+                }
+            }
 
             let priceHtml = '';
             if (list.original_price && parseFloat(list.original_price) > parseFloat(list.price)) {
@@ -3544,8 +3651,6 @@
                 `;
             }
 
-            document.getElementById('modal-listing-image').src = imageUrl;
-            document.getElementById('modal-listing-image-blur').src = imageUrl;
             document.getElementById('modal-listing-title').textContent = list.title || 'Listing Details';
             document.getElementById('modal-listing-desc').textContent = list.description || 'No description provided.';
             document.getElementById('modal-listing-category').textContent = list.category || 'Fashion';
@@ -3594,6 +3699,11 @@
             <div class="listing-modal-image-container">
                 <img id="modal-listing-image-blur" class="listing-modal-image-blur" src="" alt="Blur Backdrop">
                 <img id="modal-listing-image" class="listing-modal-image" src="" alt="Listing Image" style="object-fit: contain; z-index: 1;">
+                
+                <button id="modal-gallery-prev" class="gallery-nav-btn prev" onclick="navigateModalGallery(-1)" title="Previous photo"><i class="fas fa-chevron-left"></i></button>
+                <button id="modal-gallery-next" class="gallery-nav-btn next" onclick="navigateModalGallery(1)" title="Next photo"><i class="fas fa-chevron-right"></i></button>
+                
+                <div id="modal-gallery-thumbnails" class="modal-gallery-thumbnails"></div>
             </div>
             <div class="listing-modal-details">
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">

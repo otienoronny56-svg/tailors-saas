@@ -33,29 +33,37 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // 1. Convert user query to vector embedding using Gemini API (gemini-embedding-001 returns 3072 dimension)
-    const embeddingResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        content: {
-          parts: [{ text: query }]
-        }
-      })
-    });
+    // 1. Convert user query to vector embedding using Gemini API (returns 3072 dimension)
+    const EMBEDDING_MODELS = ['gemini-embedding-001', 'text-embedding-004'];
+    let queryEmbedding: number[] | null = null;
+    let embedErr = '';
 
-    if (!embeddingResponse.ok) {
-      const errText = await embeddingResponse.text();
-      throw new Error(`Gemini Embedding API responded with status ${embeddingResponse.status}: ${errText}`);
+    for (const model of EMBEDDING_MODELS) {
+      try {
+        const payload: any = { content: { parts: [{ text: query }] } };
+        if (model === 'text-embedding-004') payload.outputDimensionality = 3072;
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          const embData = await res.json();
+          const vals = embData.embedding?.values;
+          if (vals && Array.isArray(vals) && vals.length === 3072) {
+            queryEmbedding = vals;
+            break;
+          }
+        } else {
+          embedErr = await res.text();
+        }
+      } catch (e: any) {
+        embedErr = e.message;
+      }
     }
 
-    const embeddingData = await embeddingResponse.json();
-    const queryEmbedding = embeddingData.embedding?.values;
-
-    if (!queryEmbedding || !Array.isArray(queryEmbedding) || queryEmbedding.length !== 3072) {
-      throw new Error(`Failed to retrieve valid 3072-dimension embedding values from Gemini. Got length: ${queryEmbedding ? queryEmbedding.length : 'null'}`);
+    if (!queryEmbedding) {
+      throw new Error(`Failed to retrieve valid 3072-dimension embedding values from Gemini. Last error: ${embedErr}`);
     }
 
     // 2. Query Postgres pgvector RPC function match_listings
