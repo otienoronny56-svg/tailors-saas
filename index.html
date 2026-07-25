@@ -337,6 +337,131 @@
             width: 100%;
         }
 
+        /* ===== MEGA DROPDOWN SYSTEM ===== */
+        .nav-dropdown-item {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .nav-dropdown-item > a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-dropdown-item .chevron-icon {
+            font-size: 0.75em;
+            transition: transform 0.3s ease;
+            color: var(--text-muted);
+        }
+
+        .nav-dropdown-item:hover .chevron-icon {
+            transform: rotate(180deg);
+            color: var(--gold);
+        }
+
+        .mega-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            transform: translateY(12px);
+            width: 540px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--gold-border);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(212, 175, 55, 0.12);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1100;
+        }
+
+        [data-theme="light"] .mega-dropdown-menu {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .nav-dropdown-item:hover .mega-dropdown-menu,
+        .nav-dropdown-item:focus-within .mega-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(4px);
+        }
+
+        .mega-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .mega-link-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            text-decoration: none !important;
+            transition: var(--transition-smooth);
+            border: 1px solid transparent;
+        }
+
+        .mega-link-card::after {
+            display: none !important;
+        }
+
+        .mega-link-card:hover {
+            background: rgba(212, 175, 55, 0.08);
+            border-color: var(--gold-border);
+            transform: translateY(-2px);
+        }
+
+        .mega-icon-wrap {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: var(--gold-glow);
+            border: 1px solid var(--gold-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 1.05em;
+            flex-shrink: 0;
+        }
+
+        .mega-title {
+            font-weight: 700;
+            font-size: 0.88em;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mega-desc {
+            font-size: 0.76em;
+            color: var(--text-muted);
+            line-height: 1.3;
+            margin-top: 2px;
+        }
+
+        .mega-badge {
+            font-size: 0.6em;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 800;
+            text-transform: uppercase;
+            background: var(--gold);
+            color: var(--bg-deep);
+            line-height: 1;
+        }
+
         #nav-auth-area {
             display: flex;
             align-items: center;
@@ -2528,11 +2653,118 @@
         
         <nav id="main-nav">
             <div class="nav-links">
-                <a href="#categories-section">Categories</a>
-                <a href="#providers-section">Providers</a>
+                <!-- Dropdown 1: Tailoring Services -->
+                <div class="nav-dropdown-item">
+                    <a href="#categories-section">Services <i class="fas fa-chevron-down chevron-icon"></i></a>
+                    <div class="mega-dropdown-menu">
+                        <div class="mega-grid">
+                            <a href="views/client/marketplace.html?category=suits" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-user-tie"></i></div>
+                                <div>
+                                    <div class="mega-title">Custom Suits <span class="mega-badge">Hot</span></div>
+                                    <div class="mega-desc">2-piece & 3-piece bespoke tailored suits.</div>
+                                </div>
+                            </a>
+                            <a href="views/client/marketplace.html?category=african" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-vest"></i></div>
+                                <div>
+                                    <div class="mega-title">African Wear</div>
+                                    <div class="mega-desc">Kaftans, Kaunda & Senator suits.</div>
+                                </div>
+                            </a>
+                            <a href="views/client/marketplace.html?category=dresses" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-female"></i></div>
+                                <div>
+                                    <div class="mega-title">Women's Fashion</div>
+                                    <div class="mega-desc">Custom gowns, skirt suits & dresses.</div>
+                                </div>
+                            </a>
+                            <a href="views/client/marketplace.html?tab=listings" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-cut"></i></div>
+                                <div>
+                                    <div class="mega-title">Alterations & Fitting</div>
+                                    <div class="mega-desc">Precision resizing & style tweaks.</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dropdown 2: Marketplace & Solutions -->
+                <div class="nav-dropdown-item">
+                    <a href="views/client/marketplace.html">Marketplace <i class="fas fa-chevron-down chevron-icon"></i></a>
+                    <div class="mega-dropdown-menu">
+                        <div class="mega-grid">
+                            <a href="views/client/marketplace.html?tab=listings" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-th-large"></i></div>
+                                <div>
+                                    <div class="mega-title">Browse Garments</div>
+                                    <div class="mega-desc">Explore ready & custom designs.</div>
+                                </div>
+                            </a>
+                            <a href="views/client/marketplace.html?tab=shops" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-store"></i></div>
+                                <div>
+                                    <div class="mega-title">Verified Tailor Shops</div>
+                                    <div class="mega-desc">Top fashion houses in Kenya.</div>
+                                </div>
+                            </a>
+                            <a href="views/client/track.html" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-route"></i></div>
+                                <div>
+                                    <div class="mega-title">Order Tracker <span class="mega-badge">Live</span></div>
+                                    <div class="mega-desc">Real-time status from stitch to delivery.</div>
+                                </div>
+                            </a>
+                            <a href="tailor-onboarding.html" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-chart-line"></i></div>
+                                <div>
+                                    <div class="mega-title">Tailor SaaS Portal</div>
+                                    <div class="mega-desc">Grow your tailor shop business.</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dropdown 3: Resources & Company -->
+                <div class="nav-dropdown-item">
+                    <a href="about.html">Resources <i class="fas fa-chevron-down chevron-icon"></i></a>
+                    <div class="mega-dropdown-menu" style="width: 500px;">
+                        <div class="mega-grid">
+                            <a href="views/client/blog.html" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-newspaper"></i></div>
+                                <div>
+                                    <div class="mega-title">Style Blog</div>
+                                    <div class="mega-desc">Fashion guides & trend analysis.</div>
+                                </div>
+                            </a>
+                            <a href="pricing.html" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-tags"></i></div>
+                                <div>
+                                    <div class="mega-title">Pricing & Plans</div>
+                                    <div class="mega-desc">Transparent pricing for clients & tailors.</div>
+                                </div>
+                            </a>
+                            <a href="about.html" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-info-circle"></i></div>
+                                <div>
+                                    <div class="mega-title">About Us</div>
+                                    <div class="mega-desc">Our story, mission & fashion tech vision.</div>
+                                </div>
+                            </a>
+                            <a href="support.html" class="mega-link-card">
+                                <div class="mega-icon-wrap"><i class="fas fa-headset"></i></div>
+                                <div>
+                                    <div class="mega-title">Support Center</div>
+                                    <div class="mega-desc">24/7 help desk & inquiry assistance.</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
                 <a href="pricing.html">Pricing</a>
-                <a href="about.html">About Us</a>
-                <a href="views/client/blog.html">Style Blog</a>
                 <a href="#hiw-section">How It Works</a>
             </div>
             
