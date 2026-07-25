@@ -2758,6 +2758,33 @@
             });
 
         })();
+
+        // Gallery navigation functions (needed since dashboard-marketplace.js is not loaded on this page)
+        window.navigateModalGallery = function(direction) {
+            if (!window.currentGalleryImages || window.currentGalleryImages.length <= 1) return;
+            window.currentGalleryIndex = (window.currentGalleryIndex + direction + window.currentGalleryImages.length) % window.currentGalleryImages.length;
+            const currentUrl = window.currentGalleryImages[window.currentGalleryIndex];
+            const imgEl = document.getElementById('modal-listing-image');
+            const blurEl = document.getElementById('modal-listing-image-blur');
+            if (imgEl) imgEl.src = currentUrl;
+            if (blurEl) blurEl.src = currentUrl;
+            document.querySelectorAll('.modal-thumb-dot').forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === window.currentGalleryIndex);
+            });
+        };
+
+        window.setModalGalleryImage = function(index) {
+            if (!window.currentGalleryImages || !window.currentGalleryImages[index]) return;
+            window.currentGalleryIndex = index;
+            const currentUrl = window.currentGalleryImages[index];
+            const imgEl = document.getElementById('modal-listing-image');
+            const blurEl = document.getElementById('modal-listing-image-blur');
+            if (imgEl) imgEl.src = currentUrl;
+            if (blurEl) blurEl.src = currentUrl;
+            document.querySelectorAll('.modal-thumb-dot').forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === index);
+            });
+        };
     </script>
 
     <!-- Listing Details Modal -->
