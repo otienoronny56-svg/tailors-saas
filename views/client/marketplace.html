@@ -1071,8 +1071,8 @@
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             width: 100%;
-            max-width: 900px;
-            max-height: 90vh;
+            max-width: 1050px;
+            max-height: 92vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -1088,11 +1088,11 @@
         @media (min-width: 768px) {
             .listing-modal-content {
                 flex-direction: row;
-                height: 80vh;
+                height: 88vh;
             }
         }
         .listing-modal-image-container {
-            flex: 1.2;
+            flex: 1;
             position: relative;
             background: #000;
             min-height: 300px;
@@ -1182,14 +1182,24 @@
             box-shadow: 0 0 10px rgba(217, 177, 56, 0.7);
         }
         .listing-modal-details {
-            flex: 1;
-            padding: 30px;
+            flex: 1.1;
+            padding: 28px 30px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
             overflow-y: auto;
             background: var(--card-bg, rgba(255,255,255,0.95));
             color: var(--brand-white, #0f172a);
+        }
+        #modal-listing-desc {
+            flex: 1;
+            min-height: 80px;
+            overflow-y: auto;
+            line-height: 1.7;
+            font-size: 0.97em;
+            color: var(--brand-slate, #475569);
+            white-space: pre-wrap;
+            padding-right: 6px;
         }
         .listing-modal-close {
             position: absolute;
