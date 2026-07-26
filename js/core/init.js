@@ -1,8 +1,18 @@
+// ==========================================
+// 🛡️ SYSTEM INITIALIZATION & PWA
+// ==========================================
+var supabaseClient = window.supabaseClient || null;
 
-// ==========================================
-// 🛡️ SYSTEM INITIALIZATION
-// ==========================================
-let supabaseClient = null;
+window.triggerPWAInstall = async function() {
+    if (window.globalDeferredPrompt) {
+        window.globalDeferredPrompt.prompt();
+        const { outcome } = await window.globalDeferredPrompt.userChoice;
+        console.log('User choice:', outcome);
+        window.globalDeferredPrompt = null;
+    } else {
+        alert("To install Stitch & Styles:\n\n1. Look for the Install/Download icon in your browser address bar (top right).\n2. Or open your browser menu (⋮) and select 'Add to Home Screen' or 'Install App'.\n\n(Note: Chrome Incognito Mode disables app installation by security design).");
+    }
+};
 
 try {
     if (typeof APP_CONFIG === 'undefined') {
@@ -43,13 +53,11 @@ try {
 
 } catch (error) {
     console.error(error);
-    alert("SYSTEM CRASH: " + error.message);
 }
 
 const SHOP_CONTACT = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.shopPhone : "";
 const CURRENCY = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.currencySymbol : "Ksh";
 
-// getAdminClient has been replaced by the admin-proxy Edge Function.
 // Inject global footer for portals
 document.addEventListener('DOMContentLoaded', () => {
     const existingFooter = document.querySelector('footer');
@@ -105,18 +113,14 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-let globalDeferredPrompt;
+window.globalDeferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent the mini-infobar from appearing on mobile
     e.preventDefault();
-    // Stash the event so it can be triggered later.
-    globalDeferredPrompt = e;
+    window.globalDeferredPrompt = e;
     
-    // Also show any header install button if present on page
     const navBtn = document.getElementById('installAppBtn');
     if (navBtn) navBtn.style.display = 'inline-block';
 
-    // Create a floating install button if it doesn't exist
     if (!document.getElementById('globalInstallBtn')) {
         const btn = document.createElement('button');
         btn.id = 'globalInstallBtn';
@@ -137,31 +141,10 @@ window.addEventListener('beforeinstallprompt', (e) => {
         btn.style.alignItems = 'center';
         btn.style.gap = '8px';
         
-        btn.addEventListener('click', async () => {
-            btn.style.display = 'none';
-            if (navBtn) navBtn.style.display = 'none';
-            if (globalDeferredPrompt) {
-                globalDeferredPrompt.prompt();
-                const { outcome } = await globalDeferredPrompt.userChoice;
-                console.log('User response to install prompt:', outcome);
-                globalDeferredPrompt = null;
-            }
-        });
-        
+        btn.addEventListener('click', () => window.triggerPWAInstall());
         document.body.appendChild(btn);
     }
 });
-
-window.triggerPWAInstall = async function() {
-    if (globalDeferredPrompt) {
-        globalDeferredPrompt.prompt();
-        const { outcome } = await globalDeferredPrompt.userChoice;
-        console.log('User choice:', outcome);
-        globalDeferredPrompt = null;
-    } else {
-        alert("To install Stitch & Styles:\n\n1. Look for the Install/Download icon in your browser address bar (top right).\n2. Or open your browser menu (⋮) and select 'Add to Home Screen' or 'Install App'.\n\n(Note: Chrome Incognito Mode disables app installation by security design).");
-    }
-};
 
 window.addEventListener('appinstalled', () => {
     const btn = document.getElementById('globalInstallBtn');
@@ -170,6 +153,6 @@ window.addEventListener('appinstalled', () => {
     if (navBtn) navBtn.style.display = 'none';
     const clientBtn = document.getElementById('clientInstallAppBtn');
     if (clientBtn) clientBtn.style.display = 'none';
-    globalDeferredPrompt = null;
+    window.globalDeferredPrompt = null;
     console.log('PWA was installed');
 });
