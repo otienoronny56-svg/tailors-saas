@@ -76,11 +76,18 @@ async function checkUnreadMessages() {
                 if (bottomNavClients && !bottomNavClients.parentElement.querySelector('.msg-badge-bottom')) {
                     const bottomBadge = document.createElement('span');
                     bottomBadge.className = 'msg-badge-bottom';
-                    bottomBadge.style.cssText = 'position:absolute; top: 5px; right: 25px; background:#ef4444; width:10px; height:10px; border-radius:50%; border:2px solid white; animation: pulse 2s infinite;';
                     bottomNavClients.parentElement.style.position = 'relative';
                     bottomNavClients.parentElement.appendChild(bottomBadge);
                 }
+
+                // Add PWA launcher icon badge (Taskbar / Home Screen)
+                if ('setAppBadge' in navigator) {
+                    navigator.setAppBadge(1).catch(() => {});
+                }
             } else {
+                if ('clearAppBadge' in navigator) {
+                    navigator.clearAppBadge().catch(() => {});
+                }
                 if (navMsg) {
                     const badge = navMsg.querySelector('.msg-badge');
                     if (badge) badge.remove();
