@@ -114,45 +114,34 @@ if ('serviceWorker' in navigator) {
 }
 
 window.globalDeferredPrompt = null;
+
+function updateInstallButtonsVisibility(show) {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
+    const displayStyle = (show && !isStandalone) ? 'inline-flex' : 'none';
+    
+    const navBtn = document.getElementById('installAppBtn');
+    if (navBtn) navBtn.style.display = (show && !isStandalone) ? 'inline-block' : 'none';
+    
+    const clientBtn = document.getElementById('clientInstallAppBtn');
+    if (clientBtn) clientBtn.style.display = displayStyle;
+    
+    const globalBtn = document.getElementById('globalInstallBtn');
+    if (globalBtn) globalBtn.style.display = (show && !isStandalone) ? 'flex' : 'none';
+}
+
+// Hide buttons on load if in standalone mode or before prompt
+document.addEventListener('DOMContentLoaded', () => {
+    updateInstallButtonsVisibility(false);
+});
+
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     window.globalDeferredPrompt = e;
-    
-    const navBtn = document.getElementById('installAppBtn');
-    if (navBtn) navBtn.style.display = 'inline-block';
-
-    if (!document.getElementById('globalInstallBtn')) {
-        const btn = document.createElement('button');
-        btn.id = 'globalInstallBtn';
-        btn.innerHTML = '<i class="fas fa-download"></i> Install App';
-        btn.style.position = 'fixed';
-        btn.style.bottom = '20px';
-        btn.style.left = '20px';
-        btn.style.zIndex = '999999';
-        btn.style.padding = '12px 20px';
-        btn.style.background = 'var(--brand-gold, #D4AF37)';
-        btn.style.color = '#000';
-        btn.style.border = 'none';
-        btn.style.borderRadius = '30px';
-        btn.style.fontWeight = 'bold';
-        btn.style.cursor = 'pointer';
-        btn.style.boxShadow = '0 4px 15px rgba(212, 175, 55, 0.4)';
-        btn.style.display = 'flex';
-        btn.style.alignItems = 'center';
-        btn.style.gap = '8px';
-        
-        btn.addEventListener('click', () => window.triggerPWAInstall());
-        document.body.appendChild(btn);
-    }
+    updateInstallButtonsVisibility(true);
 });
 
 window.addEventListener('appinstalled', () => {
-    const btn = document.getElementById('globalInstallBtn');
-    if (btn) btn.style.display = 'none';
-    const navBtn = document.getElementById('installAppBtn');
-    if (navBtn) navBtn.style.display = 'none';
-    const clientBtn = document.getElementById('clientInstallAppBtn');
-    if (clientBtn) clientBtn.style.display = 'none';
     window.globalDeferredPrompt = null;
+    updateInstallButtonsVisibility(false);
     console.log('PWA was installed');
 });
