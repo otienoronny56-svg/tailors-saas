@@ -3393,7 +3393,7 @@
         }
 
         // Supabase interaction
-        let supabaseClient;
+        var supabaseClient = window.supabaseClient || null;
         let allListings = [];
 
         if (typeof window.supabase !== 'undefined' && typeof APP_CONFIG !== 'undefined') {

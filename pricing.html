@@ -1095,7 +1095,7 @@
         }
 
         // Supabase interaction
-        let supabaseClient;
+        var supabaseClient = window.supabaseClient || null;
 
         if (typeof window.supabase !== 'undefined' && typeof APP_CONFIG !== 'undefined') {
             supabaseClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);

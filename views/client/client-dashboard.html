@@ -2393,7 +2393,7 @@
     <script src="../../js/core/algorithm.js"></script>
     <script src="../../js/features/dashboard-marketplace.js"></script>
 <script>
-        let supabaseClient;
+        var supabaseClient = window.supabaseClient || null;
         let currentUser = null;
         let activeThread = null; // Storing selected shop group
         let isSelectionMode = false;

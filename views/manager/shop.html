@@ -1669,7 +1669,7 @@
     <script src="../../js/core/config.js?v=1781824528054"></script>
     <script src="../../js/core/algorithm.js"></script>
     <script>
-        let supabaseClient;
+        var supabaseClient = window.supabaseClient || null;
         let shopId;
         let shopDetails = null;
         let shopListings = [];

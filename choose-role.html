@@ -267,7 +267,7 @@
 
     <script src="js/core/config.js?v=1781824528054"></script>
     <script>
-        let supabaseClient = null;
+        var supabaseClient = window.supabaseClient || null;
         let currentUser = null;
 
         // Initialize clients
