@@ -84,6 +84,24 @@ async function checkUnreadMessages() {
                 if ('setAppBadge' in navigator) {
                     navigator.setAppBadge(1).catch(() => {});
                 }
+
+                // Trigger OS Push Notification Banner if permission granted
+                if ('Notification' in window) {
+                    if (Notification.permission === 'granted') {
+                        // Avoid repeating notification for the same message timestamp
+                        const lastNotified = localStorage.getItem('last_notified_msg_' + USER_PROFILE.id);
+                        if (!lastNotified || parseInt(lastNotified) < latestMsgTime) {
+                            localStorage.setItem('last_notified_msg_' + USER_PROFILE.id, latestMsgTime);
+                            new Notification('New Message | Stitch & Styles Kenya', {
+                                body: 'You have a new unread message in your inbox. Click to open.',
+                                icon: '/icon-192.png',
+                                tag: 'unread-message'
+                            });
+                        }
+                    } else if (Notification.permission === 'default') {
+                        Notification.requestPermission();
+                    }
+                }
             } else {
                 if ('clearAppBadge' in navigator) {
                     navigator.clearAppBadge().catch(() => {});
