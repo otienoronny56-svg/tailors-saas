@@ -2841,6 +2841,7 @@
             
             <div id="nav-auth-area">
                 <button class="theme-toggle" onclick="toggleTheme()" style="background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:1.2em; margin-right: 15px;"><i class="fas fa-moon theme-toggle-icon"></i></button>
+                <button id="installAppBtn" style="display: none;" class="btn-signup"><i class="fas fa-download"></i> Install App</button>
                 <a href="./login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
                 <a href="./login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
             </div>
@@ -4154,6 +4155,57 @@
         function openSimpleImageModal(src) {
             document.getElementById('simple-image-modal-img').src = src;
             document.getElementById('simple-image-modal').style.display = 'flex';
+        }
+    </script>
+
+    <script>
+        // --- PWA Installation & Service Worker Logic ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        let deferredPrompt;
+        const installBtn = document.getElementById('installAppBtn');
+
+        if (installBtn) {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevent the mini-infobar from appearing on mobile
+                e.preventDefault();
+                // Stash the event so it can be triggered later.
+                deferredPrompt = e;
+                // Update UI notify the user they can install the PWA
+                installBtn.style.display = 'inline-block';
+            });
+
+            installBtn.addEventListener('click', async () => {
+                // Hide our user interface that shows our A2HS button
+                installBtn.style.display = 'none';
+                // Show the prompt
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    // Wait for the user to respond to the prompt
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User response to the install prompt: ${outcome}`);
+                    // We've used the prompt, and can't use it again, throw it away
+                    deferredPrompt = null;
+                }
+            });
+
+            window.addEventListener('appinstalled', () => {
+                // Hide the app-provided install promotion
+                installBtn.style.display = 'none';
+                // Clear the deferredPrompt so it can be garbage collected
+                deferredPrompt = null;
+                console.log('PWA was installed');
+            });
         }
     </script>
 

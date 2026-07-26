@@ -89,3 +89,67 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+// ==========================================
+// PWA INSTALLATION LOGIC (Global)
+// ==========================================
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('Service Worker registered successfully:', registration.scope);
+            })
+            .catch(error => {
+                console.log('Service Worker registration failed:', error);
+            });
+    });
+}
+
+let globalDeferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    // Stash the event so it can be triggered later.
+    globalDeferredPrompt = e;
+    
+    // Create a floating install button if it doesn't exist
+    if (!document.getElementById('globalInstallBtn')) {
+        const btn = document.createElement('button');
+        btn.id = 'globalInstallBtn';
+        btn.innerHTML = '<i class=\"fas fa-download\"></i> Install App';
+        btn.style.position = 'fixed';
+        btn.style.bottom = '20px';
+        btn.style.left = '20px';
+        btn.style.zIndex = '999999';
+        btn.style.padding = '12px 20px';
+        btn.style.background = 'var(--brand-gold, #D4AF37)';
+        btn.style.color = '#fff';
+        btn.style.border = 'none';
+        btn.style.borderRadius = '30px';
+        btn.style.fontWeight = 'bold';
+        btn.style.cursor = 'pointer';
+        btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.gap = '8px';
+        
+        btn.addEventListener('click', async () => {
+            btn.style.display = 'none';
+            if (globalDeferredPrompt) {
+                globalDeferredPrompt.prompt();
+                const { outcome } = await globalDeferredPrompt.userChoice;
+                console.log(\User response to the install prompt: \\);
+                globalDeferredPrompt = null;
+            }
+        });
+        
+        document.body.appendChild(btn);
+    }
+});
+
+window.addEventListener('appinstalled', () => {
+    const btn = document.getElementById('globalInstallBtn');
+    if (btn) btn.style.display = 'none';
+    globalDeferredPrompt = null;
+    console.log('PWA was installed');
+});
