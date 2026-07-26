@@ -112,33 +112,38 @@ window.addEventListener('beforeinstallprompt', (e) => {
     // Stash the event so it can be triggered later.
     globalDeferredPrompt = e;
     
+    // Also show any header install button if present on page
+    const navBtn = document.getElementById('installAppBtn');
+    if (navBtn) navBtn.style.display = 'inline-block';
+
     // Create a floating install button if it doesn't exist
     if (!document.getElementById('globalInstallBtn')) {
         const btn = document.createElement('button');
         btn.id = 'globalInstallBtn';
-        btn.innerHTML = '<i class=\"fas fa-download\"></i> Install App';
+        btn.innerHTML = '<i class="fas fa-download"></i> Install App';
         btn.style.position = 'fixed';
         btn.style.bottom = '20px';
         btn.style.left = '20px';
         btn.style.zIndex = '999999';
         btn.style.padding = '12px 20px';
         btn.style.background = 'var(--brand-gold, #D4AF37)';
-        btn.style.color = '#fff';
+        btn.style.color = '#000';
         btn.style.border = 'none';
         btn.style.borderRadius = '30px';
         btn.style.fontWeight = 'bold';
         btn.style.cursor = 'pointer';
-        btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+        btn.style.boxShadow = '0 4px 15px rgba(212, 175, 55, 0.4)';
         btn.style.display = 'flex';
         btn.style.alignItems = 'center';
         btn.style.gap = '8px';
         
         btn.addEventListener('click', async () => {
             btn.style.display = 'none';
+            if (navBtn) navBtn.style.display = 'none';
             if (globalDeferredPrompt) {
                 globalDeferredPrompt.prompt();
                 const { outcome } = await globalDeferredPrompt.userChoice;
-                console.log(\User response to the install prompt: \\);
+                console.log('User response to install prompt:', outcome);
                 globalDeferredPrompt = null;
             }
         });
@@ -150,6 +155,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
 window.addEventListener('appinstalled', () => {
     const btn = document.getElementById('globalInstallBtn');
     if (btn) btn.style.display = 'none';
+    const navBtn = document.getElementById('installAppBtn');
+    if (navBtn) navBtn.style.display = 'none';
     globalDeferredPrompt = null;
     console.log('PWA was installed');
 });
