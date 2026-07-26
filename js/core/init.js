@@ -58,10 +58,11 @@ try {
 const SHOP_CONTACT = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.shopPhone : "";
 const CURRENCY = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.currencySymbol : "Ksh";
 
-// Inject global footer for portals
+// Inject global footer for public pages (skipping dashboard/portal workspace views)
 document.addEventListener('DOMContentLoaded', () => {
+    const isDashboard = document.querySelector('.workspace') || document.querySelector('.dock-nav') || window.location.pathname.includes('/views/');
     const existingFooter = document.querySelector('footer');
-    if (!existingFooter && !document.getElementById('global-ronny-footer')) {
+    if (!isDashboard && !existingFooter && !document.getElementById('global-ronny-footer')) {
         const footerText = document.createElement('div');
         footerText.id = 'global-ronny-footer';
         footerText.style.textAlign = 'center';
@@ -83,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mainContent.appendChild(footerText);
         } else {
             const loginCard = document.querySelector('.login-card');
-            if(loginCard) {
+            if (loginCard) {
                 footerText.style.position = 'absolute';
                 footerText.style.bottom = '15px';
                 footerText.style.left = '0';
