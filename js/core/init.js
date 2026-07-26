@@ -152,11 +152,24 @@ window.addEventListener('beforeinstallprompt', (e) => {
     }
 });
 
+window.triggerPWAInstall = async function() {
+    if (globalDeferredPrompt) {
+        globalDeferredPrompt.prompt();
+        const { outcome } = await globalDeferredPrompt.userChoice;
+        console.log('User choice:', outcome);
+        globalDeferredPrompt = null;
+    } else {
+        alert("To install Stitch & Styles:\n\n1. Look for the Install/Download icon in your browser address bar (top right).\n2. Or open your browser menu (⋮) and select 'Add to Home Screen' or 'Install App'.\n\n(Note: Chrome Incognito Mode disables app installation by security design).");
+    }
+};
+
 window.addEventListener('appinstalled', () => {
     const btn = document.getElementById('globalInstallBtn');
     if (btn) btn.style.display = 'none';
     const navBtn = document.getElementById('installAppBtn');
     if (navBtn) navBtn.style.display = 'none';
+    const clientBtn = document.getElementById('clientInstallAppBtn');
+    if (clientBtn) clientBtn.style.display = 'none';
     globalDeferredPrompt = null;
     console.log('PWA was installed');
 });
