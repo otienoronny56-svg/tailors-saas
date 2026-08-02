@@ -1,16 +1,56 @@
-const CACHE_NAME = 'tailors-cache-v2000';
+const CACHE_NAME = 'tailors-cache-v3000';
 
 const urlsToCache = [
-  '/',
+  '/about.html',
+  '/choose-role.html',
   '/index.html',
   '/login.html',
-  '/choose-role.html',
-  '/about.html',
+  '/old_dashboard.html',
   '/pricing.html',
   '/privacy.html',
-  '/terms.html',
   '/support.html',
   '/tailor-onboarding.html',
+  '/terms.html',
+  '/views/admin/admin-analytics.html',
+  '/views/admin/admin-clients.html',
+  '/views/admin/admin-dashboard.html',
+  '/views/admin/admin-expenses.html',
+  '/views/admin/admin-inventory.html',
+  '/views/admin/admin-listings.html',
+  '/views/admin/admin-management.html',
+  '/views/admin/admin-messages.html',
+  '/views/admin/admin-order-details.html',
+  '/views/admin/admin-order-form.html',
+  '/views/admin/admin-orders.html',
+  '/views/admin/admin-settings.html',
+  '/views/admin/admin-tailors-directory.html',
+  '/views/admin/admin-transactions.html',
+  '/views/admin/financial-overview.html',
+  '/views/client/blog-post.html',
+  '/views/client/blog.html',
+  '/views/client/client-dashboard.html',
+  '/views/client/marketplace.html',
+  '/views/client/track.html',
+  '/views/manager/all-orders.html',
+  '/views/manager/clients.html',
+  '/views/manager/expenses.html',
+  '/views/manager/manager-blog.html',
+  '/views/manager/manager-dashboard.html',
+  '/views/manager/manager-inventory.html',
+  '/views/manager/manager-listings.html',
+  '/views/manager/manager-messages.html',
+  '/views/manager/order-details.html',
+  '/views/manager/order-form.html',
+  '/views/manager/shop.html',
+  '/views/superadmin/superadmin-blog.html',
+  '/views/superadmin/superadmin-dashboard.html',
+  '/views/superadmin/superadmin-ledger.html',
+  '/views/superadmin/superadmin-orgs.html',
+  '/views/superadmin/superadmin-users-list.html',
+  '/views/superadmin/superadmin-users.html',
+  '/views/worker/worker-assignments.html',
+  '/views/worker/worker-management.html',
+  '/',
   '/styles.css',
   '/app.js',
   '/mobile-nav.js',
@@ -22,6 +62,8 @@ const urlsToCache = [
   '/js/core/algorithm.js',
   '/js/core/offline-store.js',
   '/js/ui/theme.js',
+  '/js/ui/sidebar.js',
+  '/js/ui/modals.js',
   '/js/ui/offline-ui.js',
   '/js/features/orders.js',
   '/js/features/clients.js',
@@ -108,7 +150,11 @@ self.addEventListener('fetch', event => {
           return caches.match(request, { ignoreSearch: true })
             .then(cachedResponse => {
               if (cachedResponse) return cachedResponse;
-              return caches.match('/index.html', { ignoreSearch: true });
+              const pathname = new URL(request.url).pathname;
+              return caches.match(pathname, { ignoreSearch: true }).then(pathMatch => {
+                if (pathMatch) return pathMatch;
+                return caches.match('/index.html', { ignoreSearch: true });
+              });
             });
         })
     );
