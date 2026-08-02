@@ -2504,24 +2504,54 @@
         // Initialize Supabase client
         if (typeof window.supabase !== 'undefined' && typeof APP_CONFIG !== 'undefined') {
             supabaseClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
-            checkClientSession();
-        }
-
-        async function checkClientSession() {
+             async function checkClientSession() {
             try {
-                const { data: { user }, error } = await supabaseClient.auth.getUser();
-                if (error || !user) {
-                    location.href = '../../login.html';
+                // 1. Try local session first (fast & reliable)
+                let { data: { session }, error: sessErr } = await supabaseClient.auth.getSession();
+                
+                // If no session found immediately, wait 600ms and try once more before deciding user is logged out
+                if (!session || sessErr) {
+                    await new Promise(r => setTimeout(r, 600));
+                    const retry = await supabaseClient.auth.getSession();
+                    session = retry.data?.session;
+                }
+
+                let user = session?.user;
+                
+                // Fallback to getUser() if session object missing user
+                if (!user) {
+                    try {
+                        const res = await supabaseClient.auth.getUser();
+                        user = res.data?.user;
+                    } catch(e) {}
+                }
+
+                // Fallback to cached profile if offline or storage glitch
+                if (!user) {
+                    try {
+                        const cached = sessionStorage.getItem('USER_PROFILE') || localStorage.getItem('USER_PROFILE');
+                        if (cached) {
+                            const parsed = JSON.parse(cached);
+                            if (parsed && (parsed.id || parsed.email)) user = parsed;
+                        }
+                    } catch(e) {}
+                }
+
+                if (!user) {
+                    console.warn("No client session found. Redirecting to login...");
+                    window.location.replace('../../login.html');
                     return;
                 }
+                
                 currentUser = user;
                 
                 // Ensure phone is set globally from metadata if auth.users native phone is empty
                 currentUser.phone = user.phone || user.user_metadata?.phone;
 
                 // Set name display
-                const fullName = user.user_metadata?.full_name || 'Customer';
-                document.getElementById('client-name-display').textContent = fullName;
+                const fullName = user.user_metadata?.full_name || user.full_name || 'Customer';
+                const nameEl = document.getElementById('client-name-display');
+                if (nameEl) nameEl.textContent = fullName;
 
                 loadClientThreads();
                 subscribeToGlobalMessages();
@@ -2538,8 +2568,13 @@
                 }
             } catch (err) {
                 console.error("Session lookup failed:", err);
-                location.href = '../../login.html';
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) {
+                    window.location.replace('../../login.html');
+                }
             }
+        }
+            checkClientSession();
         }
 
         async function loadClientThreads() {
