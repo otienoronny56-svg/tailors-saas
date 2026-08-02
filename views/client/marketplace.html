@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase SDK -->
     <script src="/js/lib/supabase.min.js"></script>
-    <script src="/js/core/offline-store.js?v=1785668703479"></script>
+    <script src="/js/core/offline-store.js?v=1785669319010"></script>
     <script src="/js/ui/offline-ui.js"></script>
     <style>
         :root {
@@ -609,6 +609,44 @@
         footer p {
             color: var(--brand-slate);
             font-size: 0.85em;
+        }
+
+        /* ===== SKELETON SHIMMER CARDS (Fashion Nova / Jiji style 0ms perceived loading) ===== */
+        @keyframes shimmerAnim {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(212,175,55,0.15) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: shimmerAnim 1.5s infinite linear;
+        }
+        .skeleton-card {
+            pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.06) !important;
+            background: var(--card-bg) !important;
+        }
+        .skeleton-img {
+            height: 220px;
+            border-radius: 12px 12px 0 0;
+            width: 100%;
+        }
+        .skeleton-title {
+            height: 18px;
+            width: 75%;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .skeleton-sub {
+            height: 14px;
+            width: 45%;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        .skeleton-price {
+            height: 22px;
+            width: 35%;
+            border-radius: 4px;
         }
 
         /* ===== LOADER ===== */
@@ -1427,20 +1465,24 @@
         <div class="marketplace-body-layout">
             <!-- Right Main Stream Content -->
             <div class="marketplace-main-stream">
-                <!-- Creations Grid -->
+                <!-- Creations Grid (0ms instant perceived loading with 8 Shimmer Skeleton cards) -->
                 <div class="content-grid" id="listings-grid">
-                    <div class="loader-container">
-                        <i class="fas fa-spinner loader-spinner"></i>
-                        <p>Loading marketplace creations...</p>
-                    </div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
                 </div>
 
                 <!-- Shops Grid -->
                 <div class="content-grid" id="shops-grid" style="display: none;">
-                    <div class="loader-container">
-                        <i class="fas fa-spinner loader-spinner"></i>
-                        <p>Loading tailoring shops...</p>
-                    </div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                    <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
                 </div>
             </div>
         </div>
@@ -1453,7 +1495,7 @@
     </footer>
 
     <!-- ===== SCRIPTS ===== -->
-    <script src="../../js/core/config.js?v=1785668703479"></script>
+    <script src="../../js/core/config.js?v=1785669319010"></script>
     <script src="../../js/core/algorithm.js"></script>
     <script>
         var supabaseClient = window.supabaseClient || null;
@@ -1465,6 +1507,21 @@
         let userLikes = [];
         let globalLikesCount = {};
         let userFavoriteShops = [];
+
+        // ⚡ INSTANT SYNCHRONOUS HYDRATION (0ms wait time using LocalStorage cache)
+        try {
+            const rawListings = localStorage.getItem('STITCH_MARKETPLACE_LISTINGS');
+            const rawShops = localStorage.getItem('STITCH_MARKETPLACE_SHOPS');
+            if (rawListings && rawShops) {
+                allListings = JSON.parse(rawListings);
+                allShops = JSON.parse(rawShops);
+                if (allListings.length > 0 && allShops.length > 0) {
+                    renderShops(allShops);
+                    renderListings(allListings);
+                    filterMarketplace();
+                }
+            }
+        } catch(e) {}
 
         // Apply config branding dynamically
         if (typeof APP_CONFIG !== 'undefined') {
@@ -1742,6 +1799,16 @@
         async function loadMarketplace() {
             // ⚡ 1. INSTANT LOCAL CACHE RENDER (Loads under 50ms)
             try {
+                const localShops = localStorage.getItem('STITCH_MARKETPLACE_SHOPS');
+                const localListings = localStorage.getItem('STITCH_MARKETPLACE_LISTINGS');
+                if (localShops && localListings) {
+                    allShops = JSON.parse(localShops);
+                    allListings = JSON.parse(localListings);
+                    renderShops(allShops);
+                    renderListings(allListings);
+                    filterMarketplace();
+                }
+
                 if (window.OfflineStore) {
                     const [cachedShops, cachedListings] = await Promise.all([
                         OfflineStore.getCache('marketplace_shops'),
