@@ -31,9 +31,23 @@ const oldVersion = match[1];
 
 for (const file of htmlFiles) {
     let content = fs.readFileSync(file, 'utf8');
+    let updated = false;
+
     if (content.includes(`v=${oldVersion}`)) {
         const regex = new RegExp(`v=${oldVersion}`, 'g');
         content = content.replace(regex, `v=${newVersion}`);
+        updated = true;
+    }
+
+    // Ensure offline-store.js has ?v= parameter in HTML files
+    if (file.endsWith('.html')) {
+        if (content.includes('js/core/offline-store.js') && !content.includes('js/core/offline-store.js?v=')) {
+            content = content.replace(/js\/core\/offline-store\.js/g, `js/core/offline-store.js?v=${newVersion}`);
+            updated = true;
+        }
+    }
+
+    if (updated) {
         fs.writeFileSync(file, content);
         count++;
     }
