@@ -1,5 +1,5 @@
 // ==========================================
-// ðŸ” AUTHENTICATION SYSTEM
+// 🔑 AUTHENTICATION SYSTEM
 // ==========================================
 
 async function checkSession() {
@@ -7,12 +7,23 @@ async function checkSession() {
 
     try {
         const path = window.location.pathname;
-        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+
+        // [FIX] Supabase sometimes returns null on first call while it's still
+        // rehydrating the session from localStorage. Wait briefly and retry once
+        // before concluding the user is logged out, to prevent the redirect loop.
+        let { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+        if (!session && !sessionError) {
+            await new Promise(resolve => setTimeout(resolve, 600));
+            const retry = await supabaseClient.auth.getSession();
+            session = retry.data?.session;
+            sessionError = retry.error;
+        }
+
         const user = session?.user;
         if (sessionError || !user) {
-            const isPublicPage = window.location.pathname.includes('index.html') || window.location.pathname.includes('login.html') || window.location.pathname.endsWith('/');
-            if (!isPublicPage && window.location.pathname !== '/') {
-                window.location.replace('/index.html');
+            const isPublicPage = path.includes('index.html') || path.includes('login.html') || path.endsWith('/');
+            if (!isPublicPage && path !== '/') {
+                window.location.replace('/login.html');
             }
             return;
         }
