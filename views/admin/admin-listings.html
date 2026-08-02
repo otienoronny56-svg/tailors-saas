@@ -17,7 +17,7 @@
     <link rel="icon" type="image/png" href="../../logo.jpeg">
     <link rel="stylesheet" href="../../styles.css">
     <script src="/js/lib/supabase.min.js"></script>
-    <script src="/js/core/offline-store.js?v=1785667754184"></script>
+    <script src="/js/core/offline-store.js?v=1785668262363"></script>
     <script src="/js/ui/offline-ui.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -498,26 +498,26 @@
         </a>
     </nav>
 
-    <script src="../../js/core/config.js?v=1785667754184"></script>
+    <script src="../../js/core/config.js?v=1785668262363"></script>
     
     <!-- Core & Utils -->
-    <script src="../../js/utils/helpers.js?v=1785667754184"></script>
-    <script src="../../js/ui/theme.js?v=1785667754184"></script>
-    <script src="../../js/core/globals.js?v=1785667754184"></script>
-    <script src="../../js/core/init.js?v=1785667754184"></script>
-    <script src="../../js/core/auth.js?v=1785667754184"></script>
-    <script src="../../js/ui/sidebar.js?v=1785667754184"></script>
-    <script src="../../js/ui/modals.js?v=1785667754184"></script>
-    <script src="../../js/features/inventory.js?v=1785667754184"></script>
-    <script src="../../js/features/clients.js?v=1785667754184"></script>
+    <script src="../../js/utils/helpers.js?v=1785668262363"></script>
+    <script src="../../js/ui/theme.js?v=1785668262363"></script>
+    <script src="../../js/core/globals.js?v=1785668262363"></script>
+    <script src="../../js/core/init.js?v=1785668262363"></script>
+    <script src="../../js/core/auth.js?v=1785668262363"></script>
+    <script src="../../js/ui/sidebar.js?v=1785668262363"></script>
+    <script src="../../js/ui/modals.js?v=1785668262363"></script>
+    <script src="../../js/features/inventory.js?v=1785668262363"></script>
+    <script src="../../js/features/clients.js?v=1785668262363"></script>
     
-    <script src="../../js/features/orders.js?v=1785667754184"></script>
-    <script src="../../js/features/payments.js?v=1785667754184"></script>
-    <script src="../../js/features/analytics.js?v=1785667754184"></script>
-    <script src="../../js/features/messaging.js?v=1785667754184"></script>
-    <script src="../../js/features/management.js?v=1785667754184"></script>
-    <script src="../../app.js?v=1785667754184"></script>
-    <script src="../../mobile-nav.js?v=1785667754184"></script>
+    <script src="../../js/features/orders.js?v=1785668262363"></script>
+    <script src="../../js/features/payments.js?v=1785668262363"></script>
+    <script src="../../js/features/analytics.js?v=1785668262363"></script>
+    <script src="../../js/features/messaging.js?v=1785668262363"></script>
+    <script src="../../js/features/management.js?v=1785668262363"></script>
+    <script src="../../app.js?v=1785668262363"></script>
+    <script src="../../mobile-nav.js?v=1785668262363"></script>
     <script>
         let listings = [];
         let shops = [];
@@ -605,24 +605,24 @@
                     }
                 });
 
-                // 2. Fetch Listings
                 let listingsData = null;
                 try {
-                    const res = await (window.OfflineStore
-                        ? window.OfflineStore.fetchWithFallback('marketplace_listings', () => supabaseClient
-                            .from('marketplace_listings')
-                            .select('*, size_charts(name)')
-                            .eq('organization_id', USER_PROFILE.organization_id)
-                            .order('created_at', { ascending: false }))
-                        : supabaseClient
-                            .from('marketplace_listings')
-                            .select('*, size_charts(name)')
-                            .eq('organization_id', USER_PROFILE.organization_id)
-                            .order('created_at', { ascending: false }));
-                    listingsData = res?.data;
+                    const { data, error } = await supabaseClient
+                        .from('marketplace_listings')
+                        .select('*, size_charts(name)')
+                        .eq('organization_id', USER_PROFILE.organization_id)
+                        .order('created_at', { ascending: false });
+
+                    if (!error && data) {
+                        listingsData = data;
+                        if (window.OfflineStore) {
+                            OfflineStore.saveCache('org_listings_' + USER_PROFILE.organization_id, data);
+                        }
+                    } else throw error || new Error("Failed to fetch listings");
                 } catch (e) {
+                    console.warn("Falling back to local listings cache:", e);
                     if (window.OfflineStore) {
-                        listingsData = await window.OfflineStore.getCache('marketplace_listings');
+                        listingsData = await window.OfflineStore.getCache('org_listings_' + USER_PROFILE.organization_id);
                     }
                 }
                 listings = listingsData || [];

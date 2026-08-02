@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase SDK -->
     <script src="/js/lib/supabase.min.js"></script>
-    <script src="/js/core/offline-store.js?v=1785667754184"></script>
+    <script src="/js/core/offline-store.js?v=1785668262363"></script>
     <script src="/js/ui/offline-ui.js"></script>
     <style>
         :root {
@@ -1453,7 +1453,7 @@
     </footer>
 
     <!-- ===== SCRIPTS ===== -->
-    <script src="../../js/core/config.js?v=1785667754184"></script>
+    <script src="../../js/core/config.js?v=1785668262363"></script>
     <script src="../../js/core/algorithm.js"></script>
     <script>
         var supabaseClient = window.supabaseClient || null;
@@ -1731,57 +1731,80 @@
                 if (categorySelect && categorySelect.parentElement) categorySelect.parentElement.style.display = 'none';
             } else if (mode === 'favourites') {
                 if (btnFavourites) btnFavourites.classList.add('active');
-                gridListings.style.display = 'grid';
-                gridShops.style.display = 'none';
-                if (searchInput) searchInput.placeholder = "Search favourites...";
-                if (categorySelect && categorySelect.parentElement) categorySelect.parentElement.style.display = 'flex';
-            }
+}
             filterMarketplace();
         }
 
         // Fetch Data from Supabase Database
         async function loadMarketplace() {
+            // ⚡ 1. INSTANT LOCAL CACHE RENDER (Loads under 50ms)
             try {
-                // Fetch current user details first
-                const authRes = await supabaseClient.auth.getUser();
-                currentUser = authRes.data?.user || null;
+                if (window.OfflineStore) {
+                    const [cachedShops, cachedListings] = await Promise.all([
+                        OfflineStore.getCache('marketplace_shops'),
+                        OfflineStore.getCache('marketplace_listings')
+                    ]);
+                    if (cachedShops && cachedShops.length > 0 && cachedListings && cachedListings.length > 0) {
+                        allShops = cachedShops;
+                        allListings = cachedListings;
+                        renderShops(allShops);
+                        renderListings(allListings);
+                        filterMarketplace();
+                    }
+                }
+            } catch (e) {
+                console.warn("Instant cache load notice:", e);
+            }
 
-                // Fire all independent queries simultaneously
-                const [shopsRes, listingsRes, reviewsRes, likesRes, favsRes, globalLikesRes] = await Promise.all([
-                    // 1. Fetch public shops
+            // ⚡ 2. NETWORK FETCH WITH 3S TIMEOUT GUARD
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                currentUser = session?.user || null;
+
+                const fetchTimeout = new Promise(resolve => setTimeout(() => resolve({ __timeout: true }), 3000));
+                const queries = Promise.all([
                     supabaseClient.from('shops').select('*').eq('is_public', true),
-                    // 2. Fetch active creations
                     supabaseClient.from('marketplace_listings').select('*, shops(name, profile_image)').eq('status', 'active'),
-                    // 3. Fetch reviews
                     supabaseClient.from('vw_marketplace_reviews').select('*'),
-                    // 4. Fetch user likes
                     currentUser ? supabaseClient.from('marketplace_likes').select('listing_id').eq('user_id', currentUser.id) : Promise.resolve({ data: [] }),
-                    // 4.5 Fetch user favorite shops
                     currentUser ? supabaseClient.from('client_favorite_shops').select('shop_id').eq('client_id', currentUser.id) : Promise.resolve({ data: [] }),
-                    // 5. Fetch global likes count
                     supabaseClient.from('marketplace_likes').select('listing_id')
                 ]);
 
-                allShops = shopsRes.data || [];
-                allListings = listingsRes.data || [];
-                allReviews = reviewsRes.data || [];
+                const raceResult = await Promise.race([queries, fetchTimeout]);
 
-                if (likesRes.data && !likesRes.error) {
+                if (raceResult && raceResult.__timeout) {
+                    console.warn("⚡ Marketplace network fetch took >3s. Serving rendered cache.");
+                    return;
+                }
+
+                const [shopsRes, listingsRes, reviewsRes, likesRes, favsRes, globalLikesRes] = raceResult;
+
+                if (shopsRes?.data) allShops = shopsRes.data;
+                if (listingsRes?.data) allListings = listingsRes.data;
+                if (reviewsRes?.data) allReviews = reviewsRes.data;
+
+                if (likesRes?.data && !likesRes.error) {
                     userLikes = likesRes.data.map(l => l.listing_id);
                 }
 
-                if (favsRes.data && !favsRes.error) {
+                if (favsRes?.data && !favsRes.error) {
                     userFavoriteShops = favsRes.data.map(f => f.shop_id);
                 }
 
-                if (globalLikesRes.data) {
+                if (globalLikesRes?.data) {
                     globalLikesCount = {};
                     globalLikesRes.data.forEach(l => {
                         globalLikesCount[l.listing_id] = (globalLikesCount[l.listing_id] || 0) + 1;
                     });
                 }
 
-                // Invalidate cache and sort listings/shops using recomendation scoring
+                // Cache for instant load next time
+                if (window.OfflineStore) {
+                    if (allShops.length > 0) OfflineStore.saveCache('marketplace_shops', allShops);
+                    if (allListings.length > 0) OfflineStore.saveCache('marketplace_listings', allListings);
+                }
+
                 if (typeof clearAlgorithmCache === 'function') {
                     clearAlgorithmCache();
                 }
@@ -1794,14 +1817,11 @@
                     allListings.sort((a, b) => calculateBespokeScore(b, allShops, allReviews, globalLikesCount, userFavoriteShops) - calculateBespokeScore(a, allShops, allReviews, globalLikesCount, userFavoriteShops));
                 }
 
-                // Check URL params for category filter trigger
                 const urlParams = new URLSearchParams(window.location.search);
                 const catParam = urlParams.get('category');
                 if (catParam) {
                     const select = document.getElementById('mkt-category-filter');
-                    if (select) {
-                        select.value = catParam;
-                    }
+                    if (select) select.value = catParam;
                 }
                 const tabParam = urlParams.get('tab');
                 if (tabParam === 'shops') {
@@ -1814,7 +1834,9 @@
 
             } catch (err) {
                 console.error("Marketplace fetch error:", err);
-                document.getElementById('listings-grid').innerHTML = `<p style="color:red;grid-column:1/-1;text-align:center;">Failed to connect to database.</p>`;
+                if (!allListings || allListings.length === 0) {
+                    document.getElementById('listings-grid').innerHTML = `<p style="color:red;grid-column:1/-1;text-align:center;">Failed to connect to database.</p>`;
+                }
             }
         }
 
