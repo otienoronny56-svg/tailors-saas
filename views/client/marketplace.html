@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase SDK -->
     <script src="/js/lib/supabase.min.js"></script>
-    <script src="/js/core/offline-store.js?v=1785668262363"></script>
+    <script src="/js/core/offline-store.js?v=1785668703479"></script>
     <script src="/js/ui/offline-ui.js"></script>
     <style>
         :root {
@@ -1453,7 +1453,7 @@
     </footer>
 
     <!-- ===== SCRIPTS ===== -->
-    <script src="../../js/core/config.js?v=1785668262363"></script>
+    <script src="../../js/core/config.js?v=1785668703479"></script>
     <script src="../../js/core/algorithm.js"></script>
     <script>
         var supabaseClient = window.supabaseClient || null;
@@ -1718,24 +1718,27 @@
             if (btnFavourites) btnFavourites.classList.remove('active');
 
             if (mode === 'listings') {
-                btnListings.classList.add('active');
-                gridListings.style.display = 'grid';
-                gridShops.style.display = 'none';
+                if (btnListings) btnListings.classList.add('active');
+                if (gridListings) gridListings.style.display = 'grid';
+                if (gridShops) gridShops.style.display = 'none';
                 if (searchInput) searchInput.placeholder = "Search creations...";
                 if (categorySelect && categorySelect.parentElement) categorySelect.parentElement.style.display = 'flex';
             } else if (mode === 'shops') {
-                btnShops.classList.add('active');
-                gridListings.style.display = 'none';
-                gridShops.style.display = 'grid';
+                if (btnShops) btnShops.classList.add('active');
+                if (gridListings) gridListings.style.display = 'none';
+                if (gridShops) gridShops.style.display = 'grid';
                 if (searchInput) searchInput.placeholder = "Search tailoring shops...";
                 if (categorySelect && categorySelect.parentElement) categorySelect.parentElement.style.display = 'none';
             } else if (mode === 'favourites') {
                 if (btnFavourites) btnFavourites.classList.add('active');
-}
+                if (gridListings) gridListings.style.display = 'grid';
+                if (gridShops) gridShops.style.display = 'none';
+                if (searchInput) searchInput.placeholder = "Search favourites...";
+                if (categorySelect && categorySelect.parentElement) categorySelect.parentElement.style.display = 'flex';
+            }
             filterMarketplace();
         }
 
-        // Fetch Data from Supabase Database
         async function loadMarketplace() {
             // ⚡ 1. INSTANT LOCAL CACHE RENDER (Loads under 50ms)
             try {
@@ -1756,81 +1759,55 @@
                 console.warn("Instant cache load notice:", e);
             }
 
-            // ⚡ 2. NETWORK FETCH WITH 3S TIMEOUT GUARD
+            // ⚡ 2. FAST PRIMARY FETCH (Shops & Active Creations — resolves in ~150ms)
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 currentUser = session?.user || null;
 
-                const fetchTimeout = new Promise(resolve => setTimeout(() => resolve({ __timeout: true }), 3000));
-                const queries = Promise.all([
+                const [shopsRes, listingsRes] = await Promise.all([
                     supabaseClient.from('shops').select('*').eq('is_public', true),
-                    supabaseClient.from('marketplace_listings').select('*, shops(name, profile_image)').eq('status', 'active'),
-                    supabaseClient.from('vw_marketplace_reviews').select('*'),
-                    currentUser ? supabaseClient.from('marketplace_likes').select('listing_id').eq('user_id', currentUser.id) : Promise.resolve({ data: [] }),
-                    currentUser ? supabaseClient.from('client_favorite_shops').select('shop_id').eq('client_id', currentUser.id) : Promise.resolve({ data: [] }),
-                    supabaseClient.from('marketplace_likes').select('listing_id')
+                    supabaseClient.from('marketplace_listings').select('*, shops(name, profile_image)').eq('status', 'active')
                 ]);
-
-                const raceResult = await Promise.race([queries, fetchTimeout]);
-
-                if (raceResult && raceResult.__timeout) {
-                    console.warn("⚡ Marketplace network fetch took >3s. Serving rendered cache.");
-                    return;
-                }
-
-                const [shopsRes, listingsRes, reviewsRes, likesRes, favsRes, globalLikesRes] = raceResult;
 
                 if (shopsRes?.data) allShops = shopsRes.data;
                 if (listingsRes?.data) allListings = listingsRes.data;
-                if (reviewsRes?.data) allReviews = reviewsRes.data;
 
-                if (likesRes?.data && !likesRes.error) {
-                    userLikes = likesRes.data.map(l => l.listing_id);
-                }
+                // Render immediately to dismiss the loading spinner!
+                renderShops(allShops);
+                renderListings(allListings);
+                filterMarketplace();
 
-                if (favsRes?.data && !favsRes.error) {
-                    userFavoriteShops = favsRes.data.map(f => f.shop_id);
-                }
-
-                if (globalLikesRes?.data) {
-                    globalLikesCount = {};
-                    globalLikesRes.data.forEach(l => {
-                        globalLikesCount[l.listing_id] = (globalLikesCount[l.listing_id] || 0) + 1;
-                    });
-                }
-
-                // Cache for instant load next time
+                // Save to cache
                 if (window.OfflineStore) {
                     if (allShops.length > 0) OfflineStore.saveCache('marketplace_shops', allShops);
                     if (allListings.length > 0) OfflineStore.saveCache('marketplace_listings', allListings);
                 }
 
-                if (typeof clearAlgorithmCache === 'function') {
-                    clearAlgorithmCache();
-                }
+                // ⚡ 3. ASYNCHRONOUS SECONDARY FETCH (Reviews & Likes in background — non-blocking)
+                Promise.allSettled([
+                    supabaseClient.from('vw_marketplace_reviews').select('*'),
+                    currentUser ? supabaseClient.from('marketplace_likes').select('listing_id').eq('user_id', currentUser.id) : Promise.resolve({ data: [] }),
+                    currentUser ? supabaseClient.from('client_favorite_shops').select('shop_id').eq('client_id', currentUser.id) : Promise.resolve({ data: [] }),
+                    supabaseClient.from('marketplace_likes').select('listing_id')
+                ]).then(([reviewsRes, likesRes, favsRes, globalLikesRes]) => {
+                    if (reviewsRes.status === 'fulfilled' && reviewsRes.value?.data) allReviews = reviewsRes.value.data;
+                    if (likesRes.status === 'fulfilled' && likesRes.value?.data) userLikes = likesRes.value.data.map(l => l.listing_id);
+                    if (favsRes.status === 'fulfilled' && favsRes.value?.data) userFavoriteShops = favsRes.value.data.map(f => f.shop_id);
+                    if (globalLikesRes.status === 'fulfilled' && globalLikesRes.value?.data) {
+                        globalLikesCount = {};
+                        globalLikesRes.value.data.forEach(l => {
+                            globalLikesCount[l.listing_id] = (globalLikesCount[l.listing_id] || 0) + 1;
+                        });
+                    }
 
-                if (typeof calculateShopScore === 'function') {
-                    allShops.sort((a, b) => calculateShopScore(b, allReviews, userLikes) - calculateShopScore(a, allReviews, userLikes));
-                }
-
-                if (typeof calculateBespokeScore === 'function') {
-                    allListings.sort((a, b) => calculateBespokeScore(b, allShops, allReviews, globalLikesCount, userFavoriteShops) - calculateBespokeScore(a, allShops, allReviews, globalLikesCount, userFavoriteShops));
-                }
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const catParam = urlParams.get('category');
-                if (catParam) {
-                    const select = document.getElementById('mkt-category-filter');
-                    if (select) select.value = catParam;
-                }
-                const tabParam = urlParams.get('tab');
-                if (tabParam === 'shops') {
-                    setMarketplaceMode('shops');
-                } else {
-                    renderShops(allShops);
-                    renderListings(allListings);
+                    if (typeof calculateShopScore === 'function') {
+                        allShops.sort((a, b) => calculateShopScore(b, allReviews, userLikes) - calculateShopScore(a, allReviews, userLikes));
+                    }
+                    if (typeof calculateBespokeScore === 'function') {
+                        allListings.sort((a, b) => calculateBespokeScore(b, allShops, allReviews, globalLikesCount, userFavoriteShops) - calculateBespokeScore(a, allShops, allReviews, globalLikesCount, userFavoriteShops));
+                    }
                     filterMarketplace();
-                }
+                }).catch(err => console.warn("Secondary background fetch notice:", err));
 
             } catch (err) {
                 console.error("Marketplace fetch error:", err);
@@ -2061,7 +2038,7 @@
         // Get single listing card HTML helper
         function getListingCardHtml(list) {
             const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || `https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=400`;
-            const shopFromCache = allShops.find(s => s.id === list.shop_id);
+            const shopFromCache = (allShops || []).find(s => s.id === list.shop_id);
             const shopName = list.shops?.name || shopFromCache?.name || 'Style Shop';
             const shopProfileImg = list.shops?.profile_image || shopFromCache?.profile_image;
 
@@ -2071,12 +2048,12 @@
                 ? `<img src="${avatarImgUrl}" style="width:16px; height:16px; border-radius:50%; object-fit:cover; margin-right:6px; border: 1px solid var(--brand-gold); vertical-align: middle;">`
                 : `<i class="fas fa-store" style="color:var(--brand-gold); margin-right:4px; vertical-align: middle;"></i>`;
 
-            const listingReviews = allReviews.filter(r => r.listing_id === list.id);
+            const listingReviews = (allReviews || []).filter(r => r.listing_id === list.id);
             const avgRating = listingReviews.length > 0
                 ? (listingReviews.reduce((sum, r) => sum + r.rating, 0) / listingReviews.length).toFixed(1)
                 : null;
 
-            const isLiked = userLikes.includes(list.id);
+            const isLiked = (userLikes || []).includes(list.id);
             const heartIcon = isLiked ? 'fas fa-heart' : 'far fa-heart';
             const heartColor = isLiked ? '#ef4444' : 'var(--brand-slate)';
             const likeBtn = `
