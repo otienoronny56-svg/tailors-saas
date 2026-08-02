@@ -722,53 +722,61 @@
         </a>
     </nav>
 
-    <script src="../../js/core/config.js?v=1785665818465"></script>
+    <script src="../../js/core/config.js?v=1785666316359"></script>
     
     <!-- Core & Utils -->
-    <script src="../../js/utils/helpers.js?v=1785665818465"></script>
-    <script src="../../js/utils/kra-tax.js?v=1785665818465"></script>
-    <script src="../../js/ui/theme.js?v=1785665818465"></script>
-    <script src="../../js/core/globals.js?v=1785665818465"></script>
-    <script src="../../js/core/init.js?v=1785665818465"></script>
-    <script src="../../js/core/auth.js?v=1785665818465"></script>
-    <script src="../../js/ui/sidebar.js?v=1785665818465"></script>
-    <script src="../../js/ui/modals.js?v=1785665818465"></script>
-    <script src="../../js/features/inventory.js?v=1785665818465"></script>
-    <script src="../../js/features/clients.js?v=1785665818465"></script>
+    <script src="../../js/utils/helpers.js?v=1785666316359"></script>
+    <script src="../../js/utils/kra-tax.js?v=1785666316359"></script>
+    <script src="../../js/ui/theme.js?v=1785666316359"></script>
+    <script src="../../js/core/globals.js?v=1785666316359"></script>
+    <script src="../../js/core/init.js?v=1785666316359"></script>
+    <script src="../../js/core/auth.js?v=1785666316359"></script>
+    <script src="../../js/ui/sidebar.js?v=1785666316359"></script>
+    <script src="../../js/ui/modals.js?v=1785666316359"></script>
+    <script src="../../js/features/inventory.js?v=1785666316359"></script>
+    <script src="../../js/features/clients.js?v=1785666316359"></script>
     
-    <script src="../../js/features/orders.js?v=1785665818465"></script>
-    <script src="../../js/features/payments.js?v=1785665818465"></script>
-    <script src="../../js/features/analytics.js?v=1785665818465"></script>
-    <script src="../../js/features/messaging.js?v=1785665818465"></script>
-    <script src="../../js/features/management.js?v=1785665818465"></script>
-    <script src="../../app.js?v=1785665818465"></script>
-    <script src="../../mobile-nav.js?v=1785665818465"></script>
+    <script src="../../js/features/orders.js?v=1785666316359"></script>
+    <script src="../../js/features/payments.js?v=1785666316359"></script>
+    <script src="../../js/features/analytics.js?v=1785666316359"></script>
+    <script src="../../js/features/messaging.js?v=1785666316359"></script>
+    <script src="../../js/features/management.js?v=1785666316359"></script>
+    <script src="../../app.js?v=1785666316359"></script>
+    <script src="../../mobile-nav.js?v=1785666316359"></script>
 
     <script>
         // Init Date Picker and Dropdowns
-        $(document).ready(function () {
-            // Setup Date Picker
-            $('#date-range-filter').daterangepicker({
-                opens: 'left',
-                ranges: {
-                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                    'This Month': [moment().startOf('month'), moment().endOf('month')],
-                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                },
-                startDate: moment().subtract(29, 'days'),
-                endDate: moment(),
-                locale: { format: 'MMM D, YYYY' }
-            }, function (start, end, label) {
-                // Pass dates to app.js function if it exists
-                if (typeof loadAnalyticsDashboard === 'function') {
-                    // We let app.js handle the reload based on these dates
-                    // (The function reads the input value automatically)
-                    loadAnalyticsDashboard();
+        if (typeof $ !== 'undefined') {
+            $(document).ready(function () {
+                // Setup Date Picker
+                if ($.fn && $.fn.daterangepicker) {
+                    $('#date-range-filter').daterangepicker({
+                        opens: 'left',
+                        ranges: {
+                            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                            'This Month': [moment().startOf('month'), moment().endOf('month')],
+                            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                        },
+                        startDate: moment().subtract(29, 'days'),
+                        endDate: moment(),
+                        locale: { format: 'MMM D, YYYY' }
+                    }, function (start, end, label) {
+                        // Pass dates to app.js function if it exists
+                        if (typeof loadAnalyticsDashboard === 'function') {
+                            // We let app.js handle the reload based on these dates
+                            // (The function reads the input value automatically)
+                            loadAnalyticsDashboard();
+                        }
+                    });
+                }
+
+                // Log for debugging
+                if (typeof APP_CONFIG !== 'undefined') {
+                    console.log("âœ… Financial Overview: Config Loaded Successfully for " + APP_CONFIG.appName);
+                } else {
+                    console.error("â Œ Financial Overview: Config Missing!");
                 }
             });
-
-            // Log for debugging
-            if (typeof APP_CONFIG !== 'undefined') {
                 console.log("âœ… Financial Overview: Config Loaded Successfully for " + APP_CONFIG.appName);
             } else {
                 console.error("âŒ Financial Overview: Config Missing!");

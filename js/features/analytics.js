@@ -1579,6 +1579,7 @@ async function loadEfficiencyChart(shopId = 'all') {
         }
     }
 
+    if (typeof Chart === 'undefined') return;
     analyticsCharts.efficiencyChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -2014,7 +2015,7 @@ async function loadAnalyticsDashboard() {
         const { data: advancedOrders } = await advOrdersQuery;
         window.advancedAnalyticsOrders = advancedOrders || [];
 
-        await Promise.all([
+        await Promise.allSettled([
             loadKPIMetrics(shopId),
             loadRevenueTrend(revenueDaysStr),
             loadProductMixChart(shopId, productMixDaysStr),

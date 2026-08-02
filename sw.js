@@ -161,10 +161,12 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 2. Static Assets (CSS, JS, Fonts, Images): Cache First with Network Fallback & Background Update (Stale-While-Revalidate)
+  // 2. Static Assets (CSS, JS, Fonts, Images): Cache First with Network Fallback
   event.respondWith(
     caches.match(request, { ignoreSearch: true }).then(cachedResponse => {
-      const fetchPromise = fetch(request).then(networkResponse => {
+      if (cachedResponse) return cachedResponse;
+
+      return fetch(request).then(networkResponse => {
         if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(request, responseToCache));
@@ -172,9 +174,8 @@ self.addEventListener('fetch', event => {
         return networkResponse;
       }).catch(err => {
         console.warn('Network fetch failed for asset:', request.url);
+        return new Response('', { status: 503, statusText: 'Offline Asset Unavailable' });
       });
-
-      return cachedResponse || fetchPromise;
     })
   );
 });

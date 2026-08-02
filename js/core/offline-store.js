@@ -288,3 +288,82 @@ const OfflineStore = (function() {
 })();
 
 window.OfflineStore = OfflineStore;
+
+// ==========================================
+// 🚀 GLOBAL AUTOMATIC SUPABASE OFFLINE INTERCEPTOR
+// Seamlessly catches all REST queries across all pages
+// ==========================================
+(function setupGlobalSupabaseInterceptor() {
+    function applyPatch() {
+        if (!window.supabaseClient || window.supabaseClient.__offlinePatched) return;
+        
+        const originalFrom = window.supabaseClient.from.bind(window.supabaseClient);
+        window.supabaseClient.__offlinePatched = true;
+
+        window.supabaseClient.from = function(table) {
+            const builder = originalFrom(table);
+            const originalThen = builder.then.bind(builder);
+
+            builder.then = function(onFulfilled, onRejected) {
+                if (!navigator.onLine) {
+                    console.log(`⚡ Auto-Interceptor (Offline): Returning cached '${table}' data`);
+                    return OfflineStore.getCache(table).then(cached => {
+                        const res = { data: cached || [], error: null, isOffline: true };
+                        return onFulfilled ? onFulfilled(res) : res;
+                    }).catch(() => {
+                        const res = { data: [], error: null, isOffline: true };
+                        return onFulfilled ? onFulfilled(res) : res;
+                    });
+                }
+
+                // 1.2s timeout race against slow/hanging network fetches
+                const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ __timeout: true }), 1200));
+                const fetchPromise = Promise.resolve().then(() => originalThen()).catch(err => ({ error: err }));
+
+                return Promise.race([fetchPromise, timeoutPromise]).then(res => {
+                    if (res && res.__timeout) {
+                        console.warn(`⚡ Auto-Interceptor: Network fetch timed out (>1.2s) for '${table}'. Serving cached data.`);
+                        return OfflineStore.getCache(table).then(cached => {
+                            fetchPromise.then(netRes => {
+                                if (netRes && netRes.data && !netRes.error) {
+                                    OfflineStore.saveCache(table, netRes.data);
+                                }
+                            }).catch(() => {});
+                            const out = { data: cached || [], error: null, isOffline: true };
+                            return onFulfilled ? onFulfilled(out) : out;
+                        });
+                    }
+
+                    if (res && res.error) {
+                        const isNetErr = !navigator.onLine || 
+                            (res.error.message && (res.error.message.includes('Failed to fetch') || res.error.message.includes('Network error') || res.error.status === 503));
+                        if (isNetErr) {
+                            console.warn(`⚡ Auto-Interceptor: Network error for '${table}', serving local cached data.`);
+                            return OfflineStore.getCache(table).then(cached => {
+                                const out = { data: cached || [], error: null, isOffline: true };
+                                return onFulfilled ? onFulfilled(out) : out;
+                            });
+                        }
+                    }
+
+                    if (res && res.data && !res.error) {
+                        OfflineStore.saveCache(table, res.data);
+                    }
+
+                    return onFulfilled ? onFulfilled(res) : res;
+                }, onRejected);
+            };
+
+            return builder;
+        };
+        console.log('✅ Global Supabase Offline Interceptor attached.');
+    }
+
+    if (window.supabaseClient) {
+        applyPatch();
+    } else {
+        document.addEventListener('DOMContentLoaded', applyPatch);
+        setTimeout(applyPatch, 500);
+        setTimeout(applyPatch, 1500);
+    }
+})();
