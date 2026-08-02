@@ -18,14 +18,14 @@ async function checkSession() {
         }
 
         // [PERF & OFFLINE] Try to load profile from sessionStorage or localStorage first for instant navigation & offline support
-        const cachedProfileData = sessionStorage.getItem('USER_PROFILE_' + user.id) || localStorage.getItem('USER_PROFILE_' + user.id) || localStorage.getItem('USER_PROFILE');
+        const cachedProfileData = sessionStorage.getItem('USER_PROFILE_' + user.id) || localStorage.getItem('USER_PROFILE_' + user.id);
         if (cachedProfileData) {
             try {
                 const tempProfile = JSON.parse(cachedProfileData);
-                if (tempProfile && (!navigator.onLine || tempProfile.status !== 'Pending')) {
+                if (tempProfile && tempProfile.id === user.id && (!navigator.onLine || tempProfile.status !== 'Pending')) {
                     USER_PROFILE = tempProfile;
                     window.USER_PROFILE = tempProfile;
-                    logDebug("Loaded user profile from cache", null, 'info');
+                    logDebug("Loaded user profile from cache for user: " + user.id, null, 'info');
                     
                     if (USER_PROFILE.business_type) {
                         document.body.className = document.body.className.replace(/\bbusiness-type-\S+/g, '');
@@ -514,6 +514,69 @@ function setupGlobalNotificationListener() {
                     });
                     notif.onclick = function() {
                         window.focus();
+                                              // If not on messages page, redirect them
+                        if (!window.location.pathname.includes('messages') && !window.location.pathname.includes('client-dashboard')) {
+                            const msgLink = document.getElementById('nav-messages');
+                            if (msgLink) msgLink.click();
+                        }
+                    };
+                } catch(e) {
+                    console.warn("Failed to show notification:", e);
+                }
+            }
+        })
+        .subscribe();
+}r = null;
+function setupGlobalNotificationListener() {
+    if (!USER_PROFILE || _globalNotificationListener) return;
+
+    if (!("Notification" in window)) return;
+
+    // Only set up for roles that use messages
+    if (USER_PROFILE.role !== 'owner' && USER_PROFILE.role !== 'client' && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.role !== 'manager') return;
+
+    // Build filter if needed (clients only care about messages to them)
+    let filterString = '';
+    if (USER_PROFILE.role === 'client') {
+        filterString = `recipient_id=eq.${USER_PROFILE.id}`;
+    }
+
+    _globalNotificationListener = window.supabaseClient
+        .channel('global-notifications-' + USER_PROFILE.id)
+        .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            ...(filterString ? { filter: filterString } : {})
+        }, payload => {
+            const newMsg = payload.new;
+            
+            // Ignore messages sent by ourselves
+            if (newMsg.sender_id === USER_PROFILE.id) return;
+            
+            // For admins/managers, make sure the message is relevant
+            if (USER_PROFILE.role !== 'client') {
+                // To avoid spam, ensure it's not a message from another admin in the same org
+                if (newMsg.sender_id === USER_PROFILE.organization_id) return;
+            }
+
+            // Immediately update the UI red dots anywhere in the app!
+            if (typeof checkUnreadMessages === 'function') {
+                checkUnreadMessages();
+            }
+
+            // Show OS Notification if page is hidden
+            if (document.hidden && Notification.permission === 'granted') {
+                const title = USER_PROFILE.role === 'client' ? "New Tailor Message" : "New Client Inquiry";
+                const body = newMsg.message_text ? newMsg.message_text.substring(0, 50) + "..." : "You have a new message.";
+                
+                try {
+                    const notif = new Notification(title + " - Tailors", {
+                        body: body,
+                        icon: '/assets/icon-192x192.png'
+                    });
+                    notif.onclick = function() {
+                        window.focus();
                         this.close();
                         
                         // If not on messages page, redirect them
@@ -553,7 +616,7 @@ async function routeToPage(path) {
 
     // Owner pages
     if (USER_PROFILE.role === 'owner') {
-        if (path.includes('manager') || path.includes('superadmin')) {
+        if (path.includes('manager') || path.includes('superadmin') || path.includes('client-dashboard')) {
             window.location.replace('/views/admin/admin-dashboard.html');
             return;
         }
@@ -587,8 +650,8 @@ async function routeToPage(path) {
         }
     }
     // Manager pages
-    else {
-        if (path.includes('admin-')) {
+    else if (USER_PROFILE.role === 'manager') {
+        if (path.includes('admin-') || path.includes('client-dashboard')) {
             window.location.replace('/views/manager/manager-dashboard.html');
             return;
         }
@@ -610,7 +673,7 @@ async function routeToPage(path) {
         } else if (path.includes('manager-listings')) {
             await loadManagerListingsScreen();
         } else if (path.includes('manager-messages')) {
-            // Page handles its own init (inline script like admin-messages)
+            // Page handles its own init
         } else if (path.includes('order-form')) {
             initOrderForm();
         } else if (path.includes('expenses')) {
@@ -618,7 +681,13 @@ async function routeToPage(path) {
         } else if (path.includes('order-details')) {
             await loadOrderDetailsScreen();
         }
-
+    }
+    // Client pages
+    else if (USER_PROFILE.role === 'client') {
+        if (path.includes('admin-') || path.includes('manager-')) {
+            window.location.replace('/views/client/client-dashboard.html');
+            return;
+        }
     }
 }
 
@@ -648,16 +717,14 @@ async function handleLogin(e) {
         logDebug("Login successful, checking session profile...", null, 'success');
 
         // 3. Perform Session & Redirect Logic
-        // We 'await' this so the button doesn't reset while the page is trying to change
         await checkSession();
 
     } catch (error) {
         logDebug("Login process error:", error, 'error');
 
-        // Show the error directly on the screen for her
         const msgEl = document.getElementById('auth-message');
         if (msgEl) {
-            msgEl.textContent = "âŒ Error: " + error.message;
+            msgEl.textContent = "❌ Error: " + error.message;
             msgEl.style.display = "block";
             msgEl.style.color = "#ff4444";
         }
@@ -667,7 +734,6 @@ async function handleLogin(e) {
             loginBtn.textContent = 'Sign In';
         }
     } finally {
-        // Safety fallback: if 5 seconds pass and we haven't navigated, re-enable button
         setTimeout(() => {
             if (loginBtn && loginBtn.disabled) {
                 loginBtn.disabled = false;
@@ -679,12 +745,22 @@ async function handleLogin(e) {
 
 async function handleLogout() {
     try {
-        await supabaseClient.auth.signOut();
-        USER_PROFILE = null; // Clear the memory!
-        window.location.replace('/index.html');
+        if (typeof supabaseClient !== 'undefined' && supabaseClient.auth) {
+            await supabaseClient.auth.signOut();
+        }
     } catch (error) {
         console.error("Logout error:", error);
-        // Force redirect anyway to break loops
-        window.location.replace('/index.html');
+    } finally {
+        USER_PROFILE = null;
+        window.USER_PROFILE = null;
+        sessionStorage.clear();
+        try {
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('USER_PROFILE')) {
+                    localStorage.removeItem(key);
+                }
+            });
+        } catch (e) {}
+        window.location.replace('/login.html');
     }
 }
