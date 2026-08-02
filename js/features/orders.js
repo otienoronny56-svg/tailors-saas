@@ -124,8 +124,26 @@ async function loadOrders(mode = 'open') {
             query = query.or(`worker_id.eq.${workerFilter},additional_workers.cs.["${workerFilter}"]`);
         }
 
-        const { data: ordersData, error } = await query;
-        if (error) throw error;
+        let ordersData = null;
+        let queryErr = null;
+        try {
+            const res = await query;
+            ordersData = res.data;
+            queryErr = res.error;
+        } catch (e) {
+            queryErr = e;
+        }
+
+        if (queryErr || !ordersData) {
+            if (window.OfflineStore) {
+                console.log("⚡ Serving orders from offline cache...");
+                ordersData = (await window.OfflineStore.getCache('orders')) || [];
+            } else {
+                throw queryErr || new Error("Failed to load orders");
+            }
+        } else if (window.OfflineStore) {
+            window.OfflineStore.saveCache('orders', ordersData);
+        }
 
         let orders = ordersData;
         if (mode === 'urgent') {
@@ -335,8 +353,20 @@ function initOrderForm() {
                     created_at: new Date().toISOString()
                 };
 
-                const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
-                if (error) throw error;
+                let order = null;
+                try {
+                    const res = await supabaseClient.from('orders').insert([orderData]).select().single();
+                    if (res.error) throw res.error;
+                    order = res.data;
+                } catch (insertErr) {
+                    if (!navigator.onLine && window.OfflineStore) {
+                        order = { ...orderData, id: 'temp_' + Date.now() };
+                        await window.OfflineStore.queueMutation('orders', 'insert', orderData);
+                        if (window.OfflineUI) window.OfflineUI.showToast('Order saved offline. Will sync when back online!');
+                    } else {
+                        throw insertErr;
+                    }
+                }
 
                 // --- [NEW] Save Inventory-backed Extras with Stock Deduction ---
                 await saveOrderExtrasWithStock(order.id, USER_PROFILE.shop_id);
@@ -928,16 +958,15 @@ async function loadPendingClosureOrders() {
             .eq('status', 6)
             .order('created_at', { ascending: false });
 
-        // Ensure owner only sees their organization's shops
         if (USER_PROFILE && USER_PROFILE.organization_id) {
-            const { data: orgShops } = await supabaseClient.from('shops').select('id').eq('organization_id', USER_PROFILE.organization_id);
+            const shopsRes = await (window.OfflineStore
+                ? window.OfflineStore.fetchWithFallback('shops', () => supabaseClient.from('shops').select('id').eq('organization_id', USER_PROFILE.organization_id))
+                : supabaseClient.from('shops').select('id').eq('organization_id', USER_PROFILE.organization_id));
+            const orgShops = shopsRes?.data;
             const validShopIds = orgShops ? orgShops.map(s => s.id) : [];
-            if(validShopIds.length === 0) {
-                const tbody = document.getElementById('orders-tbody');
-                if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No pending orders</td></tr>';
-                return;
+            if (validShopIds.length > 0) {
+                query = query.in('shop_id', validShopIds);
             }
-            query = query.in('shop_id', validShopIds);
         }
 
         const shopFilter = document.getElementById('shop-filter')?.value;
@@ -945,8 +974,24 @@ async function loadPendingClosureOrders() {
             query = query.eq('shop_id', shopFilter);
         }
 
-        const { data: orders, error } = await query;
-        if (error) throw error;
+        let orders = null;
+        let ordersErr = null;
+        try {
+            const res = await query;
+            orders = res.data;
+            ordersErr = res.error;
+        } catch (e) {
+            ordersErr = e;
+        }
+
+        if (ordersErr || !orders) {
+            if (window.OfflineStore) {
+                orders = (await window.OfflineStore.getCache('orders')) || [];
+                orders = orders.filter(o => o.status === 6);
+            } else {
+                throw ordersErr || new Error("Failed to load pending closure orders");
+            }
+        }
 
         const tbody = document.getElementById('orders-tbody');
         if (!tbody) return;

@@ -274,8 +274,26 @@ async function loadClients() {
             query = query.eq('shop_id', shopFilterVal);
         }
 
-        const { data: clients, error } = await query;
-        if (error) throw error;
+        let clients = null;
+        let queryError = null;
+        try {
+            const res = await query;
+            clients = res.data;
+            queryError = res.error;
+        } catch (e) {
+            queryError = e;
+        }
+
+        if (queryError || !clients) {
+            if (window.OfflineStore) {
+                console.log("⚡ Serving clients from offline cache...");
+                clients = (await window.OfflineStore.getCache('clients')) || [];
+            } else {
+                throw queryError || new Error("Failed to load clients");
+            }
+        } else if (window.OfflineStore) {
+            window.OfflineStore.saveCache('clients', clients);
+        }
 
         // Update top mini stat cards dynamically
         updateClientMiniStats(clients || []);

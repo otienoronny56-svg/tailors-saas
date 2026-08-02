@@ -432,14 +432,24 @@ async function loadMetrics() {/* Lines 1604-1625 omitted */ }
 async function loadMetrics() {
     if (!USER_PROFILE) return;
     try {
-        const { data: shops } = await supabaseClient.from('shops').select('id, name').eq('organization_id', USER_PROFILE.organization_id);
-        if (!shops || shops.length === 0) return;
+        const shopsRes = await (window.OfflineStore
+            ? window.OfflineStore.fetchWithFallback('shops', () => supabaseClient.from('shops').select('id, name').eq('organization_id', USER_PROFILE.organization_id))
+            : supabaseClient.from('shops').select('id, name').eq('organization_id', USER_PROFILE.organization_id));
+
+        const shops = shopsRes?.data || [];
         const shopIds = shops.map(s => s.id);
 
-        const [{ data: orders }, { data: allPayments }] = await Promise.all([
-            supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date').in('shop_id', shopIds),
-            supabaseClient.from('payments').select('order_id, amount').is('deleted_at', null)
+        const [ordersRes, paymentsRes] = await Promise.all([
+            window.OfflineStore
+                ? window.OfflineStore.fetchWithFallback('orders', () => shopIds.length > 0 ? supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date').in('shop_id', shopIds) : supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date'))
+                : (shopIds.length > 0 ? supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date').in('shop_id', shopIds) : supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date')),
+            window.OfflineStore
+                ? window.OfflineStore.fetchWithFallback('payments', () => supabaseClient.from('payments').select('order_id, amount').is('deleted_at', null))
+                : supabaseClient.from('payments').select('order_id, amount').is('deleted_at', null)
         ]);
+
+        const orders = ordersRes?.data || [];
+        const allPayments = paymentsRes?.data || [];
 
         if (!orders) return;
 
@@ -561,68 +571,6 @@ async function loadMetrics() {
 
 async function loadKPIMetrics(shopId) {
     try {
-        // Build queries - exclude soft-deleted payments
-        // Build queries - RLS handles soft-deleted payments automatically
-        let paymentsQuery = supabaseClient.from('payments').select('amount').is('deleted_at', null);
-        let ordersQuery = supabaseClient.from('orders').select('id, price, status');
-        let expensesQuery = supabaseClient.from('expenses').select('amount');
-        let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity');
-
-        if (shopId !== 'all') {
-            paymentsQuery = paymentsQuery.eq('orders.shop_id', shopId);
-            ordersQuery = ordersQuery.eq('shop_id', shopId);
-            expensesQuery = expensesQuery.eq('shop_id', shopId);
-        }
-
-        // Execute queries
-        const [paymentsRes, ordersRes, expensesRes, accRes] = await Promise.all([
-            paymentsQuery,
-            ordersQuery,
-            expensesQuery,
-            accessoriesQuery
-        ]);
-
-        const payments = paymentsRes.data || [];
-        const orders = ordersRes.data || [];
-        const expenses = expensesRes.data || [];
-        const accessories = accRes.data || [];
-
-        // Calculate metrics
-        const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
-        const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-        const accTotal = accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0);
-        const totalOrderValue = orders.reduce((sum, o) => sum + (o.price || 0), 0) + accTotal;
-
-        const netProfit = totalRevenue - totalExpenses;
-        const outstandingBalance = totalOrderValue - totalRevenue;
-
-        const activeOrders = orders.filter(o => o.status < 7).length;
-        const completedOrders = orders.filter(o => o.status === 7).length;
-
-        const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
-
-        // Update UI
-        const updateMetric = (id, value, isCurrency = false) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.textContent = isCurrency ? `Ksh ${value.toLocaleString()}` : value.toString();
-            }
-        };
-
-        updateMetric('total-revenue', totalRevenue, true);
-        updateMetric('active-orders', activeOrders);
-        updateMetric('avg-order-value', avgOrderValue, true);
-        updateMetric('net-profit', netProfit, true);
-        updateMetric('outstanding-balance', outstandingBalance, true);
-
-        logDebug("KPI metrics loaded", { totalRevenue, activeOrders }, 'success');
-    } catch (error) {
-        logDebug("Error loading KPI metrics:", error, 'error');
-    }
-}
-
-async function loadKPIMetrics(shopId) {
-    try {
         let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at').is('deleted_at', null).eq('organization_id', USER_PROFILE.organization_id);
         let ordersQuery = supabaseClient.from('orders').select('id, price, status, created_at').eq('organization_id', USER_PROFILE.organization_id);
         let expensesQuery = supabaseClient.from('expenses').select('amount, incurred_at').eq('organization_id', USER_PROFILE.organization_id);
@@ -736,102 +684,13 @@ async function loadKPIMetrics(shopId) {
         updateMetric('outstanding-balance', outstandingBalance, true);
         // Trend for outstanding balance doesn't make as much sense historically without snapshots, omitting.
 
+        if (typeof updateKRATaxUIWidget === 'function') {
+            updateKRATaxUIWidget(orders);
+        }
+
         logDebug("KPI metrics loaded", { totalRevenue, activeOrders }, 'success');
     } catch (error) {
         logDebug("Error loading KPI metrics:", error, 'error');
-    }
-}
-
-async function loadRevenueTrend(daysStr) {
-    try {
-        const days = parseInt(daysStr) || 30;
-
-        let paymentsQuery = supabaseClient
-            .from('payments')
-            .select('amount, recorded_at')
-            .order('recorded_at');
-
-        // Apply Date Filter
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - days);
-        paymentsQuery = paymentsQuery.gte('recorded_at', cutoffDate.toISOString());
-
-        const { data: payments } = await paymentsQuery;
-
-        // Group by date, filling missing days with 0
-        const dailyRevenue = {};
-        const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
-
-        // Initialize all days in range to 0 to prevent cut-off charts
-        for (let i = days - 1; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            dailyRevenue[dateFormat.format(d)] = 0;
-        }
-
-        if (payments) {
-            payments.forEach(payment => {
-                const date = new Date(payment.recorded_at);
-                const dateKey = dateFormat.format(date);
-
-                if (dailyRevenue[dateKey] !== undefined) {
-                    dailyRevenue[dateKey] += payment.amount || 0;
-                }
-            });
-        }
-
-        const labels = Object.keys(dailyRevenue);
-        const data = Object.values(dailyRevenue);
-
-        // Create chart
-        const canvas = document.getElementById('revenueChart');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-
-        if (analyticsCharts.revenueChart) {
-            analyticsCharts.revenueChart.destroy();
-        }
-
-        analyticsCharts.revenueChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Daily Revenue',
-                    data: data,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => `Revenue: Ksh ${context.raw.toLocaleString()}`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: (value) => `Ksh ${value.toLocaleString()}`
-                        }
-                    }
-                }
-            }
-        });
-
-        logDebug("Revenue chart loaded", { dataPoints: data.length }, 'success');
-    } catch (error) {
-        logDebug("Error loading revenue chart:", error, 'error');
     }
 }
 

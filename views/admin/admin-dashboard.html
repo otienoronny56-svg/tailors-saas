@@ -22,6 +22,8 @@
     <link rel="icon" type="image/png" href="../../logo.jpeg">
     <link rel="stylesheet" href="../../styles.css?v=20260629_2">
     <script src="/js/lib/supabase.min.js"></script>
+    <script src="/js/core/offline-store.js"></script>
+    <script src="/js/ui/offline-ui.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* MOBILE HAMBURGER MENU */
@@ -523,11 +525,14 @@
                     try {
                         if (typeof window.supabaseClient === 'undefined' || typeof USER_PROFILE === 'undefined' || !USER_PROFILE) { setTimeout(loadTailorsDirectory, 1200); return; }
                         const orgId = USER_PROFILE.organization_id;
-                        const [{ data: shops }, { data: allWorkers }, { data: managers }] = await Promise.all([
-                            supabaseClient.from('shops').select('id, name').eq('organization_id', orgId).order('name'),
-                            supabaseClient.from('workers').select('id, name, role, shop_id').eq('organization_id', orgId).order('name'),
-                            supabaseClient.from('user_profiles').select('id, full_name, shop_id').eq('organization_id', orgId).eq('role', 'manager')
+                        const [shopsRes, workersRes, managersRes] = await Promise.all([
+                            window.OfflineStore ? window.OfflineStore.fetchWithFallback('shops', () => supabaseClient.from('shops').select('id, name').eq('organization_id', orgId).order('name')) : supabaseClient.from('shops').select('id, name').eq('organization_id', orgId).order('name'),
+                            window.OfflineStore ? window.OfflineStore.fetchWithFallback('workers', () => supabaseClient.from('workers').select('id, name, role, shop_id').eq('organization_id', orgId).order('name')) : supabaseClient.from('workers').select('id, name, role, shop_id').eq('organization_id', orgId).order('name'),
+                            window.OfflineStore ? window.OfflineStore.fetchWithFallback('user_profiles', () => supabaseClient.from('user_profiles').select('id, full_name, shop_id').eq('organization_id', orgId).eq('role', 'manager')) : supabaseClient.from('user_profiles').select('id, full_name, shop_id').eq('organization_id', orgId).eq('role', 'manager')
                         ]);
+                        const shops = shopsRes?.data;
+                        const allWorkers = workersRes?.data;
+                        const managers = managersRes?.data;
                         if (!shops || shops.length === 0) {
                             container.innerHTML = '<p style="color:#94a3b8;text-align:center;grid-column:1/-1;padding:20px;">No shops found.</p>';
                             return;
@@ -773,26 +778,26 @@
         </a>
     </nav>
 
-    <script src="../../js/core/config.js?v=1781824528054"></script>
+    <script src="../../js/core/config.js?v=1785664270784"></script>
 
     <!-- Core & Utils -->
-    <script src="../../js/utils/helpers.js?v=1781824528054"></script>
-    <script src="../../js/ui/theme.js?v=1781824528054"></script>
-    <script src="../../js/core/globals.js?v=1781824528054"></script>
-    <script src="../../js/core/init.js?v=1781824528054"></script>
-    <script src="../../js/core/auth.js?v=1781824528054"></script>
-    <script src="../../js/ui/sidebar.js?v=1781824528054"></script>
-    <script src="../../js/ui/modals.js?v=1781824528054"></script>
-    <script src="../../js/features/inventory.js?v=1781824528054"></script>
-    <script src="../../js/features/clients.js?v=1781824528054"></script>
+    <script src="../../js/utils/helpers.js?v=1785664270784"></script>
+    <script src="../../js/ui/theme.js?v=1785664270784"></script>
+    <script src="../../js/core/globals.js?v=1785664270784"></script>
+    <script src="../../js/core/init.js?v=1785664270784"></script>
+    <script src="../../js/core/auth.js?v=1785664270784"></script>
+    <script src="../../js/ui/sidebar.js?v=1785664270784"></script>
+    <script src="../../js/ui/modals.js?v=1785664270784"></script>
+    <script src="../../js/features/inventory.js?v=1785664270784"></script>
+    <script src="../../js/features/clients.js?v=1785664270784"></script>
 
-    <script src="../../js/features/orders.js?v=1781824528054"></script>
-    <script src="../../js/features/payments.js?v=1781824528054"></script>
-    <script src="../../js/features/analytics.js?v=1781824528054"></script>
-    <script src="../../js/features/messaging.js?v=1781824528054"></script>
-    <script src="../../js/features/management.js?v=1781824528054"></script>
+    <script src="../../js/features/orders.js?v=1785664270784"></script>
+    <script src="../../js/features/payments.js?v=1785664270784"></script>
+    <script src="../../js/features/analytics.js?v=1785664270784"></script>
+    <script src="../../js/features/messaging.js?v=1785664270784"></script>
+    <script src="../../js/features/management.js?v=1785664270784"></script>
     <script src="../../app.js?v=20260725_JPDF_V1"></script>
-    <script src="../../mobile-nav.js?v=1781824528054"></script>
+    <script src="../../mobile-nav.js?v=1785664270784"></script>
 </body>
 
 </html>

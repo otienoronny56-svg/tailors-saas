@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="../../styles.css">
 
     <script src="/js/lib/supabase.min.js"></script>
+    <script src="/js/core/offline-store.js"></script>
+    <script src="/js/ui/offline-ui.js"></script>
     <!-- Chart.js for visualizations -->
     <script src="https://unpkg.com/chart.js/dist/chart.umd.js"></script>
     <script src="https://unpkg.com/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -419,6 +421,52 @@
                     </div>
                 </section>
 
+                <!-- 🇰🇪 KRA TAX RETURN HELPER CARD -->
+                <section style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 12px; padding: 20px; color: white; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #10b981;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 15px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <div style="background: rgba(16, 185, 129, 0.2); padding: 6px 12px; border-radius: 8px; font-weight: 800; color: #34d399; font-size: 0.85em; display: flex; align-items: center; gap: 6px;">
+                                🇰🇪 KRA TAX ASSISTANT
+                            </div>
+                            <select id="kra-tax-type-select" onchange="handleKRATaxTypeChange(this.value)" style="background: #334155; color: white; border: 1px solid #475569; padding: 6px 12px; border-radius: 6px; font-size: 0.85em; cursor: pointer; font-weight: 600;">
+                                <option value="tot">Turnover Tax (TOT 3%)</option>
+                                <option value="vat">Value Added Tax (VAT 16%)</option>
+                                <option value="exempt">Exempt / Small Trader</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <button onclick="triggerKRAWhatsApp()" style="background: #25D366; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                                <i class="fab fa-whatsapp" style="font-size: 1.1em;"></i> Send to Tax Agent
+                            </button>
+                            <button onclick="triggerKRADownloadCSV()" style="background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                                <i class="fas fa-file-csv" style="font-size: 1.1em;"></i> iTax CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div>
+                            <div style="font-size: 0.75em; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Period Gross Sales</div>
+                            <div id="kra-gross-sales" style="font-size: 1.5em; font-weight: 800; color: #f8fafc;">KES 0</div>
+                            <div style="font-size: 0.75em; color: #64748b;">From paid & completed orders</div>
+                        </div>
+
+                        <div>
+                            <div style="font-size: 0.75em; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">
+                                Est. Tax Liability <span id="kra-tax-rate-badge" style="background: #3b82f6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; margin-left: 6px;">3% Rate</span>
+                            </div>
+                            <div id="kra-tax-payable" style="font-size: 1.5em; font-weight: 800; color: #34d399;">KES 0</div>
+                            <div style="font-size: 0.75em; color: #64748b;">Turnover Tax Payable</div>
+                        </div>
+
+                        <div>
+                            <div style="font-size: 0.75em; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Next KRA Deadline</div>
+                            <div style="font-size: 1.1em; font-weight: 700; color: #facc15;"><i class="far fa-calendar-alt"></i> 20th Monthly</div>
+                            <div id="kra-deadline-subtext" style="font-size: 0.75em; color: #94a3b8;">Filing deadline for previous month</div>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="kpi-grid" id="kpi-metrics">
                     <div class="kpi-card revenue">
                         <div class="kpi-header">
@@ -674,26 +722,27 @@
         </a>
     </nav>
 
-    <script src="../../js/core/config.js?v=1781824528054"></script>
+    <script src="../../js/core/config.js?v=1785664270784"></script>
     
     <!-- Core & Utils -->
-    <script src="../../js/utils/helpers.js?v=1781824528054"></script>
-    <script src="../../js/ui/theme.js?v=1781824528054"></script>
-    <script src="../../js/core/globals.js?v=1781824528054"></script>
-    <script src="../../js/core/init.js?v=1781824528054"></script>
-    <script src="../../js/core/auth.js?v=1781824528054"></script>
-    <script src="../../js/ui/sidebar.js?v=1781824528054"></script>
-    <script src="../../js/ui/modals.js?v=1781824528054"></script>
-    <script src="../../js/features/inventory.js?v=1781824528054"></script>
-    <script src="../../js/features/clients.js?v=1781824528054"></script>
+    <script src="../../js/utils/helpers.js?v=1785664270784"></script>
+    <script src="../../js/utils/kra-tax.js?v=1785664270784"></script>
+    <script src="../../js/ui/theme.js?v=1785664270784"></script>
+    <script src="../../js/core/globals.js?v=1785664270784"></script>
+    <script src="../../js/core/init.js?v=1785664270784"></script>
+    <script src="../../js/core/auth.js?v=1785664270784"></script>
+    <script src="../../js/ui/sidebar.js?v=1785664270784"></script>
+    <script src="../../js/ui/modals.js?v=1785664270784"></script>
+    <script src="../../js/features/inventory.js?v=1785664270784"></script>
+    <script src="../../js/features/clients.js?v=1785664270784"></script>
     
-    <script src="../../js/features/orders.js?v=1781824528054"></script>
-    <script src="../../js/features/payments.js?v=1781824528054"></script>
-    <script src="../../js/features/analytics.js?v=1781824528054"></script>
-    <script src="../../js/features/messaging.js?v=1781824528054"></script>
-    <script src="../../js/features/management.js?v=1781824528054"></script>
-    <script src="../../app.js?v=1781824528054"></script>
-    <script src="../../mobile-nav.js?v=1781824528054"></script>
+    <script src="../../js/features/orders.js?v=1785664270784"></script>
+    <script src="../../js/features/payments.js?v=1785664270784"></script>
+    <script src="../../js/features/analytics.js?v=1785664270784"></script>
+    <script src="../../js/features/messaging.js?v=1785664270784"></script>
+    <script src="../../js/features/management.js?v=1785664270784"></script>
+    <script src="../../app.js?v=1785664270784"></script>
+    <script src="../../mobile-nav.js?v=1785664270784"></script>
 
     <script>
         // Init Date Picker and Dropdowns

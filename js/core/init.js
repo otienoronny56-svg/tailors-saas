@@ -51,6 +51,15 @@ try {
     window.appInitialized = true;
     console.log("✅ System Initialized Successfully");
 
+    // Initialize Offline Store and Auto-Sync on Boot if Online
+    if (window.OfflineStore) {
+        window.OfflineStore.init().then(() => {
+            if (navigator.onLine) {
+                window.OfflineStore.processSyncQueue();
+            }
+        });
+    }
+
 } catch (error) {
     console.error(error);
 }
@@ -106,6 +115,7 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
             .then(registration => {
+                registration.update();
                 console.log('Service Worker registered successfully:', registration.scope);
             })
             .catch(error => {

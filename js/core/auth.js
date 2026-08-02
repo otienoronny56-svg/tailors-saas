@@ -17,17 +17,16 @@ async function checkSession() {
             return;
         }
 
-        // [PERF] Try to load profile from sessionStorage first for instant navigation
-        const cachedProfileData = sessionStorage.getItem('USER_PROFILE_' + user.id);
+        // [PERF & OFFLINE] Try to load profile from sessionStorage or localStorage first for instant navigation & offline support
+        const cachedProfileData = sessionStorage.getItem('USER_PROFILE_' + user.id) || localStorage.getItem('USER_PROFILE_' + user.id) || localStorage.getItem('USER_PROFILE');
         if (cachedProfileData) {
             try {
                 const tempProfile = JSON.parse(cachedProfileData);
-                // If the cached profile is Pending, bypass cache to fetch the latest status from DB
-                if (tempProfile && tempProfile.status !== 'Pending') {
+                if (tempProfile && (!navigator.onLine || tempProfile.status !== 'Pending')) {
                     USER_PROFILE = tempProfile;
+                    window.USER_PROFILE = tempProfile;
                     logDebug("Loaded user profile from cache", null, 'info');
                     
-                    // [DYNAMIC CRM] Apply business type class immediately from cache
                     if (USER_PROFILE.business_type) {
                         document.body.className = document.body.className.replace(/\bbusiness-type-\S+/g, '');
                         document.body.classList.add('business-type-' + USER_PROFILE.business_type);
@@ -37,73 +36,84 @@ async function checkSession() {
         }
 
         if (!USER_PROFILE) {
-        // Try to get profile from user_profiles table
-        const { data: profile, error: profileError } = await supabaseClient
-            .from('user_profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
+            let profile = null;
+            let profileError = null;
 
-        if (profileError || !profile) {
-            if (profileError && profileError.code !== 'PGRST116') {
-                logDebug("Profile lookup error", profileError, 'error');
-                throw new Error("Profile Lookup Error: " + profileError.message);
+            try {
+                const res = await supabaseClient
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+                profile = res.data;
+                profileError = res.error;
+            } catch (e) {
+                profileError = e;
             }
-            // Fallback to workers table
-            const { data: workerProfile, error: workerError } = await supabaseClient
-                .from('workers')
-                .select('*')
-                .eq('id', user.id)
-                .single();
 
-            if (workerError || !workerProfile) {
-                if (workerError && workerError.code !== 'PGRST116') {
-                    logDebug("Worker lookup error", workerError, 'error');
-                    throw new Error("Worker Lookup Error: " + workerError.message);
+            if (profileError || !profile) {
+                let workerProfile = null;
+                try {
+                    const wRes = await supabaseClient
+                        .from('workers')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single();
+                    workerProfile = wRes.data;
+                } catch (e) {}
+
+                if (!workerProfile) {
+                    if (!navigator.onLine && cachedProfileData) {
+                        try {
+                            USER_PROFILE = JSON.parse(cachedProfileData);
+                            window.USER_PROFILE = USER_PROFILE;
+                        } catch(e) {}
+                    }
+
+                    if (!USER_PROFILE) {
+                        if (path.includes('tailor-onboarding')) {
+                            logDebug("No profile yet — user is completing onboarding. Allowing.", null, 'info');
+                            return;
+                        }
+                        if (navigator.onLine) {
+                            logDebug("Profile not found. Redirecting to choose-role.html...", null, 'info');
+                            window.location.replace('/choose-role.html');
+                            return;
+                        }
+                    }
+                } else {
+                    USER_PROFILE = {
+                        ...workerProfile,
+                        full_name: workerProfile.name,
+                        role: 'manager'
+                    };
                 }
-                // No profile found anywhere.
-                // If we are on the onboarding page, that is expected â€” let the user proceed.
-                if (path.includes('tailor-onboarding')) {
-                    logDebug("No profile yet â€” user is completing onboarding. Allowing.", null, 'info');
-                    return;
+            } else {
+                USER_PROFILE = profile;
+            }
+
+            if (USER_PROFILE) {
+                window.USER_PROFILE = USER_PROFILE;
+                if (USER_PROFILE.shop_id && navigator.onLine) {
+                    try {
+                        const { data: shopData } = await window.supabaseClient.from('shops').select('business_type').eq('id', USER_PROFILE.shop_id).single();
+                        if (shopData && shopData.business_type) {
+                            USER_PROFILE.business_type = shopData.business_type;
+                            document.body.className = document.body.className.replace(/\bbusiness-type-\S+/g, '');
+                            document.body.classList.add('business-type-' + shopData.business_type);
+                        }
+                    } catch (e) {
+                        console.warn("Failed to fetch shop business_type", e);
+                    }
+                } else if (USER_PROFILE.business_type) {
+                     document.body.className = document.body.className.replace(/\bbusiness-type-\S+/g, '');
+                     document.body.classList.add('business-type-' + USER_PROFILE.business_type);
                 }
                 
-                // Redirect to role selection page if no profile exists
-                logDebug("Profile not found. Redirecting to choose-role.html...", null, 'info');
-                window.location.replace('/choose-role.html');
-                return;
-            } else {
-                USER_PROFILE = {
-                    ...workerProfile,
-                    full_name: workerProfile.name,
-                    role: 'manager'
-                };
+                sessionStorage.setItem('USER_PROFILE_' + user.id, JSON.stringify(USER_PROFILE));
+                localStorage.setItem('USER_PROFILE_' + user.id, JSON.stringify(USER_PROFILE));
+                localStorage.setItem('USER_PROFILE', JSON.stringify(USER_PROFILE));
             }
-        } else {
-            USER_PROFILE = profile;
-        }
-
-        // [PERF] Cache the loaded profile
-        if (USER_PROFILE) {
-            // [DYNAMIC CRM] Fetch business type if user is tied to a specific shop
-            if (USER_PROFILE.shop_id) {
-                try {
-                    const { data: shopData } = await window.supabaseClient.from('shops').select('business_type').eq('id', USER_PROFILE.shop_id).single();
-                    if (shopData && shopData.business_type) {
-                        USER_PROFILE.business_type = shopData.business_type;
-                        document.body.className = document.body.className.replace(/\bbusiness-type-\S+/g, '');
-                        document.body.classList.add('business-type-' + shopData.business_type);
-                    }
-                } catch (e) {
-                    console.warn("Failed to fetch shop business_type", e);
-                }
-            } else if (USER_PROFILE.business_type) {
-                 document.body.className = document.body.className.replace(/\bbusiness-type-\S+/g, '');
-                 document.body.classList.add('business-type-' + USER_PROFILE.business_type);
-            }
-            
-            sessionStorage.setItem('USER_PROFILE_' + user.id, JSON.stringify(USER_PROFILE));
-        }
         } // End of if (!USER_PROFILE)
 
         // 🚀 14-DAY FREE TRIAL & SUBSCRIPTION LOCK SYSTEM (Applies ONLY to tailors registered from today onwards)

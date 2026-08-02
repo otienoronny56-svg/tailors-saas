@@ -709,10 +709,17 @@ async function loadShopsForDropdown(elId) {
         if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.organization_id) {
             query = query.eq('organization_id', USER_PROFILE.organization_id);
         }
-        const { data: shops, error } = await query.order('name');
-        if (error) {
-            logDebug("Error loading shops for dropdown:", error, 'error');
-            return;
+
+        let shops = null;
+        try {
+            const res = await (window.OfflineStore
+                ? window.OfflineStore.fetchWithFallback('shops', () => query.order('name'))
+                : query.order('name'));
+            shops = res?.data;
+        } catch (e) {
+            if (window.OfflineStore) {
+                shops = await window.OfflineStore.getCache('shops');
+            }
         }
 
         if (shops) {
