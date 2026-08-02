@@ -232,21 +232,33 @@ const OfflineStore = (function() {
 
     // High-Level Data Helper: Fetch with cached fallback
     async function fetchWithFallback(table, fetchFn) {
-        // If navigator is offline, immediately return cached data
         if (!navigator.onLine) {
             console.log(`⚡ Offline mode: Loading cached data for ${table}`);
             const cached = await getCache(table);
             return { data: cached || [], error: null, isOffline: true };
         }
 
+        // Fast timeout race: If fetchFn takes >1.2s (e.g. offline devtools or bad network), return cached data instantly!
+        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ __timeout: true }), 1200));
+
         try {
-            const result = await fetchFn();
+            const fetchPromise = Promise.resolve().then(() => fetchFn());
+            const raceResult = await Promise.race([fetchPromise, timeoutPromise]);
+
+            if (raceResult && raceResult.__timeout) {
+                console.warn(`⚡ Network fetch timeout (>1.2s) for ${table}, serving cached data instantly!`);
+                const cached = await getCache(table);
+                fetchPromise.then(res => {
+                    if (res && res.data) saveCache(table, res.data);
+                }).catch(() => {});
+                return { data: cached || [], error: null, isOffline: true };
+            }
+
+            const result = raceResult;
             if (result && !result.error && result.data) {
-                // Network fetch succeeded -> Cache results locally
                 await saveCache(table, result.data);
                 return { ...result, isOffline: false };
-            } else if (result && result.error) {
-                console.warn(`⚠️ Network fetch failed for ${table}, attempting cache fallback:`, result.error);
+            } else {
                 const cached = await getCache(table);
                 if (cached) {
                     return { data: cached, error: null, isOffline: true };

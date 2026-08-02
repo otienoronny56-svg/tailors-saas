@@ -441,8 +441,8 @@ async function loadMetrics() {
 
         const [ordersRes, paymentsRes] = await Promise.all([
             window.OfflineStore
-                ? window.OfflineStore.fetchWithFallback('orders', () => shopIds.length > 0 ? supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date').in('shop_id', shopIds) : supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date'))
-                : (shopIds.length > 0 ? supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date').in('shop_id', shopIds) : supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date')),
+                ? window.OfflineStore.fetchWithFallback('orders', () => shopIds.length > 0 ? supabaseClient.from('orders').select('*').in('shop_id', shopIds) : supabaseClient.from('orders').select('*'))
+                : (shopIds.length > 0 ? supabaseClient.from('orders').select('*').in('shop_id', shopIds) : supabaseClient.from('orders').select('*')),
             window.OfflineStore
                 ? window.OfflineStore.fetchWithFallback('payments', () => supabaseClient.from('payments').select('order_id, amount').is('deleted_at', null))
                 : supabaseClient.from('payments').select('order_id, amount').is('deleted_at', null)

@@ -558,9 +558,18 @@ async function loadAdminExpensesList() {
             query = query.eq('shop_id', shopFilterValue);
         }
 
-        const { data: expenses, error } = await query;
-
-        if (error) throw error;
+        let expenses = null;
+        try {
+            const res = await (window.OfflineStore
+                ? window.OfflineStore.fetchWithFallback('expenses', () => query)
+                : query);
+            expenses = res?.data || [];
+        } catch (e) {
+            if (window.OfflineStore) {
+                expenses = (await window.OfflineStore.getCache('expenses')) || [];
+            }
+        }
+        expenses = expenses || [];
 
         // Render Summary Cards
         renderExpenseSummaryCards(expenses);

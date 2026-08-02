@@ -1005,10 +1005,10 @@ async function loadPendingClosureOrders() {
         const shopIds = [...new Set(orders.map(o => o.shop_id).filter(id => id))];
         let shopMap = {};
         if (shopIds.length > 0) {
-            const { data: shops } = await supabaseClient
-                .from('shops')
-                .select('id, name')
-                .in('id', shopIds);
+            const shopsRes = await (window.OfflineStore
+                ? window.OfflineStore.fetchWithFallback('shops', () => supabaseClient.from('shops').select('id, name').in('id', shopIds))
+                : supabaseClient.from('shops').select('id, name').in('id', shopIds));
+            const shops = shopsRes?.data;
 
             if (shops) {
                 shops.forEach(s => {
@@ -1019,10 +1019,10 @@ async function loadPendingClosureOrders() {
 
         // Get payments for these orders
         const orderIds = orders.map(o => o.id);
-        const { data: payments } = await supabaseClient
-            .from('payments')
-            .select('*')
-            .in('order_id', orderIds);
+        const paymentsRes = await (window.OfflineStore
+            ? window.OfflineStore.fetchWithFallback('payments', () => supabaseClient.from('payments').select('*').in('order_id', orderIds))
+            : supabaseClient.from('payments').select('*').in('order_id', orderIds));
+        const payments = paymentsRes?.data;
 
         const paymentsByOrder = {};
         if (payments) {
@@ -1038,12 +1038,13 @@ async function loadPendingClosureOrders() {
             const paid = activePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
             const orderIdStr = String(order.id);
             const shortId = orderIdStr.slice(-6);
+            const custName = order.customer_name || order.client_name || order.name || 'Customer';
 
             return `
                 <tr>
                     <td>#${shortId}</td>
-                    <td>${shopMap[order.shop_id] || 'Unknown'}</td>
-                    <td>${order.customer_name}</td>
+                    <td>${shopMap[order.shop_id] || 'HQ Global'}</td>
+                    <td>${custName}</td>
                     <td>Ksh ${paid.toLocaleString()}</td>
                     <td><span class="status-indicator status-6">Pending Closure</span></td>
                     <td>

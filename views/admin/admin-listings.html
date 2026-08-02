@@ -498,26 +498,26 @@
         </a>
     </nav>
 
-    <script src="../../js/core/config.js?v=1785665227378"></script>
+    <script src="../../js/core/config.js?v=1785665818465"></script>
     
     <!-- Core & Utils -->
-    <script src="../../js/utils/helpers.js?v=1785665227378"></script>
-    <script src="../../js/ui/theme.js?v=1785665227378"></script>
-    <script src="../../js/core/globals.js?v=1785665227378"></script>
-    <script src="../../js/core/init.js?v=1785665227378"></script>
-    <script src="../../js/core/auth.js?v=1785665227378"></script>
-    <script src="../../js/ui/sidebar.js?v=1785665227378"></script>
-    <script src="../../js/ui/modals.js?v=1785665227378"></script>
-    <script src="../../js/features/inventory.js?v=1785665227378"></script>
-    <script src="../../js/features/clients.js?v=1785665227378"></script>
+    <script src="../../js/utils/helpers.js?v=1785665818465"></script>
+    <script src="../../js/ui/theme.js?v=1785665818465"></script>
+    <script src="../../js/core/globals.js?v=1785665818465"></script>
+    <script src="../../js/core/init.js?v=1785665818465"></script>
+    <script src="../../js/core/auth.js?v=1785665818465"></script>
+    <script src="../../js/ui/sidebar.js?v=1785665818465"></script>
+    <script src="../../js/ui/modals.js?v=1785665818465"></script>
+    <script src="../../js/features/inventory.js?v=1785665818465"></script>
+    <script src="../../js/features/clients.js?v=1785665818465"></script>
     
-    <script src="../../js/features/orders.js?v=1785665227378"></script>
-    <script src="../../js/features/payments.js?v=1785665227378"></script>
-    <script src="../../js/features/analytics.js?v=1785665227378"></script>
-    <script src="../../js/features/messaging.js?v=1785665227378"></script>
-    <script src="../../js/features/management.js?v=1785665227378"></script>
-    <script src="../../app.js?v=1785665227378"></script>
-    <script src="../../mobile-nav.js?v=1785665227378"></script>
+    <script src="../../js/features/orders.js?v=1785665818465"></script>
+    <script src="../../js/features/payments.js?v=1785665818465"></script>
+    <script src="../../js/features/analytics.js?v=1785665818465"></script>
+    <script src="../../js/features/messaging.js?v=1785665818465"></script>
+    <script src="../../js/features/management.js?v=1785665818465"></script>
+    <script src="../../app.js?v=1785665818465"></script>
+    <script src="../../mobile-nav.js?v=1785665818465"></script>
     <script>
         let listings = [];
         let shops = [];
@@ -606,15 +606,24 @@
                 });
 
                 // 2. Fetch Listings
-                const { data: listingsData, error: listingsErr } = await supabaseClient
-                    .from('marketplace_listings')
-                    .select('*, size_charts(name)')
-                    .eq('organization_id', USER_PROFILE.organization_id)
-                    .order('created_at', { ascending: false });
-
-                if (listingsErr) {
-                    // Table might not exist yet if schema was not run
-                    throw listingsErr;
+                let listingsData = null;
+                try {
+                    const res = await (window.OfflineStore
+                        ? window.OfflineStore.fetchWithFallback('marketplace_listings', () => supabaseClient
+                            .from('marketplace_listings')
+                            .select('*, size_charts(name)')
+                            .eq('organization_id', USER_PROFILE.organization_id)
+                            .order('created_at', { ascending: false }))
+                        : supabaseClient
+                            .from('marketplace_listings')
+                            .select('*, size_charts(name)')
+                            .eq('organization_id', USER_PROFILE.organization_id)
+                            .order('created_at', { ascending: false }));
+                    listingsData = res?.data;
+                } catch (e) {
+                    if (window.OfflineStore) {
+                        listingsData = await window.OfflineStore.getCache('marketplace_listings');
+                    }
                 }
                 listings = listingsData || [];
                 renderListingsTable();
