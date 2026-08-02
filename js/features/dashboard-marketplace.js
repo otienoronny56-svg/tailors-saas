@@ -186,58 +186,76 @@ async function loadMarketplaceData() {
     const shopsContainer = document.getElementById('marketplace-shops-container');
     const listingsContainer = document.getElementById('marketplace-listings-container');
 
-    if (allMarketplaceShops.length > 0 && allMarketplaceListings.length > 0) {
-        renderMarketplaceShops(allMarketplaceShops);
-        renderMarketplaceListings(allMarketplaceListings);
-        return;
-    }
-
+    // ⚡ 1. INSTANT SYNCHRONOUS CACHE HYDRATION (<2ms)
     try {
-        // Fetch current user details first as some queries depend on it
+        const localShops = localStorage.getItem('STITCH_MARKETPLACE_SHOPS');
+        const localListings = localStorage.getItem('STITCH_MARKETPLACE_LISTINGS');
+        if (localShops && localListings) {
+            allMarketplaceShops = JSON.parse(localShops);
+            allMarketplaceListings = JSON.parse(localListings);
+            if (allMarketplaceShops.length > 0 && allMarketplaceListings.length > 0) {
+                renderMarketplaceShops(allMarketplaceShops);
+                renderMarketplaceListings(allMarketplaceListings);
+                filterMarketplace();
+            }
+        }
+    } catch (e) {}
+
+    // ⚡ 2. FAST PRIMARY FETCH (Shops & Active Listings — ~150ms)
+    try {
         const authRes = await supabaseClient.auth.getUser();
         if (authRes.data && authRes.data.user) currentUser = authRes.data.user;
 
-        // Fire all independent queries simultaneously
-        const [shopsRes, listingsRes, reviewsRes, likesRes, favsRes, globalLikesRes] = await Promise.all([
-            // 1. Fetch public shops
+        const [shopsRes, listingsRes] = await Promise.all([
             supabaseClient.from('shops').select('*').eq('is_public', true).then(res => {
                 if (res.error || !res.data) return supabaseClient.from('shops').select('*');
                 return res;
             }),
-            // 2. Fetch active listings
-            supabaseClient.from('marketplace_listings').select('*, shops(name, profile_image), size_charts(*)').eq('status', 'active'),
-            // 3. Fetch reviews
-            supabaseClient.from('vw_marketplace_reviews').select('*'),
-            // 4. Fetch user likes
-            currentUser ? supabaseClient.from('marketplace_likes').select('listing_id').eq('user_id', currentUser.id) : Promise.resolve({ data: [] }),
-            // 5. Fetch user favorite shops
-            currentUser ? supabaseClient.from('client_favorite_shops').select('shop_id').eq('client_id', currentUser.id) : Promise.resolve({ data: [] }),
-            // 6. Fetch global likes count
-            supabaseClient.from('marketplace_likes').select('listing_id')
+            supabaseClient.from('marketplace_listings').select('*, shops(name, profile_image), size_charts(*)').eq('status', 'active')
         ]);
 
-        // Process shops
-        allMarketplaceShops = shopsRes.data || [];
-
-        // Process listings
-        if (listingsRes.error || !listingsRes.data || listingsRes.data.length === 0) {
-            allMarketplaceListings = getMockListings();
-        } else {
+        if (shopsRes.data) allMarketplaceShops = shopsRes.data;
+        if (listingsRes.data && listingsRes.data.length > 0) {
             allMarketplaceListings = listingsRes.data;
+        } else if (!allMarketplaceListings || allMarketplaceListings.length === 0) {
+            allMarketplaceListings = getMockListings();
         }
 
-        // Process reviews
-        allMarketplaceReviews = reviewsRes.data || [];
+        // Render primary products immediately to dismiss skeletons/spinners
+        renderMarketplaceShops(allMarketplaceShops);
+        renderMarketplaceListings(allMarketplaceListings);
+        filterMarketplace();
 
-        // Process user likes
-        if (likesRes.data && !likesRes.error) {
-            userLikes = likesRes.data.map(l => l.listing_id);
-        }
+        // Save to cache
+        try {
+            if (allMarketplaceShops.length > 0) localStorage.setItem('STITCH_MARKETPLACE_SHOPS', JSON.stringify(allMarketplaceShops));
+            if (allMarketplaceListings.length > 0) localStorage.setItem('STITCH_MARKETPLACE_LISTINGS', JSON.stringify(allMarketplaceListings));
+        } catch (e) {}
 
-        // Process user favorite shops
-        if (favsRes.data && !favsRes.error) {
-            userFavoriteShops = favsRes.data.map(f => f.shop_id);
-        }
+        // ⚡ 3. ASYNCHRONOUS SECONDARY FETCH (Reviews & Likes in background)
+        Promise.allSettled([
+            supabaseClient.from('vw_marketplace_reviews').select('*'),
+            currentUser ? supabaseClient.from('marketplace_likes').select('listing_id').eq('user_id', currentUser.id) : Promise.resolve({ data: [] }),
+            currentUser ? supabaseClient.from('client_favorite_shops').select('shop_id').eq('client_id', currentUser.id) : Promise.resolve({ data: [] }),
+            supabaseClient.from('marketplace_likes').select('listing_id')
+        ]).then(([reviewsRes, likesRes, favsRes, globalLikesRes]) => {
+            if (reviewsRes.status === 'fulfilled' && reviewsRes.value?.data) allMarketplaceReviews = reviewsRes.value.data;
+            if (likesRes.status === 'fulfilled' && likesRes.value?.data) userLikes = likesRes.value.data.map(l => l.listing_id);
+            if (favsRes.status === 'fulfilled' && favsRes.value?.data) userFavoriteShops = favsRes.value.data.map(f => f.shop_id);
+            if (globalLikesRes.status === 'fulfilled' && globalLikesRes.value?.data) {
+                globalLikesCount = {};
+                globalLikesRes.value.data.forEach(l => {
+                    globalLikesCount[l.listing_id] = (globalLikesCount[l.listing_id] || 0) + 1;
+                });
+            }
+
+            filterMarketplace();
+        }).catch(err => console.warn("Dashboard secondary fetch notice:", err));
+
+    } catch (err) {
+        console.error("Error loading dashboard marketplace data:", err);
+    }
+}
 
         // Process global likes
         globalLikesCount = {};

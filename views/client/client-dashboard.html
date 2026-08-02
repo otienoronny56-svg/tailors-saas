@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Client -->
     <script src="/js/lib/supabase.min.js"></script>
-    <script src="/js/core/offline-store.js?v=1785670379319"></script>
+    <script src="/js/core/offline-store.js?v=1785670808938"></script>
     <script src="/js/ui/offline-ui.js"></script>
     <!-- Paystack Client -->
     <script src="https://js.paystack.co/v1/inline.js"></script>
@@ -503,7 +503,44 @@
             flex-direction: column;
             gap: 20px;
             min-height: 0;
-            /* Ensures the container shrinks to fit the flex space and doesn't push the input area out */
+        }
+
+        /* ===== SKELETON SHIMMER CARDS (Fashion Nova / Jiji style 0ms perceived loading) ===== */
+        @keyframes shimmerAnim {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(212,175,55,0.15) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: shimmerAnim 1.5s infinite linear;
+        }
+        .skeleton-card {
+            pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.06) !important;
+            background: var(--card-bg) !important;
+        }
+        .skeleton-img {
+            height: 220px;
+            border-radius: 12px 12px 0 0;
+            width: 100%;
+        }
+        .skeleton-title {
+            height: 18px;
+            width: 75%;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .skeleton-sub {
+            height: 14px;
+            width: 45%;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        .skeleton-price {
+            height: 22px;
+            width: 35%;
+            border-radius: 4px;
         }
 
         .message-bubble {
@@ -2109,20 +2146,22 @@
                     <div id="mkt-section-shops" style="display: none;">
                         <h3 class="section-title" style="margin-top: 10px;"><i class="fas fa-store"></i> Featured Tailoring Shops</h3>
                         <div class="grid-shops" id="marketplace-shops-container">
-                            <div style="grid-column: 1/-1; text-align: center; color: var(--brand-slate); padding: 40px;">
-                                <i class="fas fa-spinner fa-spin" style="font-size: 2em; color: var(--brand-gold); margin-bottom: 10px;"></i>
-                                <p>Loading shops...</p>
-                            </div>
+                            <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                            <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                            <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                            <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
                         </div>
                     </div>
 
                     <div id="mkt-section-listings">
                         <h3 class="section-title" style="margin-top: 10px;"><i class="fas fa-cut"></i> Premium Creations &amp; Designs</h3>
                         <div class="grid-listings" id="marketplace-listings-container">
-                            <div style="grid-column: 1/-1; text-align: center; color: var(--brand-slate); padding: 40px;">
-                                <i class="fas fa-spinner fa-spin" style="font-size: 2em; color: var(--brand-gold); margin-bottom: 10px;"></i>
-                                <p>Loading designs...</p>
-                            </div>
+                            <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                            <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                            <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                            <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                            <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
+                            <div class="card listing-card skeleton-card"><div class="skeleton-img shimmer"></div><div class="card-body"><div class="skeleton-title shimmer"></div><div class="skeleton-sub shimmer"></div><div class="skeleton-price shimmer"></div></div></div>
                         </div>
                     </div>
                 </div>
@@ -2391,7 +2430,7 @@
         </div>
     </div>
 
-    <script src="../../js/core/config.js?v=1785670379319"></script>
+    <script src="../../js/core/config.js?v=1785670808938"></script>
     <script src="../../js/core/algorithm.js"></script>
     <script src="../../js/features/dashboard-marketplace.js"></script>
 <script>
