@@ -1055,8 +1055,8 @@ window.handleAssignManagerToShop = async function(e) {
     const msg = document.getElementById('assign-manager-message');
     const submitBtn = document.querySelector('#assign-manager-form button[type="submit"]');
 
-    if (!shopId || !mgrName || !mgrEmail || !mgrPass) {
-        msg.innerHTML = '<span style="color:red;">Please fill all fields</span>';
+    if (!shopId || !mgrName || !mgrEmail) {
+        msg.innerHTML = '<span style="color:red;">Please fill all required fields</span>';
         return;
     }
 
@@ -1065,50 +1065,47 @@ window.handleAssignManagerToShop = async function(e) {
     msg.innerHTML = '';
 
     try {
-        const adminClient = window.supabaseClient;
-        
-
-        // 1. Create Manager Auth User
-        const { data: edgeData, error: authErr } = await window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'createUser', payload: {
-            email: mgrEmail,
-            password: mgrPass,
-            email_confirm: true,
-            user_metadata: { full_name: mgrName }
-        } } });
-        const authUser = edgeData ? edgeData.data.user : null;
+        const { data: edgeData, error: authErr } = await window.supabaseClient.functions.invoke('admin-proxy', {
+            body: {
+                action: 'assignManager',
+                payload: {
+                    email: mgrEmail,
+                    password: mgrPass,
+                    full_name: mgrName,
+                    shop_id: shopId,
+                    organization_id: USER_PROFILE.organization_id
+                }
+            }
+        });
 
         if (authErr) {
+            let errMsg = authErr.message;
             if (authErr.context && typeof authErr.context.json === 'function') {
                 try {
                     const errBody = await authErr.context.json();
-                    throw new Error(errBody.error || authErr.message);
-                } catch (e) {
-                    throw authErr;
-                }
+                    if (errBody && errBody.error) errMsg = errBody.error;
+                } catch (e) {}
             }
-            throw authErr;
+            throw new Error(errMsg);
         }
 
-        // 2. Create Manager User Profile
-        const { error: profileErr } = await supabaseClient.from('user_profiles').insert([{
-            id: authUser.id,
-            organization_id: USER_PROFILE.organization_id,
-            shop_id: shopId,
-            full_name: mgrName,
-            role: 'manager'
-        }]);
-
-        if (profileErr) throw profileErr;
+        if (edgeData && edgeData.error) {
+            throw new Error(edgeData.error);
+        }
 
         alert(`✅ Manager '${mgrName}' successfully assigned to the shop!`);
         document.getElementById('assign-manager-form').reset();
         document.getElementById('assign-manager-modal').style.display = 'none';
         
-        loadShopCommandCenter();
+        if (typeof loadShopCommandCenter === 'function') {
+            loadShopCommandCenter();
+        }
 
     } catch (error) {
         msg.innerHTML = `<span style="color:red;">❌ Error: ${error.message}</span>`;
-        logDebug("Assign Manager Error", error, 'error');
+        if (typeof logDebug === 'function') {
+            logDebug("Assign Manager Error", error, 'error');
+        }
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Assign Manager';

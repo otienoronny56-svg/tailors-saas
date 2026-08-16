@@ -142,7 +142,7 @@
             z-index: 1;
             max-height: 100%;
             min-height: 0;
-            overflow: hidden; /* Hide outer scrollbar */
+            overflow: hidden;
         }
 
         .card-header {
@@ -177,9 +177,12 @@
         .finance-badge {
             background: rgba(255,255,255,0.03);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 10px 15px;
+            border-radius: 14px;
+            padding: 10px 16px;
             text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .total-price {
@@ -191,11 +194,24 @@
         .paid-amount {
             font-size: 0.8em;
             color: var(--success-color);
-            margin-top: 2px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
             gap: 5px;
+        }
+
+        .balance-amount {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #f59e0b;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+
+        .balance-amount.fully-paid {
+            color: var(--success-color);
         }
 
         .dates-grid {
@@ -257,7 +273,6 @@
             bottom: 0;
             width: 1px;
             background: linear-gradient(to bottom, var(--brand-gold) 0%, rgba(255,255,255,0.1) 100%);
-            /* dynamically updated via JS based on progress */
         }
 
         .timeline-step {
@@ -367,14 +382,17 @@
                 text-align: left;
                 width: 100%;
                 display: flex;
-                justify-content: space-between;
-                align-items: center;
+                flex-direction: column;
+                gap: 4px;
             }
-            .paid-amount { margin-top: 0; }
+            .paid-amount, .balance-amount {
+                justify-content: flex-start;
+                margin-top: 0;
+            }
             .tracking-card { border-radius: 16px; max-height: 90vh; }
             .card-header { padding: 20px; }
             .card-body { padding: 20px; padding-bottom: 60px; }
-            .nav-logo span { display: none; } /* Show icon only on small screens */
+            .nav-logo span { display: none; }
         }
     </style>
     <link rel="manifest" href="../../manifest.json">
@@ -476,6 +494,14 @@
                 ? new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
                 : '—';
 
+            const price = parseFloat(order.price || 0);
+            const amountPaid = parseFloat(order.amount_paid || 0);
+            const balance = Math.max(0, price - amountPaid);
+
+            const balanceHtml = balance > 0
+                ? `<div class="balance-amount"><i class="fas fa-hourglass-half" style="font-size:0.9em;"></i> Balance: Ksh ${balance.toLocaleString()}</div>`
+                : `<div class="balance-amount fully-paid"><i class="fas fa-check-double" style="font-size:0.9em;"></i> Fully Paid</div>`;
+
             let timelineHtml = '<div class="timeline">';
             
             let activeIndex = 0;
@@ -518,8 +544,9 @@
                             <div class="customer-name">Ordered by ${order.customer_name}</div>
                         </div>
                         <div class="finance-badge">
-                            <div class="total-price">Ksh ${parseFloat(order.price || 0).toLocaleString()}</div>
-                            <div class="paid-amount"><i class="fas fa-check-circle"></i> Paid: Ksh ${parseFloat(order.amount_paid || 0).toLocaleString()}</div>
+                            <div class="total-price">Ksh ${price.toLocaleString()}</div>
+                            <div class="paid-amount"><i class="fas fa-check-circle"></i> Paid: Ksh ${amountPaid.toLocaleString()}</div>
+                            ${balanceHtml}
                         </div>
                     </div>
                     <div class="dates-grid">
