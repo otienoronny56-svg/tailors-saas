@@ -4329,6 +4329,9 @@
                         ? window.location.pathname.substring(0, window.location.pathname.indexOf('/views/')) 
                         : '';
                     const trackLink = `${window.location.origin}${basePath}/views/client/track.html?id=${order.id}`;
+                    const orderPrice = parseFloat(order.price || 0);
+                    const orderPaid = parseFloat(order.amount_paid || 0);
+                    const orderBalance = Math.max(0, orderPrice - orderPaid);
 
                     return `
                         <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px; position: relative;">
@@ -4345,7 +4348,7 @@
                                 </div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
                                 <div>
                                     <div style="font-size: 0.7em; color: var(--brand-slate); text-transform: uppercase; letter-spacing: 1px;">Date Ordered</div>
                                     <div style="font-weight: 500;">${createdDate}</div>
@@ -4356,11 +4359,15 @@
                                 </div>
                                 <div>
                                     <div style="font-size: 0.7em; color: var(--brand-slate); text-transform: uppercase; letter-spacing: 1px;">Total Price</div>
-                                    <div style="font-weight: 500;">Ksh ${parseFloat(order.price || 0).toLocaleString()}</div>
+                                    <div style="font-weight: 500;">Ksh ${orderPrice.toLocaleString()}</div>
                                 </div>
                                 <div>
                                     <div style="font-size: 0.7em; color: var(--brand-slate); text-transform: uppercase; letter-spacing: 1px;">Amount Paid</div>
-                                    <div style="font-weight: 500; color: #2ecc71;">Ksh ${parseFloat(order.amount_paid || 0).toLocaleString()}</div>
+                                    <div style="font-weight: 500; color: #2ecc71;">Ksh ${orderPaid.toLocaleString()}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.7em; color: var(--brand-slate); text-transform: uppercase; letter-spacing: 1px;">Balance Due</div>
+                                    <div style="font-weight: 500; color: ${orderBalance > 0 ? '#f59e0b' : '#2ecc71'};">${orderBalance > 0 ? `Ksh ${orderBalance.toLocaleString()}` : 'Cleared'}</div>
                                 </div>
                             </div>
 
